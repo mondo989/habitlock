@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import CalendarGrid from '../components/CalendarGrid';
 import HabitModal from '../components/HabitModal';
+import HabitDayModal from '../components/HabitDayModal';
 import { useHabits } from '../hooks/useHabits';
 import { useCalendar } from '../hooks/useCalendar';
 import styles from './CalendarView.module.scss';
@@ -9,6 +10,11 @@ const CalendarView = () => {
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
   const [modalMode, setModalMode] = useState('create');
+  
+  // New state for day modal
+  const [isDayModalOpen, setIsDayModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(null);
 
   const {
     habits,
@@ -57,6 +63,27 @@ const CalendarView = () => {
   const handleDeleteHabit = async (habitId) => {
     if (confirm('Are you sure you want to delete this habit? This will also remove all related history.')) {
       await removeHabit(habitId);
+    }
+  };
+
+  // Handle day click to open modal
+  const handleDayClick = (date, day) => {
+    setSelectedDate(date);
+    setSelectedDay(day);
+    setIsDayModalOpen(true);
+  };
+
+  // Handle saving habits for a specific day
+  const handleSaveDayHabits = async (date, selectedHabits) => {
+    const currentCompleted = getCompletedHabits(date);
+    
+    // Calculate what habits need to be toggled
+    const toAdd = selectedHabits.filter(habitId => !currentCompleted.includes(habitId));
+    const toRemove = currentCompleted.filter(habitId => !selectedHabits.includes(habitId));
+    
+    // Toggle each habit that needs to change
+    for (const habitId of [...toAdd, ...toRemove]) {
+      await toggleHabitCompletion(date, habitId);
     }
   };
 
@@ -123,7 +150,34 @@ const CalendarView = () => {
         </div>
       </div>
 
-      {/* Habits sidebar */}
+      {/* Calendar Grid */}
+      <div className={styles.calendarSection}>
+        {habits.length === 0 ? (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyStateContent}>
+              <h2>Welcome to HabitLock! 🎯</h2>
+              <p>Start building positive habits by creating your first habit tracker.</p>
+              <button 
+                className={styles.primaryButton}
+                onClick={handleCreateHabit}
+              >
+                Create Your First Habit
+              </button>
+            </div>
+          </div>
+        ) : (
+          <CalendarGrid
+            calendarMatrix={calendarMatrix}
+            habits={habits}
+            getCompletedHabits={getCompletedHabits}
+            onHabitToggle={toggleHabitCompletion}
+            onDayClick={handleDayClick}
+            hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
+          />
+        )}
+      </div>
+
+      {/* Habits sidebar - moved below calendar */}
       {habits.length > 0 && (
         <div className={styles.habitsSidebar}>
           <h3>Your Habits</h3>
@@ -173,32 +227,6 @@ const CalendarView = () => {
         </div>
       )}
 
-      {/* Calendar Grid */}
-      <div className={styles.calendarSection}>
-        {habits.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyStateContent}>
-              <h2>Welcome to HabitLock! 🎯</h2>
-              <p>Start building positive habits by creating your first habit tracker.</p>
-              <button 
-                className={styles.primaryButton}
-                onClick={handleCreateHabit}
-              >
-                Create Your First Habit
-              </button>
-            </div>
-          </div>
-        ) : (
-          <CalendarGrid
-            calendarMatrix={calendarMatrix}
-            habits={habits}
-            getCompletedHabits={getCompletedHabits}
-            onHabitToggle={toggleHabitCompletion}
-            hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
-          />
-        )}
-      </div>
-
       {/* Weekly Progress Summary */}
       {habits.length > 0 && (
         <div className={styles.weeklyProgress}>
@@ -241,6 +269,18 @@ const CalendarView = () => {
         onSave={handleSaveHabit}
         habit={editingHabit}
         mode={modalMode}
+      />
+
+      {/* Habit Day Modal */}
+      <HabitDayModal
+        isOpen={isDayModalOpen}
+        onClose={() => setIsDayModalOpen(false)}
+        onSave={handleSaveDayHabits}
+        date={selectedDate}
+        day={selectedDay}
+        habits={habits}
+        completedHabits={selectedDate ? getCompletedHabits(selectedDate) : []}
+        hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
       />
     </div>
   );

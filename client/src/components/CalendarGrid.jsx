@@ -6,6 +6,7 @@ const CalendarGrid = ({
   habits, 
   getCompletedHabits, 
   onHabitToggle,
+  onDayClick,
   hasHabitMetWeeklyGoal,
   currentDate 
 }) => {
@@ -36,6 +37,7 @@ const CalendarGrid = ({
                   habits={habits}
                   completedHabits={completedHabits}
                   onHabitToggle={onHabitToggle}
+                  onDayClick={onDayClick}
                   hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
                   isCurrentMonth={day.isCurrentMonth}
                   isToday={day.isToday}

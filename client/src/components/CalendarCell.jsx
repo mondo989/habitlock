@@ -6,7 +6,8 @@ const CalendarCell = ({
   day, 
   habits, 
   completedHabits, 
-  onHabitToggle, 
+  onHabitToggle,
+  onDayClick,
   hasHabitMetWeeklyGoal,
   isCurrentMonth = true,
   isToday = false 
@@ -47,7 +48,7 @@ const CalendarCell = ({
       return (
         <div>
           <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
-          <div>No habits completed</div>
+          <div>Click to manage habits</div>
         </div>
       );
     }
@@ -65,13 +66,18 @@ const CalendarCell = ({
             </div>
           );
         })}
+        <div style={{ marginTop: '4px', fontSize: '0.75rem', opacity: 0.8 }}>
+          Click to manage habits
+        </div>
       </div>
     );
   }, [completedHabitDetails, hasHabitMetWeeklyGoal, day, date]);
 
   const handleCellClick = (e) => {
     e.preventDefault();
-    // Could implement day selection or quick habit toggle here
+    if (onDayClick) {
+      onDayClick(date, day);
+    }
   };
 
   const handleHabitClick = (e, habitId) => {
@@ -113,25 +119,6 @@ const CalendarCell = ({
                 </span>
               );
             })}
-          </div>
-        )}
-
-        {/* Quick add habits for today */}
-        {isToday && completedHabitDetails.length < habits.length && (
-          <div className={styles.quickAdd}>
-            {habits
-              .filter(habit => !completedHabits.includes(habit.id))
-              .slice(0, 3)
-              .map(habit => (
-                <span
-                  key={habit.id}
-                  className={styles.quickAddEmoji}
-                  onClick={(e) => handleHabitClick(e, habit.id)}
-                  title={`Add ${habit.name}`}
-                >
-                  {habit.emoji}
-                </span>
-              ))}
           </div>
         )}
       </div>
