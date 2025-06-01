@@ -179,81 +179,75 @@ const CalendarView = () => {
 
       {/* Habits sidebar - moved below calendar */}
       {habits.length > 0 && (
-        <div className={styles.habitsSidebar}>
-          <h3>Your Habits</h3>
-          <div className={styles.habitsList}>
+        <div className={styles.habitsContainer}>
+          <div className={styles.habitsHeader}>
+            <h3>Your Habits & Weekly Progress</h3>
+            <div className={styles.weeklyStats}>
+              {Object.values(weekStats).filter(stat => stat?.hasMetGoal).length} of {habits.length} goals met this week
+            </div>
+          </div>
+          
+          <div className={styles.habitsGrid}>
             {habits.map(habit => {
               const streak = streaks[habit.id] || 0;
-              const weekStat = weekStats[habit.id];
-              
-              return (
-                <div key={habit.id} className={styles.habitCard}>
-                  <div className={styles.habitInfo}>
-                    <span 
-                      className={styles.habitEmoji}
-                      style={{ backgroundColor: `${habit.color}20` }}
-                    >
-                      {habit.emoji}
-                    </span>
-                    <div className={styles.habitDetails}>
-                      <div className={styles.habitName}>{habit.name}</div>
-                      <div className={styles.habitStats}>
-                        🔥 {streak} days • 
-                        🎯 {weekStat?.completions || 0}/{habit.weeklyGoal} this week
-                        {weekStat?.hasMetGoal && ' ✨'}
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.habitActions}>
-                    <button
-                      className={styles.editButton}
-                      onClick={() => handleEditHabit(habit)}
-                      title="Edit habit"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={() => handleDeleteHabit(habit.id)}
-                      title="Delete habit"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Weekly Progress Summary */}
-      {habits.length > 0 && (
-        <div className={styles.weeklyProgress}>
-          <h4>This Week's Progress</h4>
-          <div className={styles.progressGrid}>
-            {habits.map(habit => {
               const weekStat = weekStats[habit.id];
               const percentage = weekStat?.percentage || 0;
               
               return (
-                <div key={habit.id} className={styles.progressCard}>
-                  <div className={styles.progressHeader}>
-                    <span className={styles.progressEmoji}>{habit.emoji}</span>
-                    <span className={styles.progressName}>{habit.name}</span>
-                    {weekStat?.hasMetGoal && <span className={styles.goalMet}>🎯</span>}
+                <div key={habit.id} className={styles.habitCard}>
+                  <div className={styles.habitMainInfo}>
+                    <div className={styles.habitBasics}>
+                      <span 
+                        className={styles.habitEmoji}
+                        style={{ backgroundColor: `${habit.color}20` }}
+                      >
+                        {habit.emoji}
+                      </span>
+                      <div className={styles.habitDetails}>
+                        <div className={styles.habitName}>{habit.name}</div>
+                        <div className={styles.habitDescription}>{habit.description}</div>
+                        <div className={styles.habitStats}>
+                          🔥 {streak} day streak
+                        </div>
+                      </div>
+                    </div>
+                    <div className={styles.habitActions}>
+                      <button
+                        className={styles.editButton}
+                        onClick={() => handleEditHabit(habit)}
+                        title="Edit habit"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className={styles.deleteButton}
+                        onClick={() => handleDeleteHabit(habit.id)}
+                        title="Delete habit"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
-                  <div className={styles.progressBar}>
-                    <div 
-                      className={styles.progressFill}
-                      style={{ 
-                        width: `${Math.min(percentage, 100)}%`,
-                        backgroundColor: habit.color 
-                      }}
-                    />
-                  </div>
-                  <div className={styles.progressText}>
-                    {weekStat?.completions || 0} / {habit.weeklyGoal}
+                  
+                  <div className={styles.weeklyProgressSection}>
+                    <div className={styles.progressHeader}>
+                      <span className={styles.progressLabel}>This Week</span>
+                      <div className={styles.progressStats}>
+                        <span className={styles.progressText}>
+                          {weekStat?.completions || 0} / {habit.weeklyGoal}
+                        </span>
+                        {weekStat?.hasMetGoal && <span className={styles.goalMet}>🎯 Goal Met!</span>}
+                      </div>
+                    </div>
+                    <div className={styles.progressBar}>
+                      <div 
+                        className={styles.progressFill}
+                        style={{ 
+                          width: `${Math.min(percentage, 100)}%`,
+                          backgroundColor: habit.color 
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               );

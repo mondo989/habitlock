@@ -131,13 +131,8 @@
 // Main content layout
 .calendarView {
   @media (min-width: 1024px) {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    grid-template-rows: auto 1fr auto;
-    grid-template-areas: 
-      "header header"
-      "calendar sidebar"
-      "progress progress";
+    display: flex;
+    flex-direction: column;
     gap: 20px;
   }
 }
@@ -154,64 +149,85 @@
   }
 }
 
-.habitsSidebar {
+// New consolidated habits container
+.habitsContainer {
   background: white;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f3f4f6;
+}
 
-  @media (min-width: 1024px) {
-    grid-area: sidebar;
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
-  }
+.habitsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f3f4f6;
 
   h3 {
-    margin: 0 0 16px;
-    font-size: 1.125rem;
+    margin: 0;
+    font-size: 1.25rem;
     font-weight: 600;
     color: #1f2937;
   }
 }
 
-.habitsList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.weeklyStats {
+  font-size: 0.875rem;
+  color: #6b7280;
+  background: #f9fafb;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.habitsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
 }
 
 .habitCard {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
   background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
   transition: all 0.2s ease;
 
   &:hover {
     background: #f3f4f6;
     border-color: #d1d5db;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 }
 
-.habitInfo {
+.habitMainInfo {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.habitBasics {
+  display: flex;
+  align-items: flex-start;
   gap: 12px;
   flex: 1;
 }
 
 .habitEmoji {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .habitDetails {
@@ -219,151 +235,172 @@
 }
 
 .habitName {
-  font-weight: 500;
+  font-weight: 600;
   color: #1f2937;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  font-size: 1.1rem;
+}
+
+.habitDescription {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 6px;
+  line-height: 1.4;
 }
 
 .habitStats {
   font-size: 0.875rem;
   color: #6b7280;
+  font-weight: 500;
 }
 
 .habitActions {
   display: flex;
-  gap: 4px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .editButton, .deleteButton {
-  background: none;
-  border: none;
-  padding: 6px;
-  border-radius: 4px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.875rem;
   transition: all 0.2s ease;
-
-  &:hover {
-    background: #e5e7eb;
-  }
-}
-
-// Empty state
-.emptyState {
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.emptyStateContent {
-  text-align: center;
-  max-width: 400px;
-
-  h2 {
-    margin: 0 0 12px;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1f2937;
-  }
-
-  p {
-    margin: 0 0 24px;
-    color: #6b7280;
-    line-height: 1.6;
-  }
-}
-
-.primaryButton {
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 1rem;
-  transition: all 0.2s ease;
 
   &:hover {
-    background: #2563eb;
+    background: #f9fafb;
+    border-color: #d1d5db;
+    transform: scale(1.05);
   }
 }
 
-// Weekly progress
-.weeklyProgress {
+// Weekly progress section within each habit card
+.weeklyProgressSection {
   background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  @media (min-width: 1024px) {
-    grid-area: progress;
-  }
-
-  h4 {
-    margin: 0 0 16px;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1f2937;
-  }
-}
-
-.progressGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 16px;
-}
-
-.progressCard {
+  border-radius: 10px;
   padding: 16px;
-  background: #f9fafb;
-  border-radius: 8px;
   border: 1px solid #e5e7eb;
 }
 
 .progressHeader {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
-.progressEmoji {
-  font-size: 1.1rem;
-}
-
-.progressName {
-  font-weight: 500;
-  color: #1f2937;
-  flex: 1;
-}
-
-.goalMet {
+.progressLabel {
   font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
 }
 
-.progressBar {
-  height: 6px;
-  background: #e5e7eb;
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.progressFill {
-  height: 100%;
-  transition: width 0.3s ease;
-  border-radius: 3px;
+.progressStats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .progressText {
   font-size: 0.875rem;
   color: #6b7280;
-  text-align: center;
+  font-weight: 500;
+}
+
+.goalMet {
+  font-size: 0.75rem;
+  color: #059669;
+  font-weight: 600;
+  background: #d1fae5;
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid #a7f3d0;
+}
+
+.progressBar {
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+    animation: shimmer 2s infinite;
+  }
+}
+
+// Remove old sidebar styles
+.habitsSidebar {
+  display: none;
+}
+
+// Remove old weekly progress styles  
+.weeklyProgress {
+  display: none;
+}
+
+// Shimmer animation for progress bars
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+// Responsive design
+@media (max-width: 1023px) {
+  .habitsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .habitCard {
+    padding: 16px;
+  }
+
+  .habitsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .habitsContainer {
+    padding: 16px;
+  }
+
+  .habitMainInfo {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .habitActions {
+    align-self: flex-end;
+  }
+
+  .habitEmoji {
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+  }
 }
 
 // Animations
@@ -439,10 +476,6 @@
   }
 }
 
-.habitDescription {
-  font-size: 0.75rem;
-}
-
 // Dark mode styles
 :global(html.dark-mode) {
   .calendarView {
@@ -507,13 +540,25 @@
     }
   }
 
-  .habitsSidebar {
+  // New consolidated habits container dark mode
+  .habitsContainer {
     background: #1f2937;
+    border-color: #374151;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .habitsHeader {
+    border-bottom-color: #374151;
 
     h3 {
       color: #f9fafb;
     }
+  }
+
+  .weeklyStats {
+    background: #374151;
+    border-color: #4b5563;
+    color: #d1d5db;
   }
 
   .habitCard {
@@ -530,6 +575,10 @@
     color: #f9fafb;
   }
 
+  .habitDescription {
+    color: #9ca3af;
+  }
+
   .habitStats {
     color: #9ca3af;
   }
@@ -537,41 +586,42 @@
   .editButton, .deleteButton {
     background: #4b5563;
     color: #d1d5db;
+    border-color: #6b7280;
 
     &:hover {
       background: #6b7280;
       color: #f9fafb;
+      border-color: #9ca3af;
     }
   }
 
-  .weeklyProgress {
-    background: #1f2937;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-
-    h4 {
-      color: #f9fafb;
-    }
-  }
-
-  .progressCard {
+  .weeklyProgressSection {
     background: #374151;
     border-color: #4b5563;
-
-    &:hover {
-      background: #4b5563;
-      border-color: #6b7280;
-    }
   }
 
-  .progressName {
-    color: #f9fafb;
+  .progressLabel {
+    color: #d1d5db;
   }
 
   .progressText {
     color: #9ca3af;
   }
 
+  .goalMet {
+    background: #065f46;
+    color: #10b981;
+    border-color: #047857;
+  }
+
+  .progressBar {
+    background: #4b5563;
+  }
+
   .emptyState {
+    background: #1f2937;
+    border-color: #374151;
+
     h2 {
       color: #f9fafb;
     }
@@ -589,4 +639,49 @@
       background: #2563eb;
     }
   }
-} 
+}
+
+// Empty state
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.emptyStateContent {
+  text-align: center;
+  max-width: 400px;
+
+  h2 {
+    margin: 0 0 12px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0 0 24px;
+    color: #6b7280;
+    line-height: 1.6;
+  }
+}
+
+.primaryButton {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #2563eb;
+  }
+}
