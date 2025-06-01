@@ -1,0 +1,193 @@
+.calendarCell {
+  position: relative;
+  min-height: 80px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #d1d5db;
+  }
+
+  &.otherMonth {
+    opacity: 0.4;
+    background: #f9fafb;
+
+    .dayNumber {
+      color: #9ca3af;
+    }
+  }
+
+  &.today {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+
+    .dayNumber {
+      color: #3b82f6;
+      font-weight: 600;
+    }
+  }
+
+  &.hasCompletions {
+    border-color: transparent;
+    color: white;
+
+    .dayNumber {
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      font-weight: 600;
+    }
+  }
+}
+
+.dayNumber {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.habitEmojis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: auto;
+}
+
+.habitEmoji {
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px;
+  transition: all 0.2s ease;
+  display: inline-block;
+
+  &:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &.glowing {
+    animation: glow 2s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+}
+
+.quickAdd {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+  .calendarCell:hover & {
+    opacity: 1;
+  }
+}
+
+.quickAddEmoji {
+  font-size: 0.875rem;
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.95);
+  }
+}
+
+// Tooltip content styles
+.tooltipDate {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tooltipHabit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0;
+}
+
+.tooltipEmoji {
+  font-size: 1rem;
+}
+
+.tooltipName {
+  font-size: 0.875rem;
+}
+
+.goalMet {
+  font-size: 0.75rem;
+  margin-left: auto;
+}
+
+// Glow animation for habits that met weekly goal
+@keyframes glow {
+  from {
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+  to {
+    filter: drop-shadow(0 0 12px currentColor) drop-shadow(0 0 8px currentColor);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .calendarCell {
+    min-height: 60px;
+    padding: 6px;
+  }
+
+  .habitEmoji {
+    font-size: 1rem;
+  }
+
+  .dayNumber {
+    font-size: 0.75rem;
+  }
+}
+
+// Special styling for cells with multiple habit completions
+.calendarCell.hasCompletions {
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    opacity: 0.1;
+    z-index: -1;
+  }
+
+  // Enhance contrast for readability
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+// Today cell with completions gets special treatment
+.calendarCell.today.hasCompletions {
+  box-shadow: 
+    0 0 0 2px rgba(59, 130, 246, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+} 
