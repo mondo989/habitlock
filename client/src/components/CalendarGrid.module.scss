@@ -83,4 +83,34 @@
   @media (max-width: 768px) {
     min-height: 60px;
   }
+}
+
+// Dark mode styles
+:global(html.dark-mode) {
+  .calendarGrid {
+    background: #1f2937;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .dayHeaders {
+    background: #374151;
+    border-bottom-color: #4b5563;
+  }
+
+  .dayHeader {
+    color: #9ca3af;
+  }
+
+  .calendarWeek {
+    border-bottom-color: #4b5563;
+
+    :global(.calendarCell) {
+      border-right-color: #4b5563;
+
+      &:hover {
+        border-color: #6b7280;
+        background: #374151;
+      }
+    }
+  }
 } 

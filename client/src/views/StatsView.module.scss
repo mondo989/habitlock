@@ -376,4 +376,108 @@
   .heatmap {
     grid-template-columns: repeat(20, 1fr); // Show 5 months on small mobile
   }
+}
+
+// Dark mode styles
+:global(html.dark-mode) {
+  .statsView {
+    background: #111827;
+  }
+
+  .header {
+    h1 {
+      color: #f9fafb;
+    }
+
+    p {
+      color: #9ca3af;
+    }
+  }
+
+  .loading, .emptyState {
+    color: #9ca3af;
+
+    h2 {
+      color: #f9fafb;
+    }
+
+    p {
+      color: #9ca3af;
+    }
+  }
+
+  .spinner {
+    border-color: #374151;
+    border-top-color: #3b82f6;
+  }
+
+  .overviewCard {
+    background: #1f2937;
+    border-color: #374151;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      background: #374151;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  .habitInfo {
+    h3 {
+      color: #f9fafb;
+    }
+
+    p {
+      color: #9ca3af;
+    }
+  }
+
+  .statItem {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .statValue {
+    color: #f9fafb;
+  }
+
+  .statLabel {
+    color: #9ca3af;
+  }
+
+  .habitAnalytics {
+    background: #1f2937;
+    border-color: #374151;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+    h4 {
+      color: #f9fafb;
+    }
+  }
+
+  .heatmapLegend {
+    color: #9ca3af;
+  }
+
+  .summaryCard {
+    background: #1f2937;
+    border-color: #374151;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      background: #374151;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  .summaryValue {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .summaryLabel {
+    color: #9ca3af;
+  }
 } 

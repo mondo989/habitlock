@@ -347,4 +347,148 @@
       width: 100%;
     }
   }
+}
+
+// Dark mode styles
+:global(html.dark-mode) {
+  .modalOverlay {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .modalContent {
+    background: #1f2937;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  }
+
+  .modalHeader {
+    border-bottom-color: #4b5563;
+
+    h2 {
+      color: #f9fafb;
+    }
+  }
+
+  .closeButton {
+    color: #9ca3af;
+
+    &:hover {
+      background: #374151;
+      color: #d1d5db;
+    }
+  }
+
+  .field {
+    label {
+      color: #d1d5db;
+    }
+
+    input, textarea, select {
+      background: #374151;
+      border-color: #4b5563;
+      color: #f9fafb;
+
+      &:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+
+      &.error {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+      }
+
+      &::placeholder {
+        color: #6b7280;
+      }
+    }
+  }
+
+  .errorText {
+    color: #f87171;
+  }
+
+  .emojiGrid {
+    .emojiOption {
+      background: #374151;
+      border-color: #4b5563;
+
+      &:hover {
+        background: #4b5563;
+        border-color: #6b7280;
+      }
+
+      &.selected {
+        background: #3b82f6;
+        border-color: #2563eb;
+      }
+    }
+  }
+
+  .colorGrid {
+    .colorOption {
+      &.selected {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+      }
+    }
+  }
+
+  .goalButtonsGrid {
+    .goalButton {
+      background: #374151;
+      border-color: #4b5563;
+      color: #d1d5db;
+
+      &:hover {
+        background: #4b5563;
+        border-color: #6b7280;
+        color: #f9fafb;
+      }
+
+      &.selected {
+        background: #3b82f6;
+        border-color: #2563eb;
+        color: white;
+      }
+    }
+  }
+
+  .modalFooter {
+    border-top-color: #4b5563;
+    background: #374151;
+  }
+
+  .cancelButton {
+    background: #4b5563;
+    color: #d1d5db;
+    border-color: #6b7280;
+
+    &:hover {
+      background: #6b7280;
+      color: #f9fafb;
+      border-color: #9ca3af;
+    }
+  }
+
+  .saveButton {
+    background: #3b82f6;
+    color: white;
+
+    &:hover {
+      background: #2563eb;
+    }
+
+    &:disabled {
+      background: #4b5563;
+      color: #6b7280;
+    }
+  }
+
+  .deleteButton {
+    background: #dc2626;
+    color: white;
+
+    &:hover {
+      background: #b91c1c;
+    }
+  }
 } 

@@ -1,0 +1,147 @@
+.themeToggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  }
+}
+
+.toggleTrack {
+  width: 52px;
+  height: 28px;
+  border-radius: 14px;
+  position: relative;
+  transition: all 0.3s ease;
+  
+  .themeToggle.light & {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    box-shadow: 
+      inset 0 2px 4px rgba(0, 0, 0, 0.1),
+      0 2px 8px rgba(245, 158, 11, 0.3);
+  }
+  
+  .themeToggle.dark & {
+    background: linear-gradient(135deg, #374151, #1f2937);
+    box-shadow: 
+      inset 0 2px 4px rgba(0, 0, 0, 0.3),
+      0 2px 8px rgba(31, 41, 55, 0.4);
+  }
+}
+
+.toggleThumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  position: absolute;
+  top: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  .themeToggle.light & {
+    left: 2px;
+    background: linear-gradient(135deg, #ffffff, #f9fafb);
+    box-shadow: 
+      0 2px 4px rgba(0, 0, 0, 0.1),
+      0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+  
+  .themeToggle.dark & {
+    left: 26px;
+    background: linear-gradient(135deg, #4b5563, #374151);
+    box-shadow: 
+      0 2px 4px rgba(0, 0, 0, 0.2),
+      0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.toggleIcon {
+  font-size: 12px;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  
+  .themeToggle.light & {
+    transform: rotate(0deg) scale(1);
+  }
+  
+  .themeToggle.dark & {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+// Hover effects
+.themeToggle:hover {
+  .toggleTrack {
+    .themeToggle.light & {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.15),
+        0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+    
+    .themeToggle.dark & {
+      background: linear-gradient(135deg, #4b5563, #374151);
+      box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.4),
+        0 4px 12px rgba(31, 41, 55, 0.5);
+    }
+  }
+  
+  .toggleThumb {
+    .themeToggle.light & {
+      transform: translateX(2px);
+    }
+    
+    .themeToggle.dark & {
+      transform: translateX(-2px);
+    }
+  }
+}
+
+// Active state
+.themeToggle:active {
+  transform: scale(0.95);
+  
+  .toggleThumb {
+    transform: scale(0.9);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .themeToggle {
+    padding: 2px;
+  }
+  
+  .toggleTrack {
+    width: 48px;
+    height: 26px;
+    border-radius: 13px;
+  }
+  
+  .toggleThumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    
+    .themeToggle.dark & {
+      left: 24px;
+    }
+  }
+  
+  .toggleIcon {
+    font-size: 11px;
+  }
+} 

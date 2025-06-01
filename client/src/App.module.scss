@@ -149,6 +149,12 @@
   }
 }
 
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .navMeta {
   font-size: 0.75rem;
   color: #9ca3af;
@@ -223,6 +229,10 @@
     font-size: 0.75rem;
   }
 
+  .navActions {
+    gap: 12px;
+  }
+
   .navMeta {
     display: none;
   }
@@ -270,6 +280,11 @@
     text-align: center;
   }
 
+  .navActions {
+    order: -1;
+    justify-content: center;
+  }
+
   .main {
     padding-top: 8px;
   }
@@ -284,6 +299,17 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: #f8fafc;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+:global(html.dark-mode body) {
+  background: #111827;
+  color: #f9fafb;
+}
+
+:global(html.light-mode body) {
+  background: #f8fafc;
+  color: #1f2937;
 }
 
 :global(*) {
@@ -303,4 +329,90 @@
 :global(button) {
   font-family: inherit;
   font-size: inherit;
+}
+
+// Dark mode styles
+:global(html.dark-mode) {
+  .app {
+    background: #111827;
+    color: #f9fafb;
+  }
+
+  .nav {
+    background: #1f2937;
+    border-bottom-color: #374151;
+
+    .logo h1 {
+      color: #f9fafb;
+    }
+  }
+
+  .navTab {
+    color: #d1d5db;
+
+    &:hover {
+      background: #374151;
+      color: #f9fafb;
+    }
+
+    &.active {
+      background: #3b82f6;
+      color: white;
+
+      &:hover {
+        background: #2563eb;
+      }
+    }
+  }
+
+  .navMeta {
+    color: #9ca3af;
+  }
+
+  .userId {
+    background: #374151;
+    color: #d1d5db;
+  }
+
+  .footer {
+    background: #1f2937;
+    border-top-color: #374151;
+
+    .footerContent p {
+      color: #9ca3af;
+    }
+  }
+
+  .loadingScreen, .errorScreen, .authScreen {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  }
+
+  .retryButton {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+// Light mode explicit styles
+:global(html.light-mode) {
+  .app {
+    background: #f8fafc;
+    color: #1f2937;
+  }
+
+  .nav {
+    background: white;
+    border-bottom-color: #e5e7eb;
+  }
+
+  .footer {
+    background: white;
+    border-top-color: #e5e7eb;
+  }
 } 

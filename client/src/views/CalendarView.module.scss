@@ -437,4 +437,156 @@
       text-align: center;
     }
   }
+}
+
+.habitDescription {
+  font-size: 0.75rem;
+}
+
+// Dark mode styles
+:global(html.dark-mode) {
+  .calendarView {
+    background: #111827;
+  }
+
+  .loading, .error {
+    color: #9ca3af;
+
+    button {
+      background: #3b82f6;
+      color: white;
+
+      &:hover {
+        background: #2563eb;
+      }
+    }
+  }
+
+  .spinner {
+    border-color: #374151;
+    border-top-color: #3b82f6;
+  }
+
+  .header {
+    background: #1f2937;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .navButton {
+    background: #374151;
+    color: #d1d5db;
+
+    &:hover {
+      background: #4b5563;
+      color: #f9fafb;
+    }
+  }
+
+  .monthTitle {
+    color: #f9fafb;
+  }
+
+  .todayButton {
+    background: #374151;
+    border-color: #4b5563;
+    color: #d1d5db;
+
+    &:hover {
+      background: #4b5563;
+      border-color: #6b7280;
+      color: #f9fafb;
+    }
+  }
+
+  .addHabitButton {
+    background: #3b82f6;
+    color: white;
+
+    &:hover {
+      background: #2563eb;
+    }
+  }
+
+  .habitsSidebar {
+    background: #1f2937;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+    h3 {
+      color: #f9fafb;
+    }
+  }
+
+  .habitCard {
+    background: #374151;
+    border-color: #4b5563;
+
+    &:hover {
+      background: #4b5563;
+      border-color: #6b7280;
+    }
+  }
+
+  .habitName {
+    color: #f9fafb;
+  }
+
+  .habitStats {
+    color: #9ca3af;
+  }
+
+  .editButton, .deleteButton {
+    background: #4b5563;
+    color: #d1d5db;
+
+    &:hover {
+      background: #6b7280;
+      color: #f9fafb;
+    }
+  }
+
+  .weeklyProgress {
+    background: #1f2937;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+    h4 {
+      color: #f9fafb;
+    }
+  }
+
+  .progressCard {
+    background: #374151;
+    border-color: #4b5563;
+
+    &:hover {
+      background: #4b5563;
+      border-color: #6b7280;
+    }
+  }
+
+  .progressName {
+    color: #f9fafb;
+  }
+
+  .progressText {
+    color: #9ca3af;
+  }
+
+  .emptyState {
+    h2 {
+      color: #f9fafb;
+    }
+
+    p {
+      color: #9ca3af;
+    }
+  }
+
+  .primaryButton {
+    background: #3b82f6;
+    color: white;
+
+    &:hover {
+      background: #2563eb;
+    }
+  }
 } 

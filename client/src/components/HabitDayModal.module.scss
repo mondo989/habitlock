@@ -333,4 +333,142 @@
   .habitDescription {
     font-size: 0.75rem;
   }
+}
+
+// Dark mode styles
+:global(html.dark-mode) {
+  .modalOverlay {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .modalContent {
+    background: #1f2937;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  }
+
+  .modalHeader {
+    border-bottom-color: #4b5563;
+
+    h2 {
+      color: #f9fafb;
+    }
+  }
+
+  .dayLabel {
+    color: #9ca3af;
+  }
+
+  .todayBadge {
+    background: #3b82f6;
+    color: white;
+  }
+
+  .closeButton {
+    color: #9ca3af;
+
+    &:hover {
+      background: #374151;
+      color: #d1d5db;
+    }
+  }
+
+  .modalBody {
+    h3 {
+      color: #d1d5db;
+    }
+  }
+
+  .habitItem {
+    background: #374151;
+    border-color: #4b5563;
+
+    &:hover {
+      background: #4b5563;
+      border-color: #6b7280;
+    }
+
+    &.selected {
+      background: #1e3a8a;
+      border-color: #3b82f6;
+
+      &:hover {
+        background: #1e40af;
+      }
+    }
+
+    &.goalMet {
+      background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
+      border-color: #d97706;
+
+      &.selected {
+        background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+        border-color: #3b82f6;
+      }
+    }
+  }
+
+  .habitName {
+    color: #f9fafb;
+  }
+
+  .habitDescription {
+    color: #9ca3af;
+  }
+
+  .goalMetText {
+    color: #fbbf24;
+  }
+
+  .checkmark {
+    border-color: #6b7280;
+    color: white;
+
+    &.checked {
+      background: #3b82f6;
+      border-color: #3b82f6;
+    }
+  }
+
+  .emptyState {
+    color: #9ca3af;
+
+    p {
+      color: #9ca3af;
+    }
+  }
+
+  .modalFooter {
+    border-top-color: #4b5563;
+    background: #374151;
+  }
+
+  .summary {
+    color: #9ca3af;
+  }
+
+  .cancelButton {
+    background: #4b5563;
+    color: #d1d5db;
+    border-color: #6b7280;
+
+    &:hover {
+      background: #6b7280;
+      color: #f9fafb;
+      border-color: #9ca3af;
+    }
+  }
+
+  .saveButton {
+    background: #4b5563;
+    color: #6b7280;
+
+    &.hasChanges {
+      background: #3b82f6;
+      color: white;
+
+      &:hover {
+        background: #2563eb;
+      }
+    }
+  }
 } 
