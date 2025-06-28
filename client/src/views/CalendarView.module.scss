@@ -1,10 +1,11 @@
 .calendarView {
   min-height: 100vh;
-  background: #f8fafc;
-  padding: 20px;
+  background: #fafbfc;
+  padding: 32px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 32px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 // Loading and error states
@@ -17,29 +18,35 @@
   color: #6b7280;
 
   p {
-    margin: 16px 0 0;
+    margin: 20px 0 0;
     font-size: 1.125rem;
+    font-weight: 500;
   }
 
   button {
-    margin-top: 16px;
-    padding: 10px 20px;
+    margin-top: 20px;
+    padding: 12px 24px;
     background: #3b82f6;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
 
     &:hover {
       background: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
     }
   }
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 3px solid #e5e7eb;
   border-top: 3px solid #3b82f6;
   border-radius: 50%;
@@ -52,79 +59,93 @@
   justify-content: space-between;
   align-items: center;
   background: white;
-  padding: 20px 24px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 28px 32px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .monthControls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 }
 
 .navButton {
-  background: #f3f4f6;
-  border: none;
-  border-radius: 8px;
-  width: 40px;
-  height: 40px;
+  background: #f8fafc;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1.2rem;
-  color: #374151;
-  transition: all 0.2s ease;
+  font-size: 1.25rem;
+  color: #4b5563;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  font-weight: 600;
 
   &:hover {
-    background: #e5e7eb;
+    background: #f1f5f9;
     color: #1f2937;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.1);
   }
 }
 
 .monthTitle {
   margin: 0;
-  font-size: 1.875rem;
-  font-weight: 600;
+  font-size: 2.125rem;
+  font-weight: 700;
   color: #1f2937;
-  min-width: 200px;
+  min-width: 280px;
   text-align: center;
+  letter-spacing: -0.025em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .headerActions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
 
 .todayButton {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  color: #374151;
-  padding: 10px 16px;
-  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #4b5563;
+  padding: 12px 20px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
   &:hover {
-    background: #e5e7eb;
-    border-color: #9ca3af;
+    background: #f1f5f9;
+    border-color: rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 }
 
 .addHabitButton {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 12px 20px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
 
   &:hover {
-    background: #2563eb;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
   }
 }
 
@@ -133,7 +154,7 @@
   @media (min-width: 1024px) {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 32px;
   }
 }
 
@@ -152,55 +173,57 @@
 // New consolidated habits container
 .habitsContainer {
   background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f3f4f6;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .habitsHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
   h3 {
     margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: 1.375rem;
+    font-weight: 700;
     color: #1f2937;
+    letter-spacing: -0.025em;
   }
 }
 
 .weeklyStats {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   color: #6b7280;
-  background: #f9fafb;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  font-weight: 500;
 }
 
 .habitsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px;
 }
 
 .habitCard {
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 20px;
-  transition: all 0.2s ease;
+  background: #fafbfc;
+  border: 2px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
   &:hover {
-    background: #f3f4f6;
-    border-color: #d1d5db;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background: #f8fafc;
+    border-color: rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08), 0 3px 10px rgba(0, 0, 0, 0.05);
   }
 }
 
@@ -208,26 +231,27 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .habitBasics {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 16px;
   flex: 1;
 }
 
 .habitEmoji {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   flex-shrink: 0;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .habitDetails {
@@ -235,71 +259,76 @@
 }
 
 .habitName {
-  font-weight: 600;
+  font-weight: 700;
   color: #1f2937;
-  margin-bottom: 4px;
-  font-size: 1.1rem;
+  margin-bottom: 6px;
+  font-size: 1.1875rem;
+  letter-spacing: -0.025em;
 }
 
 .habitDescription {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   color: #6b7280;
-  margin-bottom: 6px;
-  line-height: 1.4;
+  margin-bottom: 8px;
+  line-height: 1.5;
 }
 
 .habitStats {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   color: #6b7280;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .habitActions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
 .editButton, .deleteButton {
   background: white;
-  border: 1px solid #e5e7eb;
-  padding: 8px;
-  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 10px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-  width: 36px;
-  height: 36px;
+  font-size: 0.9375rem;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
   &:hover {
-    background: #f9fafb;
-    border-color: #d1d5db;
-    transform: scale(1.05);
+    background: #f8fafc;
+    border-color: rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 }
 
 // Weekly progress section within each habit card
 .weeklyProgressSection {
   background: white;
-  border-radius: 10px;
-  padding: 16px;
-  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .progressHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .progressLabel {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.9375rem;
+  font-weight: 700;
   color: #374151;
+  letter-spacing: -0.025em;
 }
 
 .progressStats {
@@ -309,33 +338,36 @@
 }
 
 .progressText {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   color: #6b7280;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .goalMet {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: #059669;
-  font-weight: 600;
+  font-weight: 700;
   background: #d1fae5;
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
   border: 1px solid #a7f3d0;
+  letter-spacing: -0.025em;
 }
 
 .progressBar {
-  height: 8px;
-  background: #f3f4f6;
-  border-radius: 4px;
+  height: 10px;
+  background: #f1f5f9;
+  border-radius: 6px;
   overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .progressFill {
   height: 100%;
-  transition: width 0.3s ease;
-  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-radius: 6px;
   position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 
   &::after {
     content: '';
@@ -344,8 +376,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
-    animation: shimmer 2s infinite;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+    animation: shimmer 2.5s infinite;
   }
 }
 
@@ -365,44 +397,6 @@
   100% { transform: translateX(100%); }
 }
 
-// Responsive design
-@media (max-width: 1023px) {
-  .habitsGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .habitCard {
-    padding: 16px;
-  }
-
-  .habitsHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-}
-
-@media (max-width: 640px) {
-  .habitsContainer {
-    padding: 16px;
-  }
-
-  .habitMainInfo {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .habitActions {
-    align-self: flex-end;
-  }
-
-  .habitEmoji {
-    width: 40px;
-    height: 40px;
-    font-size: 1.3rem;
-  }
-}
-
 // Animations
 @keyframes spin {
   0% { transform: rotate(0deg); }
@@ -412,14 +406,47 @@
 // Responsive design
 @media (max-width: 1023px) {
   .calendarView {
-    padding: 12px;
+    padding: 20px;
+    gap: 24px;
+  }
+  
+  .habitsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .habitCard {
+    padding: 20px;
+  }
+
+  .habitsContainer {
+    padding: 24px;
+  }
+
+  .habitsHeader {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 16px;
+  }
+  
+  .header {
+    padding: 24px;
+  }
+  
+  .monthTitle {
+    font-size: 1.875rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .calendarView {
+    padding: 16px;
+    gap: 20px;
   }
 
   .header {
     flex-direction: column;
-    gap: 16px;
-    padding: 16px;
+    gap: 20px;
+    padding: 20px;
 
     .monthControls {
       order: 2;
@@ -437,32 +464,10 @@
     min-width: auto;
   }
 
-  .habitsSidebar {
-    order: -1;
-  }
-
-  .progressGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .calendarView {
-    padding: 8px;
-  }
-
-  .header {
-    padding: 12px;
-  }
-
-  .monthTitle {
-    font-size: 1.25rem;
-  }
-
   .navButton {
-    width: 36px;
-    height: 36px;
-    font-size: 1rem;
+    width: 40px;
+    height: 40px;
+    font-size: 1.125rem;
   }
 
   .headerActions {
@@ -474,12 +479,45 @@
       text-align: center;
     }
   }
+  
+  .habitsContainer {
+    padding: 20px;
+  }
+
+  .habitMainInfo {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .habitActions {
+    align-self: flex-end;
+  }
+
+  .habitEmoji {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+  }
+  
+  .emptyState {
+    padding: 40px 24px;
+  }
+  
+  .emptyStateContent {
+    h2 {
+      font-size: 1.5rem;
+    }
+    
+    p {
+      font-size: 1rem;
+    }
+  }
 }
 
 // Dark mode styles
 :global(html.dark-mode) {
   .calendarView {
-    background: #111827;
+    background: #0f1419;
   }
 
   .loading, .error {
@@ -501,54 +539,43 @@
   }
 
   .header {
-    background: #1f2937;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  }
-
-  .navButton {
-    background: #374151;
-    color: #d1d5db;
-
-    &:hover {
-      background: #4b5563;
-      color: #f9fafb;
-    }
+    background: #1a1d23;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
 
   .monthTitle {
     color: #f9fafb;
   }
 
-  .todayButton {
-    background: #374151;
-    border-color: #4b5563;
+  .navButton, .todayButton {
+    background: #232830;
+    border-color: rgba(255, 255, 255, 0.1);
     color: #d1d5db;
 
     &:hover {
-      background: #4b5563;
-      border-color: #6b7280;
-      color: #f9fafb;
+      background: #2d343e;
+      color: #f3f4f6;
+      border-color: rgba(255, 255, 255, 0.15);
     }
   }
 
   .addHabitButton {
-    background: #3b82f6;
-    color: white;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 
     &:hover {
-      background: #2563eb;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     }
   }
 
-  // New consolidated habits container dark mode
-  .habitsContainer {
-    background: #1f2937;
-    border-color: #374151;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  .habitsContainer, .emptyState {
+    background: #1a1d23;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
 
   .habitsHeader {
-    border-bottom-color: #374151;
+    border-bottom-color: rgba(255, 255, 255, 0.08);
 
     h3 {
       color: #f9fafb;
@@ -556,18 +583,18 @@
   }
 
   .weeklyStats {
-    background: #374151;
-    border-color: #4b5563;
-    color: #d1d5db;
+    background: #232830;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #9ca3af;
   }
 
   .habitCard {
-    background: #374151;
-    border-color: #4b5563;
+    background: #1e2328;
+    border-color: rgba(255, 255, 255, 0.08);
 
     &:hover {
-      background: #4b5563;
-      border-color: #6b7280;
+      background: #232830;
+      border-color: rgba(255, 255, 255, 0.12);
     }
   }
 
@@ -575,53 +602,35 @@
     color: #f9fafb;
   }
 
-  .habitDescription {
-    color: #9ca3af;
-  }
-
-  .habitStats {
+  .habitDescription, .habitStats, .progressText {
     color: #9ca3af;
   }
 
   .editButton, .deleteButton {
-    background: #4b5563;
+    background: #232830;
+    border-color: rgba(255, 255, 255, 0.1);
     color: #d1d5db;
-    border-color: #6b7280;
 
     &:hover {
-      background: #6b7280;
-      color: #f9fafb;
-      border-color: #9ca3af;
+      background: #2d343e;
+      border-color: rgba(255, 255, 255, 0.15);
     }
   }
 
   .weeklyProgressSection {
-    background: #374151;
-    border-color: #4b5563;
+    background: #232830;
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
   .progressLabel {
-    color: #d1d5db;
-  }
-
-  .progressText {
-    color: #9ca3af;
-  }
-
-  .goalMet {
-    background: #065f46;
-    color: #10b981;
-    border-color: #047857;
+    color: #e5e7eb;
   }
 
   .progressBar {
-    background: #4b5563;
+    background: #374151;
   }
 
-  .emptyState {
-    background: #1f2937;
-    border-color: #374151;
-
+  .emptyStateContent {
     h2 {
       color: #f9fafb;
     }
@@ -630,58 +639,57 @@
       color: #9ca3af;
     }
   }
-
-  .primaryButton {
-    background: #3b82f6;
-    color: white;
-
-    &:hover {
-      background: #2563eb;
-    }
-  }
 }
 
 // Empty state
 .emptyState {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 400px;
+  text-align: center;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  padding: 60px 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .emptyStateContent {
-  text-align: center;
-  max-width: 400px;
+  max-width: 480px;
 
   h2 {
-    margin: 0 0 12px;
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1.75rem;
+    font-weight: 700;
     color: #1f2937;
+    margin: 0 0 16px;
+    letter-spacing: -0.025em;
   }
 
   p {
-    margin: 0 0 24px;
+    font-size: 1.0625rem;
     color: #6b7280;
+    margin: 0 0 32px;
     line-height: 1.6;
   }
 }
 
 .primaryButton {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 14px 24px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 1rem;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
 
   &:hover {
-    background: #2563eb;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
   }
 }

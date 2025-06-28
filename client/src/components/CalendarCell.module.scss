@@ -1,84 +1,119 @@
 .calendarCell {
   position: relative;
-  min-height: 80px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 8px;
+  min-height: 120px;
+  border: none;
+  border-radius: 0;
+  padding: 16px 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   background: white;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: #d1d5db;
+    // Hover styles are handled by CalendarGrid parent
   }
 
   &.otherMonth {
-    opacity: 0.4;
-    background: #f9fafb;
+    opacity: 0.35;
+    background: rgba(248, 250, 252, 0.5);
 
     .dayNumber {
-      color: #9ca3af;
+      color: #cbd5e1;
     }
   }
 
   &.today {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    background: rgba(59, 130, 246, 0.03);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      margin: 6px;
+      opacity: 0.6;
+      pointer-events: none;
+    }
 
     .dayNumber {
       color: #3b82f6;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 1rem;
     }
   }
 
   &.hasCompletions {
-    border-color: transparent;
     color: white;
 
     .dayNumber {
       color: white;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+      font-weight: 700;
+      font-size: 1rem;
+      z-index: 2;
+      position: relative;
     }
   }
 }
 
 .dayNumber {
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.9375rem;
+  font-weight: 600;
   color: #374151;
-  line-height: 1;
-  margin-bottom: 4px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  z-index: 2;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .habitEmojis {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 6px;
   margin-top: auto;
+  z-index: 2;
+  position: relative;
+  justify-content: center;
+  align-items: center;
 }
 
 .habitEmoji {
-  font-size: 1.2rem;
   cursor: pointer;
-  border-radius: 4px;
-  padding: 2px;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: inline-block;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  
+  // Base size - scales down with more habits
+  font-size: 1.5rem;
+  
+  // Scale down emojis when there are multiple habits
+  .habitEmojis:has(.habitEmoji:nth-child(2)) & {
+    font-size: 1.25rem;
+  }
+  
+  .habitEmojis:has(.habitEmoji:nth-child(3)) & {
+    font-size: 1.125rem;
+  }
+  
+  .habitEmojis:has(.habitEmoji:nth-child(4)) & {
+    font-size: 1rem;
+  }
 
   &:hover {
-    transform: scale(1.1);
-    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.2);
   }
 
   &.glowing {
-    animation: glow 2s ease-in-out infinite alternate;
-    filter: drop-shadow(0 0 8px currentColor);
+    animation: glow 2.5s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
   }
 }
 
@@ -86,127 +121,164 @@
 .tooltipDate {
   font-weight: 600;
   font-size: 0.875rem;
-  margin-bottom: 4px;
-  padding-bottom: 4px;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .tooltipHabit {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin: 2px 0;
+  gap: 8px;
+  margin: 4px 0;
 }
 
 .tooltipEmoji {
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .tooltipName {
   font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .goalMet {
   font-size: 0.75rem;
   margin-left: auto;
+  font-weight: 600;
 }
 
-// Glow animation for habits that met weekly goal
+// Enhanced glow animation for habits that met weekly goal
 @keyframes glow {
   from {
-    filter: drop-shadow(0 0 4px currentColor);
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+    transform: scale(1);
   }
   to {
-    filter: drop-shadow(0 0 12px currentColor) drop-shadow(0 0 8px currentColor);
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+    transform: scale(1.05);
   }
 }
 
 // Responsive adjustments
 @media (max-width: 768px) {
   .calendarCell {
-    min-height: 60px;
-    padding: 6px;
+    min-height: 100px;
+    padding: 12px 10px;
   }
 
   .habitEmoji {
-    font-size: 1rem;
+    font-size: 1.25rem;
+    
+    .habitEmojis:has(.habitEmoji:nth-child(2)) & {
+      font-size: 1.125rem;
+    }
+    
+    .habitEmojis:has(.habitEmoji:nth-child(3)) & {
+      font-size: 1rem;
+    }
+    
+    .habitEmojis:has(.habitEmoji:nth-child(4)) & {
+      font-size: 0.875rem;
+    }
   }
 
   .dayNumber {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
   }
 }
 
-// Special styling for cells with multiple habit completions
-.calendarCell.hasCompletions {
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: inherit;
-    opacity: 0.1;
-    z-index: -1;
+@media (max-width: 480px) {
+  .calendarCell {
+    min-height: 85px;
+    padding: 10px 8px;
   }
 
-  // Enhance contrast for readability
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  .habitEmoji {
+    font-size: 1.125rem;
+    
+    .habitEmojis:has(.habitEmoji:nth-child(2)) & {
+      font-size: 1rem;
+    }
+    
+    .habitEmojis:has(.habitEmoji:nth-child(3)) & {
+      font-size: 0.875rem;
+    }
+    
+    .habitEmojis:has(.habitEmoji:nth-child(4)) & {
+      font-size: 0.75rem;
+    }
+  }
+
+  .dayNumber {
+    font-size: 0.8125rem;
+    margin-bottom: 6px;
+  }
+  
+  .habitEmojis {
+    gap: 4px;
+  }
 }
 
 // Today cell with completions gets special treatment
 .calendarCell.today.hasCompletions {
-  box-shadow: 
-    0 0 0 2px rgba(59, 130, 246, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.15);
+  &::before {
+    border-color: rgba(255, 255, 255, 0.8);
+    border-width: 2px;
+    box-shadow: 
+      0 0 0 1px rgba(255, 255, 255, 0.4),
+      0 4px 12px rgba(255, 255, 255, 0.3);
+  }
 }
 
 // Dark mode styles
 :global(html.dark-mode) {
   .calendarCell {
-    background: #374151;
-    border-color: #4b5563;
-
-    &:hover {
-      background: #4b5563;
-      border-color: #6b7280;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
+    background: #1a1d23;
 
     &.otherMonth {
-      background: #1f2937;
-      opacity: 0.5;
+      background: rgba(17, 24, 39, 0.5);
 
       .dayNumber {
-        color: #6b7280;
+        color: #4b5563;
       }
     }
 
     &.today {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+      background: rgba(59, 130, 246, 0.08);
+
+      &::before {
+        border-color: #3b82f6;
+        opacity: 0.8;
+      }
 
       .dayNumber {
-        color: #3b82f6;
+        color: #60a5fa;
       }
     }
 
     &.hasCompletions {
       .dayNumber {
         color: white;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
       }
     }
   }
 
   .dayNumber {
-    color: #d1d5db;
+    color: #e5e7eb;
   }
 
   .habitEmoji {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+
     &:hover {
-      background: rgba(255, 255, 255, 0.1);
+      filter: brightness(1.2);
+    }
+    
+    &.glowing {
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
     }
   }
 
@@ -217,8 +289,11 @@
 
   // Today cell with completions in dark mode
   .calendarCell.today.hasCompletions {
-    box-shadow: 
-      0 0 0 2px rgba(59, 130, 246, 0.4),
-      0 4px 12px rgba(0, 0, 0, 0.4);
+    &::before {
+      border-color: rgba(96, 165, 250, 0.8);
+      box-shadow: 
+        0 0 0 1px rgba(59, 130, 246, 0.4),
+        0 4px 12px rgba(59, 130, 246, 0.3);
+    }
   }
 } 

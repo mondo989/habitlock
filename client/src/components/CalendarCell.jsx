@@ -42,36 +42,17 @@ const CalendarCell = ({
     };
   }, [completedHabitDetails, hasHabitMetWeeklyGoal, date]);
 
-  // Generate tooltip content
-  const tooltipContent = useMemo(() => {
-    if (completedHabitDetails.length === 0) {
-      return (
-        <div>
-          <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
-          <div>Click to manage habits</div>
-        </div>
-      );
-    }
-
+  // Generate cell-level tooltip content for empty days
+  const cellTooltipContent = useMemo(() => {
+    if (completedHabitDetails.length > 0) return null;
+    
     return (
       <div>
         <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
-        {completedHabitDetails.map(habit => {
-          const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
-          return (
-            <div key={habit.id} className={styles.tooltipHabit}>
-              <span className={styles.tooltipEmoji}>{habit.emoji}</span>
-              <span className={styles.tooltipName}>{habit.name}</span>
-              {hasMetGoal && <span className={styles.goalMet}>🎯</span>}
-            </div>
-          );
-        })}
-        <div style={{ marginTop: '4px', fontSize: '0.75rem', opacity: 0.8 }}>
-          Click to manage habits
-        </div>
+        <div>Click to manage habits</div>
       </div>
     );
-  }, [completedHabitDetails, hasHabitMetWeeklyGoal, day, date]);
+  }, [completedHabitDetails, day]);
 
   const handleCellClick = (e) => {
     e.preventDefault();
@@ -85,44 +66,67 @@ const CalendarCell = ({
     onHabitToggle(date, habitId);
   };
 
-  return (
-    <Tooltip content={tooltipContent} position="top">
-      <div
-        className={`
-          ${styles.calendarCell}
-          ${!isCurrentMonth ? styles.otherMonth : ''}
-          ${isToday ? styles.today : ''}
-          ${completedHabitDetails.length > 0 ? styles.hasCompletions : ''}
-        `}
-        style={backgroundStyle}
-        onClick={handleCellClick}
-      >
-        <div className={styles.dayNumber}>
-          {day.dayjs.date()}
-        </div>
-        
-        {completedHabitDetails.length > 0 && (
-          <div className={styles.habitEmojis}>
-            {completedHabitDetails.map(habit => {
-              const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
-              return (
+  const cellContent = (
+    <div
+      className={`
+        ${styles.calendarCell}
+        ${!isCurrentMonth ? styles.otherMonth : ''}
+        ${isToday ? styles.today : ''}
+        ${completedHabitDetails.length > 0 ? styles.hasCompletions : ''}
+      `}
+      style={backgroundStyle}
+      onClick={handleCellClick}
+    >
+      <div className={styles.dayNumber}>
+        {day.dayjs.date()}
+      </div>
+      
+      {completedHabitDetails.length > 0 && (
+        <div className={styles.habitEmojis}>
+          {completedHabitDetails.map(habit => {
+            const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
+            
+            // Individual tooltip content for each emoji
+            const emojiTooltipContent = (
+              <div>
+                <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
+                <div className={styles.tooltipHabit}>
+                  <span className={styles.tooltipEmoji}>{habit.emoji}</span>
+                  <span className={styles.tooltipName}>{habit.name}</span>
+                  {hasMetGoal && <span className={styles.goalMet}>🎯 Goal met!</span>}
+                </div>
+                <div style={{ marginTop: '4px', fontSize: '0.75rem', opacity: 0.8 }}>
+                  Click to toggle
+                </div>
+              </div>
+            );
+            
+            return (
+              <Tooltip key={habit.id} content={emojiTooltipContent} position="top">
                 <span
-                  key={habit.id}
                   className={`
                     ${styles.habitEmoji}
                     ${hasMetGoal ? styles.glowing : ''}
                   `}
                   onClick={(e) => handleHabitClick(e, habit.id)}
-                  title={`${habit.name}${hasMetGoal ? ' (Goal met!)' : ''}`}
                 >
                   {habit.emoji}
                 </span>
-              );
-            })}
-          </div>
-        )}
-      </div>
+              </Tooltip>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
+  // Only wrap with tooltip if there are no completed habits (empty cell)
+  return completedHabitDetails.length === 0 ? (
+    <Tooltip content={cellTooltipContent} position="top">
+      {cellContent}
     </Tooltip>
+  ) : (
+    cellContent
   );
 };
 

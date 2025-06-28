@@ -270,11 +270,13 @@ const CalendarView = () => {
         isOpen={isDayModalOpen}
         onClose={() => setIsDayModalOpen(false)}
         onSave={handleSaveDayHabits}
+        onEditHabit={handleEditHabit}
         date={selectedDate}
         day={selectedDay}
         habits={habits}
         completedHabits={selectedDate ? getCompletedHabits(selectedDate) : []}
         hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
+        weekStats={weekStats}
       />
     </div>
   );

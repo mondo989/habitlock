@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { initializeAuth, auth } from './services/firebase';
+import { initializeAuth, auth, onAuthChange } from './services/firebase';
 import { ThemeProvider } from './context/ThemeContext';
 import CalendarView from './views/CalendarView';
 import StatsView from './views/StatsView';
@@ -11,12 +11,14 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     const initAuth = async () => {
       try {
         setAuthError(null);
-        await initializeAuth();
+        const user = await initializeAuth();
+        setCurrentUser(user);
         setIsAuthenticated(true);
       } catch (error) {
         console.error('Authentication failed:', error);
@@ -26,13 +28,22 @@ function App() {
       }
     };
 
-    // Check if user is already authenticated
-    if (auth.currentUser) {
-      setIsAuthenticated(true);
-      setIsLoading(false);
-    } else {
-      initAuth();
-    }
+    // Set up authentication state listener
+    const unsubscribeAuth = onAuthChange((user) => {
+      setCurrentUser(user);
+      setIsAuthenticated(!!user);
+      
+      if (user) {
+        console.log('User authenticated:', user.uid);
+        setAuthError(null);
+      }
+    });
+
+    // Initialize authentication
+    initAuth();
+
+    // Cleanup listener on unmount
+    return () => unsubscribeAuth();
   }, []);
 
   if (isLoading) {
@@ -46,6 +57,11 @@ function App() {
             </div>
             <div className={styles.spinner}></div>
             <p>Setting up your habit tracker...</p>
+            {currentUser && (
+              <div className={styles.userInfo}>
+                <small>User ID: {currentUser.uid.slice(-8)}</small>
+              </div>
+            )}
           </div>
         </div>
       </ThemeProvider>
@@ -77,7 +93,7 @@ function App() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !currentUser) {
     return (
       <ThemeProvider>
         <div className={styles.app}>
@@ -86,7 +102,7 @@ function App() {
               <span className={styles.logoEmoji}>🎯</span>
               <h1>HabitLock</h1>
             </div>
-            <p>Initializing your anonymous session...</p>
+            <p>Initializing your session...</p>
           </div>
         </div>
       </ThemeProvider>
@@ -123,8 +139,12 @@ function App() {
               <ThemeToggle />
               <div className={styles.navMeta}>
                 <span className={styles.userId}>
-                  {auth.currentUser?.uid ? `User: ${auth.currentUser.uid.slice(-6)}` : ''}
+                  Persistent User: {currentUser.uid.slice(-6)}
                 </span>
+                <div className={styles.userStatus}>
+                  <span className={styles.statusDot}></span>
+                  Connected
+                </div>
               </div>
             </div>
           </div>
@@ -141,7 +161,7 @@ function App() {
             <p>
               Built with ❤️ for building better habits • 
               <span className={styles.footerMeta}>
-                {' '}MVP by HabitLock Team
+                {' '}MVP by HabitLock Team • Data persists across sessions
               </span>
             </p>
           </div>
