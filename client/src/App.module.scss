@@ -28,6 +28,14 @@
   }
 }
 
+.authDescription {
+  max-width: 500px;
+  line-height: 1.6;
+  font-size: 1rem;
+  margin: 24px 0;
+  opacity: 0.9;
+}
+
 .logo {
   display: flex;
   align-items: center;
@@ -159,18 +167,151 @@
   font-size: 0.75rem;
   color: #9ca3af;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: center;
+  gap: 12px;
 }
 
-.userId {
-  font-family: monospace;
-  background: #f3f4f6;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-weight: 500;
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  
+  &:hover {
+    background: #f3f4f6;
+  }
 }
+
+.profileImage {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.userName {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #374151;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdownArrow {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+  margin-left: 4px;
+  
+  &.dropdownArrowOpen {
+    transform: rotate(180deg);
+  }
+}
+
+.profileDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  min-width: 240px;
+  z-index: 1000;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dropdownProfileImage {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdownUserInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dropdownUserName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2937;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdownUserEmail {
+  font-size: 0.75rem;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 0;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+  
+  &:active {
+    background: #fee2e2;
+  }
+}
+
+.dropdownIcon {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+
 
 .userStatus {
   display: flex;
@@ -280,7 +421,55 @@
   }
 
   .navMeta {
-    display: none;
+    gap: 8px;
+  }
+
+  .userProfile {
+    gap: 6px;
+  }
+
+  .profileImage {
+    width: 28px;
+    height: 28px;
+  }
+
+  .userName {
+    max-width: 80px;
+    font-size: 0.7rem;
+  }
+
+  .userProfile {
+    padding: 6px;
+  }
+
+  .dropdownArrow {
+    font-size: 0.6rem;
+  }
+
+  .profileDropdown {
+    min-width: 200px;
+  }
+
+  .dropdownHeader {
+    padding: 12px;
+  }
+
+  .dropdownProfileImage {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dropdownUserName {
+    font-size: 0.85rem;
+  }
+
+  .dropdownUserEmail {
+    font-size: 0.7rem;
+  }
+
+  .dropdownItem {
+    padding: 12px 14px;
+    font-size: 0.8rem;
   }
 
   .footer {
@@ -415,10 +604,61 @@
     color: #9ca3af;
   }
 
-  .userId {
-    background: #374151;
+  .profileImage {
+    border-color: #374151;
+  }
+
+  .userName {
     color: #d1d5db;
   }
+
+  .userProfile {
+    &:hover {
+      background: #374151;
+    }
+  }
+
+  .profileDropdown {
+    background: #1f2937;
+    border-color: #374151;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  .dropdownHeader {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    border-bottom-color: #4b5563;
+  }
+
+  .dropdownProfileImage {
+    border-color: #374151;
+  }
+
+  .dropdownUserName {
+    color: #f9fafb;
+  }
+
+  .dropdownUserEmail {
+    color: #9ca3af;
+  }
+
+  .dropdownDivider {
+    background: #374151;
+  }
+
+  .dropdownItem {
+    color: #d1d5db;
+    
+    &:hover {
+      background: #7f1d1d;
+      color: #fca5a5;
+    }
+    
+    &:active {
+      background: #991b1b;
+    }
+  }
+
+
 
   .userStatus {
     color: #10b981;

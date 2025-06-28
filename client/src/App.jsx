@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { initializeAuth, auth, onAuthChange } from './services/firebase';
+import { initializeAuth, auth, onAuthChange, signOutUser, getUserInfo } from './services/firebase';
 import { ThemeProvider } from './context/ThemeContext';
 import CalendarView from './views/CalendarView';
 import StatsView from './views/StatsView';
 import ThemeToggle from './components/ThemeToggle';
+import AuthModal from './components/AuthModal';
 import styles from './App.module.scss';
 
 function App() {
@@ -12,19 +13,29 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showProfileDropdown && !event.target.closest(`.${styles.navMeta}`)) {
+        setShowProfileDropdown(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showProfileDropdown]);
 
   useEffect(() => {
     const initAuth = async () => {
       try {
         setAuthError(null);
-        const user = await initializeAuth();
-        setCurrentUser(user);
-        setIsAuthenticated(true);
+        await initializeAuth();
       } catch (error) {
-        console.error('Authentication failed:', error);
+        console.error('Authentication initialization failed:', error);
         setAuthError('Failed to initialize authentication. Please refresh the page.');
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -32,10 +43,15 @@ function App() {
     const unsubscribeAuth = onAuthChange((user) => {
       setCurrentUser(user);
       setIsAuthenticated(!!user);
+      setIsLoading(false);
       
       if (user) {
-        console.log('User authenticated:', user.uid);
+        console.log('User authenticated:', user.uid, user.email);
         setAuthError(null);
+        setShowAuthModal(false);
+      } else {
+        console.log('No user authenticated');
+        setShowAuthModal(true);
       }
     });
 
@@ -45,6 +61,15 @@ function App() {
     // Cleanup listener on unmount
     return () => unsubscribeAuth();
   }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+      setShowProfileDropdown(false);
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -56,12 +81,7 @@ function App() {
               <h1>HabitLock</h1>
             </div>
             <div className={styles.spinner}></div>
-            <p>Setting up your habit tracker...</p>
-            {currentUser && (
-              <div className={styles.userInfo}>
-                <small>User ID: {currentUser.uid.slice(-8)}</small>
-              </div>
-            )}
+            <p>Loading your habit tracker...</p>
           </div>
         </div>
       </ThemeProvider>
@@ -102,12 +122,21 @@ function App() {
               <span className={styles.logoEmoji}>🎯</span>
               <h1>HabitLock</h1>
             </div>
-            <p>Initializing your session...</p>
+            <p className={styles.authDescription}>
+              Track your habits and build better routines with personalized insights and streak tracking.
+            </p>
           </div>
+          <AuthModal 
+            isOpen={showAuthModal} 
+            onClose={() => {}} // Prevent closing since auth is required
+            user={currentUser}
+          />
         </div>
       </ThemeProvider>
     );
   }
+
+  const userInfo = getUserInfo();
 
   return (
     <ThemeProvider>
@@ -138,13 +167,55 @@ function App() {
             <div className={styles.navActions}>
               <ThemeToggle />
               <div className={styles.navMeta}>
-                <span className={styles.userId}>
-                  Persistent User: {currentUser.uid.slice(-6)}
-                </span>
-                <div className={styles.userStatus}>
-                  <span className={styles.statusDot}></span>
-                  Connected
+                <div 
+                  className={styles.userProfile}
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                >
+                  {userInfo?.photoURL && (
+                    <img 
+                      src={userInfo.photoURL} 
+                      alt="Profile" 
+                      className={styles.profileImage}
+                    />
+                  )}
+                  <div className={styles.userDetails}>
+                    <span className={styles.userName}>
+                      {userInfo?.displayName || userInfo?.email || 'User'}
+                    </span>
+                    <div className={styles.userStatus}>
+                      <span className={styles.statusDot}></span>
+                      Connected
+                    </div>
+                  </div>
+                  <span className={`${styles.dropdownArrow} ${showProfileDropdown ? styles.dropdownArrowOpen : ''}`}>▼</span>
                 </div>
+                
+                {showProfileDropdown && (
+                  <div className={styles.profileDropdown}>
+                    <div className={styles.dropdownHeader}>
+                      {userInfo?.photoURL && (
+                        <img 
+                          src={userInfo.photoURL} 
+                          alt="Profile" 
+                          className={styles.dropdownProfileImage}
+                        />
+                      )}
+                      <div className={styles.dropdownUserInfo}>
+                        <div className={styles.dropdownUserName}>
+                          {userInfo?.displayName || 'User'}
+                        </div>
+                        <div className={styles.dropdownUserEmail}>
+                          {userInfo?.email}
+                        </div>
+                      </div>
+                    </div>
+                    <div className={styles.dropdownDivider}></div>
+                    <div className={styles.dropdownItem} onClick={handleSignOut}>
+                      <span className={styles.dropdownIcon}>🚪</span>
+                      Sign Out
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -161,7 +232,7 @@ function App() {
             <p>
               Built with ❤️ for building better habits • 
               <span className={styles.footerMeta}>
-                {' '}MVP by HabitLock Team • Data persists across sessions
+                {' '}MVP by HabitLock Team • Data synced to your Google account
               </span>
             </p>
           </div>

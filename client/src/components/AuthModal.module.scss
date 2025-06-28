@@ -1,0 +1,334 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 8px 16px rgba(0, 0, 0, 0.05);
+  max-width: 480px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+.closeButton {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f3f4f6;
+  color: #6b7280;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #e5e7eb;
+    color: #1f2937;
+  }
+}
+
+.modalContent {
+  padding: 24px;
+}
+
+.description {
+  margin: 0 0 24px 0;
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.errorMessage {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.providerButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.providerButton {
+  width: 100%;
+  padding: 14px 20px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.providerIcon {
+  font-size: 1.2rem;
+}
+
+.googleButton {
+  background: white;
+  color: #1f2937;
+  border-color: #e5e7eb;
+
+  &:hover:not(:disabled) {
+    border-color: #d1d5db;
+    background: #f9fafb;
+  }
+}
+
+.appleButton {
+  background: #000;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: #1f1f1f;
+  }
+}
+
+.facebookButton {
+  background: #1877f2;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: #166fe5;
+  }
+}
+
+.skipSection {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.skipButton {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+}
+
+.skipText {
+  margin: 8px 0 0 0;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+
+  p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 1rem;
+  }
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+// Dark mode styles
+:global(html.dark-mode) {
+  .modal {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+
+  .modalHeader {
+    background: #111827;
+    border-bottom-color: #374151;
+
+    h2 {
+      color: #f9fafb;
+    }
+  }
+
+  .closeButton {
+    background: #374151;
+    color: #d1d5db;
+
+    &:hover {
+      background: #4b5563;
+      color: #f9fafb;
+    }
+  }
+
+  .description {
+    color: #d1d5db;
+  }
+
+  .errorMessage {
+    background: #1f2937;
+    border-color: #dc2626;
+    color: #fca5a5;
+  }
+
+  .googleButton {
+    background: #374151;
+    color: #f9fafb;
+    border-color: #4b5563;
+
+    &:hover:not(:disabled) {
+      background: #4b5563;
+      border-color: #6b7280;
+    }
+  }
+
+  .skipSection {
+    border-top-color: #374151;
+  }
+
+  .skipButton {
+    color: #d1d5db;
+
+    &:hover {
+      background: #374151;
+      color: #f9fafb;
+    }
+  }
+
+  .skipText {
+    color: #9ca3af;
+  }
+
+  .loadingOverlay {
+    background: rgba(31, 41, 55, 0.95);
+
+    p {
+      color: #d1d5db;
+    }
+  }
+
+  .spinner {
+    border-color: #374151;
+    border-top-color: #60a5fa;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Mobile responsive
+@media (max-width: 768px) {
+  .modal {
+    max-width: 95vw;
+    margin: 20px;
+  }
+  
+  .modalHeader {
+    padding: 20px;
+
+    h2 {
+      font-size: 1.3rem;
+    }
+  }
+  
+  .modalContent {
+    padding: 20px;
+  }
+  
+  .providerButton {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+} 

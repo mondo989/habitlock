@@ -1,5 +1,13 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  setPersistence, 
+  browserLocalPersistence,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut
+} from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
@@ -16,37 +24,43 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const database = getDatabase(app);
 
+// Google OAuth provider
+const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
+
 // Initialize authentication with persistence
 export const initializeAuth = async () => {
   try {
     // Set authentication persistence to LOCAL (persists across browser sessions)
     await setPersistence(auth, browserLocalPersistence);
-    
-    return new Promise((resolve, reject) => {
-      // Check if user is already authenticated
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        unsubscribe(); // Clean up listener after first callback
-        
-        if (user) {
-          // User is already signed in
-          console.log('Existing user found:', user.uid);
-          resolve(user);
-        } else {
-          // No user, create new anonymous user
-          try {
-            console.log('Creating new anonymous user...');
-            const userCredential = await signInAnonymously(auth);
-            console.log('New anonymous user created:', userCredential.user.uid);
-            resolve(userCredential.user);
-          } catch (error) {
-            console.error('Anonymous authentication failed:', error);
-            reject(error);
-          }
-        }
-      }, reject);
-    });
+    console.log('Authentication persistence set');
   } catch (error) {
     console.error('Failed to set authentication persistence:', error);
+    throw error;
+  }
+};
+
+// Google Sign In
+export const signInWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    console.log('Google sign-in successful:', user.uid, user.email);
+    return user;
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    throw error;
+  }
+};
+
+// Sign Out
+export const signOutUser = async () => {
+  try {
+    await signOut(auth);
+    console.log('User signed out successfully');
+  } catch (error) {
+    console.error('Sign out error:', error);
     throw error;
   }
 };
@@ -54,6 +68,20 @@ export const initializeAuth = async () => {
 // Get current user ID (helper function)
 export const getCurrentUserId = () => {
   return auth.currentUser?.uid;
+};
+
+// Get current user info
+export const getUserInfo = () => {
+  const user = auth.currentUser;
+  if (!user) return null;
+  
+  return {
+    uid: user.uid,
+    email: user.email,
+    displayName: user.displayName,
+    photoURL: user.photoURL,
+    emailVerified: user.emailVerified
+  };
 };
 
 // Check if user is authenticated
