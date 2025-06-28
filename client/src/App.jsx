@@ -4,7 +4,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import CalendarView from './views/CalendarView';
 import StatsView from './views/StatsView';
 import ThemeToggle from './components/ThemeToggle';
-import AuthModal from './components/AuthModal';
+import LandingPage from './components/LandingPage';
 import styles from './App.module.scss';
 
 function App() {
@@ -13,7 +13,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   // Close dropdown when clicking outside
@@ -48,10 +47,8 @@ function App() {
       if (user) {
         console.log('User authenticated:', user.uid, user.email);
         setAuthError(null);
-        setShowAuthModal(false);
       } else {
         console.log('No user authenticated');
-        setShowAuthModal(true);
       }
     });
 
@@ -116,22 +113,7 @@ function App() {
   if (!isAuthenticated || !currentUser) {
     return (
       <ThemeProvider>
-        <div className={styles.app}>
-          <div className={styles.authScreen}>
-            <div className={styles.logo}>
-              <span className={styles.logoEmoji}>🎯</span>
-              <h1>HabitLock</h1>
-            </div>
-            <p className={styles.authDescription}>
-              Track your habits and build better routines with personalized insights and streak tracking.
-            </p>
-          </div>
-          <AuthModal 
-            isOpen={showAuthModal} 
-            onClose={() => {}} // Prevent closing since auth is required
-            user={currentUser}
-          />
-        </div>
+        <LandingPage />
       </ThemeProvider>
     );
   }

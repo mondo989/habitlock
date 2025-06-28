@@ -1,0 +1,444 @@
+.animatedCalendar {
+  position: relative;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 4px;
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+.streakIndicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-radius: 20px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  animation: streakPulse 2s ease-in-out infinite;
+}
+
+.streakIcon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+.habitTitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0369a1;
+}
+
+.habitTitleEmoji {
+  font-size: 18px;
+}
+
+.habitTitleText {
+  font-weight: 600;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.day {
+  aspect-ratio: 1;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.daySvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.dayBackground {
+  fill: #f9fafb;
+  stroke: #e5e7eb;
+  stroke-width: 1;
+  transition: all 0.3s ease;
+}
+
+.day.completed .dayBackground {
+  fill: #10b981;
+  stroke: #059669;
+}
+
+.day.today .dayBackground {
+  fill: #6366f1;
+  stroke: #4f46e5;
+}
+
+.day.animating .dayBackground {
+  fill: #10b981;
+  stroke: #059669;
+  animation: backgroundPulse 0.6s ease-out;
+}
+
+.day.animating.today .dayBackground {
+  fill: #6366f1;
+  stroke: #4f46e5;
+}
+
+.progressBorder {
+  fill: none;
+  stroke: #10b981;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 144;
+  stroke-dashoffset: 144;
+  animation: drawBorder 1s ease-out forwards;
+  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.5));
+}
+
+.day.today .progressBorder {
+  stroke: #8b5cf6;
+  filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.5));
+}
+
+.habitEmoji {
+  font-size: 14px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  opacity: 0;
+  animation: emojiAppear 0.5s ease-out forwards;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.particles {
+  opacity: 0;
+  animation: particleBurst 1.2s ease-out forwards;
+}
+
+.particle {
+  fill: #fbbf24;
+  animation: particleMove 1s ease-out forwards;
+  opacity: 0;
+}
+
+.dayNumber {
+  font-size: 12px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  fill: #6b7280;
+  transition: fill 0.3s ease;
+}
+
+.day.completed .dayNumber,
+.day.today .dayNumber,
+.day.animating .dayNumber {
+  fill: white;
+  font-weight: 700;
+}
+
+.ripple {
+  fill: none;
+  stroke: #10b981;
+  stroke-width: 2;
+  opacity: 0.6;
+  animation: rippleEffect 1s ease-out forwards;
+}
+
+.day.today .ripple {
+  stroke: #8b5cf6;
+}
+
+.notification {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 25px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  animation: notificationSlide 2s ease-out forwards;
+  z-index: 10;
+}
+
+.notificationEmoji {
+  font-size: 18px;
+  animation: notificationEmojiBounce 0.6s ease-out;
+}
+
+// Animations
+@keyframes streakPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-10deg) scale(1.1); }
+  75% { transform: rotate(10deg) scale(1.1); }
+}
+
+@keyframes backgroundPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes drawBorder {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes emojiAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(10px);
+  }
+  60% {
+    transform: scale(1.2) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes particleBurst {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes particleMove {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0);
+  }
+}
+
+@keyframes rippleEffect {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes notificationSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px) scale(0.8);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px) scale(0.9);
+  }
+}
+
+@keyframes notificationEmojiBounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-4px) scale(1.1);
+  }
+  60% {
+    transform: translateY(-2px) scale(1.05);
+  }
+}
+
+// Dark mode support
+:global(html.dark-mode) {
+  .calendarHeader h3 {
+    color: #f9fafb;
+  }
+
+  .habitTitle {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: #475569;
+    color: #38bdf8;
+  }
+
+  .dayBackground {
+    fill: #374151;
+    stroke: #4b5563;
+  }
+
+  .dayNumber {
+    fill: #d1d5db;
+  }
+
+  .day.completed .dayBackground,
+  .day.animating .dayBackground {
+    fill: #10b981;
+    stroke: #059669;
+  }
+
+  .day.today .dayBackground {
+    fill: #6366f1;
+    stroke: #4f46e5;
+  }
+
+  .day.animating.today .dayBackground {
+    fill: #6366f1;
+    stroke: #4f46e5;
+  }
+
+  .day.today .progressBorder {
+    stroke: #8b5cf6;
+    filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.5));
+  }
+
+  .day.today .ripple {
+    stroke: #8b5cf6;
+  }
+
+  .day.completed .dayNumber,
+  .day.today .dayNumber,
+  .day.animating .dayNumber {
+    fill: white;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .animatedCalendar {
+    max-width: 320px;
+  }
+
+  .calendarHeader {
+    margin-bottom: 16px;
+
+    h3 {
+      font-size: 1.125rem;
+    }
+  }
+
+  .streakIndicator {
+    padding: 4px 10px;
+    font-size: 0.7rem;
+  }
+
+  .streakIcon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .habitTitle {
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .habitTitleEmoji {
+    font-size: 16px;
+  }
+
+  .calendarGrid {
+    gap: 6px;
+  }
+
+  .dayNumber {
+    font-size: 10px;
+  }
+
+  .habitEmoji {
+    font-size: 12px;
+  }
+
+  .notification {
+    top: -50px;
+    padding: 10px 16px;
+    font-size: 0.8rem;
+  }
+
+  .notificationEmoji {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .animatedCalendar {
+    max-width: 280px;
+  }
+
+  .habitTitle {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+  }
+
+  .habitTitleEmoji {
+    font-size: 14px;
+  }
+
+  .calendarGrid {
+    gap: 4px;
+  }
+
+  .dayNumber {
+    font-size: 9px;
+  }
+
+  .habitEmoji {
+    font-size: 11px;
+  }
+} 
