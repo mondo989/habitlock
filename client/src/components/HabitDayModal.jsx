@@ -17,11 +17,18 @@ const HabitDayModal = ({
 
   useEffect(() => {
     if (isOpen) {
-      setSelectedHabits([...completedHabits]);
+      // Filter out any undefined or invalid habit IDs from completedHabits
+      const validCompletedHabits = (completedHabits || []).filter(habitId => habitId != null && habitId !== '');
+      setSelectedHabits([...validCompletedHabits]);
     }
   }, [isOpen, completedHabits]);
 
   const handleHabitToggle = (habitId) => {
+    if (!habitId || habitId === '') {
+      console.warn('Invalid habit ID provided to handleHabitToggle:', habitId);
+      return;
+    }
+    
     setSelectedHabits(prev => {
       if (prev.includes(habitId)) {
         return prev.filter(id => id !== habitId);
@@ -32,7 +39,8 @@ const HabitDayModal = ({
   };
 
   const handleSave = () => {
-    onSave(date, selectedHabits);
+    const validSelectedHabits = selectedHabits.filter(habitId => habitId != null && habitId !== '');
+    onSave(date, validSelectedHabits);
     onClose();
   };
 
@@ -74,7 +82,7 @@ const HabitDayModal = ({
           <h3>Select habits for this day:</h3>
           
           <div className={styles.habitsList}>
-            {habits.map(habit => {
+            {habits.filter(habit => habit && habit.id).map(habit => {
               const isSelected = selectedHabits.includes(habit.id);
               const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
               const weekStat = weekStats?.[habit.id] || { completions: 0, goal: habit.weeklyGoal, percentage: 0 };

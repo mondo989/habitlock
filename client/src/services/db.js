@@ -16,7 +16,23 @@ export const createHabit = async (userId, habitData) => {
 
 export const updateHabit = async (userId, habitId, updates) => {
   const habitRef = ref(database, `habits/${userId}/${habitId}`);
-  await set(habitRef, updates);
+  
+  // Get the existing habit first
+  const snapshot = await get(habitRef);
+  if (!snapshot.exists()) {
+    throw new Error('Habit not found');
+  }
+  
+  const existingHabit = snapshot.val();
+  
+  // Merge updates with existing habit data to preserve id and createdAt
+  const updatedHabit = {
+    ...existingHabit,
+    ...updates,
+    id: habitId, // Ensure ID is preserved
+  };
+  
+  await set(habitRef, updatedHabit);
 };
 
 export const deleteHabit = async (userId, habitId) => {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import CalendarGrid from '../components/CalendarGrid';
 import HabitModal from '../components/HabitModal';
 import HabitDayModal from '../components/HabitDayModal';
+import HabitStatsModal from '../components/HabitStatsModal';
 import { useHabits } from '../hooks/useHabits';
 import { useCalendar } from '../hooks/useCalendar';
 import styles from './CalendarView.module.scss';
@@ -15,6 +16,10 @@ const CalendarView = () => {
   const [isDayModalOpen, setIsDayModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
+
+  // State for habit stats modal
+  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
+  const [selectedHabit, setSelectedHabit] = useState(null);
 
   const {
     habits,
@@ -73,17 +78,35 @@ const CalendarView = () => {
     setIsDayModalOpen(true);
   };
 
+  // Handle habit detail click to show stats
+  const handleHabitDetailClick = (habitId) => {
+    const habit = habits.find(h => h.id === habitId);
+    if (habit) {
+      setSelectedHabit(habit);
+      setIsStatsModalOpen(true);
+    }
+  };
+
   // Handle saving habits for a specific day
   const handleSaveDayHabits = async (date, selectedHabits) => {
-    const currentCompleted = getCompletedHabits(date);
-    
-    // Calculate what habits need to be toggled
-    const toAdd = selectedHabits.filter(habitId => !currentCompleted.includes(habitId));
-    const toRemove = currentCompleted.filter(habitId => !selectedHabits.includes(habitId));
-    
-    // Toggle each habit that needs to change
-    for (const habitId of [...toAdd, ...toRemove]) {
-      await toggleHabitCompletion(date, habitId);
+    try {
+      // Filter out any undefined or falsy values
+      const validSelectedHabits = selectedHabits.filter(habitId => habitId != null && habitId !== '');
+      const currentCompleted = getCompletedHabits(date).filter(habitId => habitId != null && habitId !== '');
+      
+      // Calculate what habits need to be toggled
+      const toAdd = validSelectedHabits.filter(habitId => !currentCompleted.includes(habitId));
+      const toRemove = currentCompleted.filter(habitId => !validSelectedHabits.includes(habitId));
+      
+      // Toggle each habit that needs to change
+      for (const habitId of [...toAdd, ...toRemove]) {
+        if (habitId != null && habitId !== '') {
+          await toggleHabitCompletion(date, habitId);
+        }
+      }
+    } catch (error) {
+      console.error('Error saving day habits:', error);
+      // You could add user notification here
     }
   };
 
@@ -171,6 +194,7 @@ const CalendarView = () => {
             habits={habits}
             getCompletedHabits={getCompletedHabits}
             onHabitToggle={toggleHabitCompletion}
+            onHabitDetailClick={handleHabitDetailClick}
             onDayClick={handleDayClick}
             hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
           />
@@ -183,7 +207,7 @@ const CalendarView = () => {
           <div className={styles.habitsHeader}>
             <h3>Your Habits & Weekly Progress</h3>
             <div className={styles.weeklyStats}>
-              {Object.values(weekStats).filter(stat => stat?.hasMetGoal).length} of {habits.length} goals met this week
+              {Object.values(weekStats || {}).filter(stat => stat?.hasMetGoal).length} of {habits.length} goals met this week
             </div>
           </div>
           
@@ -277,6 +301,18 @@ const CalendarView = () => {
         completedHabits={selectedDate ? getCompletedHabits(selectedDate) : []}
         hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
         weekStats={weekStats}
+      />
+
+      {/* Habit Stats Modal */}
+      <HabitStatsModal
+        isOpen={isStatsModalOpen}
+        onClose={() => setIsStatsModalOpen(false)}
+        onEditHabit={handleEditHabit}
+        habit={selectedHabit}
+        streaks={streaks}
+        weekStats={weekStats}
+        getCompletedHabits={getCompletedHabits}
+        calendarMatrix={calendarMatrix}
       />
     </div>
   );
