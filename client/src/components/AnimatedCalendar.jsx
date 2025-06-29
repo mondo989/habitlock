@@ -5,6 +5,7 @@ const AnimatedCalendar = () => {
   const [animatingDay, setAnimatingDay] = useState(null);
   const [completedDays, setCompletedDays] = useState(new Set());
   const [todayCompleted, setTodayCompleted] = useState(false);
+  const [weeklyCount, setWeeklyCount] = useState(0);
   
   // Get current date info
   const now = new Date();
@@ -15,6 +16,7 @@ const AnimatedCalendar = () => {
   // Single habit being tracked (water intake)
   const habitEmoji = '💧';
   const habitName = 'Water';
+  const weeklyGoal = 5; // Goal: 5 times per week
 
   // Calculate completed days (simulate a good habit streak leading up to today)
   const getInitialCompletedDays = () => {
@@ -33,9 +35,28 @@ const AnimatedCalendar = () => {
 
   const [initialCompleted] = useState(() => getInitialCompletedDays());
 
+  // Calculate current week's completed days
+  const getCurrentWeekCount = (completedSet) => {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay()); // Start of current week (Sunday)
+    
+    let count = 0;
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      if (date.getMonth() === today.getMonth() && completedSet.has(date.getDate())) {
+        count++;
+      }
+    }
+    return count;
+  };
+
   useEffect(() => {
     // Set initial completed days
-    setCompletedDays(new Set(initialCompleted));
+    const initialSet = new Set(initialCompleted);
+    setCompletedDays(initialSet);
+    setWeeklyCount(getCurrentWeekCount(initialSet));
 
     const animateCompletion = () => {
       // Only animate if today hasn't been completed yet
@@ -43,7 +64,9 @@ const AnimatedCalendar = () => {
         setTimeout(() => {
           setAnimatingDay(currentDay);
           setTimeout(() => {
-            setCompletedDays(prev => new Set([...prev, currentDay]));
+            const newCompletedSet = new Set([...initialCompleted, currentDay]);
+            setCompletedDays(newCompletedSet);
+            setWeeklyCount(getCurrentWeekCount(newCompletedSet));
             setTodayCompleted(true);
             setAnimatingDay(null);
           }, 1500);
@@ -171,6 +194,7 @@ const AnimatedCalendar = () => {
   };
 
   const currentStreak = getCurrentStreak();
+  const progressPercentage = Math.min((weeklyCount / weeklyGoal) * 100, 100);
 
   return (
     <div className={styles.animatedCalendar}>
@@ -186,7 +210,18 @@ const AnimatedCalendar = () => {
       
       <div className={styles.habitTitle}>
         <span className={styles.habitTitleEmoji}>{habitEmoji}</span>
-        <span className={styles.habitTitleText}>Daily {habitName} Goal</span>
+        <div className={styles.habitTitleInfo}>
+          <span className={styles.habitTitleText}>Daily {habitName} Goal</span>
+          <div className={styles.weeklyProgress}>
+            <span className={styles.weeklyCount}>{weeklyCount}/{weeklyGoal} this week</span>
+            <div className={styles.progressBar}>
+              <div 
+                className={styles.progressFill} 
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
       </div>
       
       <div className={styles.calendarGrid}>
@@ -198,6 +233,9 @@ const AnimatedCalendar = () => {
         <div className={styles.notification}>
           <span className={styles.notificationEmoji}>{habitEmoji}</span>
           <span>{habitName} goal completed!</span>
+          <div className={styles.notificationProgress}>
+            {weeklyCount}/{weeklyGoal} this week
+          </div>
         </div>
       )}
     </div>

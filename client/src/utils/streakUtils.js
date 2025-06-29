@@ -1,5 +1,11 @@
 import { getDatesInWeek, formatDateForDB } from './dateUtils';
 import dayjs from 'dayjs';
+import dayOfYear from 'dayjs/plugin/dayOfYear';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+
+// Extend dayjs with plugins
+dayjs.extend(dayOfYear);
+dayjs.extend(weekOfYear);
 
 // Calculate current streak for a habit
 export const calculateStreak = (habitId, calendarEntries) => {
@@ -137,10 +143,14 @@ export const getCurrentWeekStats = (habits, calendarEntries) => {
   return stats;
 };
 
-// Generate heatmap data for a habit over a year
+// Generate heatmap data for a habit for entire year (GitHub style)
 export const generateHeatmapData = (habitId, year, calendarEntries) => {
-  const startDate = dayjs().year(year).startOf('year');
-  const endDate = dayjs().year(year).endOf('year');
+  const now = dayjs();
+  const currentYear = now.year();
+  
+  // Always use current year, show entire year
+  const startDate = dayjs().year(currentYear).startOf('year');
+  const endDate = dayjs().year(currentYear).endOf('year');
   const data = [];
   
   let current = startDate;
@@ -148,12 +158,24 @@ export const generateHeatmapData = (habitId, year, calendarEntries) => {
     const dateStr = current.format('YYYY-MM-DD');
     const entry = calendarEntries[dateStr];
     const completed = entry && entry.completedHabits && entry.completedHabits.includes(habitId);
+    const isFuture = current.isAfter(now, 'day');
+    
+    // Get completion time if available
+    let completionTime = null;
+    if (completed && entry.habits && entry.habits[habitId]) {
+      completionTime = entry.habits[habitId].completedAt;
+    }
     
     data.push({
       date: dateStr,
-      completed,
+      completed: completed && !isFuture, // Don't show future dates as completed
+      isFuture,
       dayOfYear: current.dayOfYear(),
       week: current.week(),
+      dayOfWeek: current.day(), // 0 = Sunday, 1 = Monday, etc.
+      formattedDate: current.format('MMM D, YYYY'),
+      weekday: current.format('dddd'),
+      completionTime
     });
     
     current = current.add(1, 'day');

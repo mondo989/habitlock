@@ -4,7 +4,7 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
 }
 
 // Header
@@ -13,16 +13,20 @@
   margin-bottom: 8px;
 
   h1 {
-    margin: 0 0 8px;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #1f2937;
+    margin: 0 0 12px;
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   p {
     margin: 0;
     color: #6b7280;
-    font-size: 1.125rem;
+    font-size: 1.25rem;
+    font-weight: 500;
   }
 }
 
@@ -43,9 +47,42 @@
   }
 
   p {
-    margin: 0;
+    margin: 0 0 24px;
     font-size: 1.125rem;
     text-align: center;
+  }
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.emptyTips {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f3f4f6;
+  max-width: 400px;
+
+  h3 {
+    margin: 0 0 16px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+    
+    li {
+      margin-bottom: 8px;
+      color: #4b5563;
+      font-size: 0.9375rem;
+    }
   }
 }
 
@@ -58,17 +95,150 @@
   animation: spin 1s linear infinite;
 }
 
-// Overview cards
-.overviewGrid {
+// Achievement Badges
+.achievementsSection {
+  h2 {
+    margin: 0 0 20px;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+}
+
+.achievementsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.achievementBadge {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  border: 2px solid #fbbf24;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+  }
+}
+
+.badgeEmoji {
+  font-size: 2.5rem;
+  background: white;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.badgeInfo {
+  flex: 1;
+
+  h4 {
+    margin: 0 0 4px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+}
+
+// Insights Section
+.insightsSection {
+  h2 {
+    margin: 0 0 20px;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+}
+
+.insightsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.insightCard {
+  padding: 16px 20px;
+  border-radius: 12px;
+  border-left: 4px solid;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  &.achievement {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+  }
+
+  &.success {
+    background: #d1fae5;
+    border-color: #10b981;
+    color: #065f46;
+  }
+
+  &.warning {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #dc2626;
+  }
+
+  &.tip {
+    background: #dbeafe;
+    border-color: #3b82f6;
+    color: #1e40af;
+  }
+
+  &.milestone {
+    background: #f3e8ff;
+    border-color: #8b5cf6;
+    color: #6b21a8;
+  }
+}
+
+// Quick Stats
+.quickStatsSection {
+  h2 {
+    margin: 0 0 20px;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+  }
+}
+
+.quickStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
 }
 
-.overviewCard {
+.quickStat {
   background: white;
   border-radius: 16px;
   padding: 24px;
+  text-align: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #f3f4f6;
   transition: all 0.2s ease;
@@ -77,81 +247,222 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
   }
+
+  .statValue {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .statLabel {
+    font-size: 1rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
 }
 
-.cardHeader {
+// Habit Details Section
+.habitDetailsSection {
+  h2 {
+    margin: 0 0 24px;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+}
+
+.habitDetailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.habitDetailCard {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f3f4f6;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+  }
+}
+
+.habitHeader {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 20px;
-}
 
-.habitEmoji {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}
-
-.habitInfo {
-  flex: 1;
-
-  h3 {
-    margin: 0 0 4px;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1f2937;
+  .habitEmoji {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
   }
 
-  p {
-    margin: 0;
-    color: #6b7280;
-    font-size: 0.875rem;
+  .habitInfo {
+    flex: 1;
+
+    h3 {
+      margin: 0 0 4px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+  }
+
+  .habitStatus {
+    .activeStreak {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .noStreak {
+      font-size: 1.5rem;
+      opacity: 0.5;
+    }
   }
 }
 
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-.statItem {
-  text-align: center;
+// Weekly Goal Progress
+.weeklyGoalSection {
+  margin-bottom: 20px;
   padding: 16px;
   background: #f9fafb;
   border-radius: 12px;
   border: 1px solid #f3f4f6;
 }
 
-.statValue {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 4px;
-}
-
-.statLabel {
+.goalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
   font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
+  font-weight: 600;
+  color: #4b5563;
 }
 
-// Analytics section
-.analyticsSection {
+.goalPercentage {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.goalProgressBar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.goalProgressFill {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+// Metrics Grid
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.metric {
+  text-align: center;
+  padding: 12px 8px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #f3f4f6;
+
+  .metricValue {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 2px;
+  }
+
+  .metricLabel {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
+}
+
+// Habit Insights
+.habitInsights {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.habitInsight {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-left: 3px solid;
+
+  &.achievement {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+  }
+
+  &.success {
+    background: #d1fae5;
+    border-color: #10b981;
+    color: #065f46;
+  }
+
+  &.warning {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #dc2626;
+  }
+
+  &.milestone {
+    background: #f3e8ff;
+    border-color: #8b5cf6;
+    color: #6b21a8;
+  }
+}
+
+// Heatmap Section
+.heatmapSection {
   h2 {
-    margin: 0 0 20px;
-    font-size: 1.5rem;
-    font-weight: 600;
+    margin: 0 0 24px;
+    font-size: 1.75rem;
+    font-weight: 700;
     color: #1f2937;
   }
 }
 
-.habitAnalytics {
+.habitHeatmap {
   background: white;
   border-radius: 16px;
   padding: 24px;
@@ -160,7 +471,7 @@
   border: 1px solid #f3f4f6;
 }
 
-.analyticsHeader {
+.heatmapHeader {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -170,6 +481,11 @@
     width: 32px;
     height: 32px;
     font-size: 1.2rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9fafb;
   }
 
   h3 {
@@ -177,118 +493,97 @@
     font-size: 1.25rem;
     font-weight: 600;
     color: #1f2937;
+    flex: 1;
   }
-}
 
-// Heatmap
-.heatmapSection {
-  h4 {
-    margin: 0 0 16px;
-    font-size: 1rem;
-    font-weight: 500;
+  .yearLabel {
+    font-size: 0.875rem;
     color: #6b7280;
+    font-weight: 500;
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 6px;
   }
 }
 
-.heatmap {
-  display: grid;
-  grid-template-columns: repeat(53, 1fr); // 53 weeks in a year
-  gap: 2px;
+// GitHub-style heatmap container
+.heatmapContainer {
+  display: flex;
+  gap: 8px;
   margin-bottom: 12px;
-  max-width: 100%;
   overflow-x: auto;
   padding: 8px;
   background: #f9fafb;
   border-radius: 8px;
 }
 
+.dayLabels {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-right: 4px;
+  padding-top: 2px;
+}
+
+.dayLabel {
+  height: 12px;
+  display: flex;
+  align-items: center;
+  font-size: 0.625rem;
+  color: #6b7280;
+  font-weight: 500;
+  width: 20px;
+  margin-bottom: 2px;
+}
+
+.heatmapGrid {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.heatmapWeekColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
 .heatmapDay {
   width: 12px;
   height: 12px;
   border-radius: 2px;
-  background: #f3f4f6;
+  background: #e5e7eb;
   transition: all 0.2s ease;
   cursor: pointer;
+  border: 1px solid #d1d5db;
 
   &:hover {
-    transform: scale(1.2);
+    transform: scale(1.3);
     z-index: 10;
     position: relative;
+    border-color: #6b7280;
   }
 
   &.completed {
-    opacity: 0.8;
+    opacity: 0.9;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  &.future {
+    opacity: 0.3;
+    border-color: #e5e7eb;
   }
 }
 
-.heatmapLegend {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-.legendScale {
-  display: flex;
-  gap: 2px;
-}
-
-.legendDay {
-  width: 10px;
-  height: 10px;
-  background: #d1d5db;
+.heatmapDayEmpty {
+  width: 12px;
+  height: 12px;
   border-radius: 2px;
-}
-
-// Summary section
-.summarySection {
-  h2 {
-    margin: 0 0 20px;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1f2937;
-    text-align: center;
-  }
-}
-
-.summaryGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.summaryCard {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f3f4f6;
-  transition: all 0.2s ease;
-
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-  }
-}
-
-.summaryValue {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #3b82f6;
-  margin-bottom: 8px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.summaryLabel {
-  font-size: 1rem;
-  color: #6b7280;
-  font-weight: 500;
+  background: transparent;
 }
 
 // Animations
@@ -301,12 +596,12 @@
 @media (max-width: 768px) {
   .statsView {
     padding: 12px;
-    gap: 16px;
+    gap: 24px;
   }
 
   .header {
     h1 {
-      font-size: 1.5rem;
+      font-size: 2rem;
     }
 
     p {
@@ -314,67 +609,97 @@
     }
   }
 
-  .overviewGrid {
+  .achievementsGrid {
     grid-template-columns: 1fr;
   }
 
-  .overviewCard {
-    padding: 16px;
-  }
-
-  .statsGrid {
+  .insightsGrid {
     grid-template-columns: 1fr;
-    gap: 12px;
   }
 
-  .statItem {
-    padding: 12px;
+  .quickStatsGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .statValue {
-    font-size: 1.5rem;
+  .habitDetailsGrid {
+    grid-template-columns: 1fr;
   }
 
-  .habitAnalytics {
+  .habitDetailCard {
     padding: 16px;
   }
 
-  .heatmap {
-    grid-template-columns: repeat(26, 1fr); // Show 6 months on mobile
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .metric {
+    padding: 10px 6px;
+
+    .metricValue {
+      font-size: 1rem;
+    }
+
+    .metricLabel {
+      font-size: 0.6875rem;
+    }
+  }
+
+  .heatmapContainer {
     padding: 4px;
+    gap: 6px;
   }
 
-  .heatmapDay {
+  .heatmapDay, .heatmapDayEmpty {
     width: 8px;
     height: 8px;
   }
 
-  .summaryGrid {
-    grid-template-columns: repeat(2, 1fr);
+  .dayLabel {
+    font-size: 0.5rem;
+    width: 16px;
+    height: 8px;
+    margin-bottom: 2px;
   }
 
-  .summaryCard {
-    padding: 16px;
+  .heatmapGrid {
+    gap: 1px;
   }
 
-  .summaryValue {
-    font-size: 2rem;
+  .heatmapWeekColumn {
+    gap: 1px;
   }
 }
 
 @media (max-width: 480px) {
-  .summaryGrid {
+  .quickStatsGrid {
     grid-template-columns: 1fr;
   }
 
-  .cardHeader {
+  .achievementBadge {
     flex-direction: column;
     text-align: center;
     gap: 12px;
   }
 
-  .heatmap {
-    grid-template-columns: repeat(20, 1fr); // Show 5 months on small mobile
+  .habitHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .heatmapContainer {
+    gap: 4px;
+    padding: 2px;
+  }
+
+  .heatmapGrid {
+    gap: 1px;
+  }
+
+  .heatmapWeekColumn {
+    gap: 1px;
   }
 }
 
@@ -386,7 +711,10 @@
 
   .header {
     h1 {
-      color: #f9fafb;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     p {
@@ -406,12 +734,62 @@
     }
   }
 
+  .emptyTips {
+    background: #1f2937;
+    border-color: #374151;
+
+    h3 {
+      color: #f9fafb;
+    }
+
+    li {
+      color: #d1d5db;
+    }
+  }
+
   .spinner {
     border-color: #374151;
     border-top-color: #3b82f6;
   }
 
-  .overviewCard {
+  .achievementBadge {
+    background: linear-gradient(135deg, #d97706, #92400e);
+    border-color: #d97706;
+  }
+
+  .insightCard {
+    &.achievement {
+      background: #451a03;
+      border-color: #d97706;
+      color: #fbbf24;
+    }
+
+    &.success {
+      background: #064e3b;
+      border-color: #059669;
+      color: #34d399;
+    }
+
+    &.warning {
+      background: #450a0a;
+      border-color: #dc2626;
+      color: #f87171;
+    }
+
+    &.tip {
+      background: #1e3a8a;
+      border-color: #2563eb;
+      color: #60a5fa;
+    }
+
+    &.milestone {
+      background: #581c87;
+      border-color: #7c3aed;
+      color: #a78bfa;
+    }
+  }
+
+  .quickStat {
     background: #1f2937;
     border-color: #374151;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -420,64 +798,148 @@
       background: #374151;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
-  }
 
-  .habitInfo {
-    h3 {
-      color: #f9fafb;
-    }
-
-    p {
+    .statLabel {
       color: #9ca3af;
     }
   }
 
-  .statItem {
+  .habitDetailsSection h2,
+  .achievementsSection h2,
+  .insightsSection h2,
+  .quickStatsSection h2,
+  .heatmapSection h2 {
+    color: #f9fafb;
+  }
+
+  .habitDetailCard {
+    background: #1f2937;
+    border-color: #374151;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      background: #374151;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .habitInfo {
+      h3 {
+        color: #f9fafb;
+      }
+
+      p {
+        color: #9ca3af;
+      }
+    }
+
+    .habitStatus {
+      .activeStreak {
+        background: #451a03;
+        color: #fbbf24;
+      }
+    }
+  }
+
+  .weeklyGoalSection {
     background: #374151;
     border-color: #4b5563;
   }
 
-  .statValue {
-    color: #f9fafb;
+  .goalHeader {
+    color: #d1d5db;
   }
 
-  .statLabel {
-    color: #9ca3af;
+  .goalPercentage {
+    color: #60a5fa;
   }
 
-  .habitAnalytics {
-    background: #1f2937;
-    border-color: #374151;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  .goalProgressBar {
+    background: #4b5563;
+  }
 
-    h4 {
+  .metric {
+    background: #374151;
+    border-color: #4b5563;
+
+    .metricValue {
       color: #f9fafb;
     }
+
+    .metricLabel {
+      color: #9ca3af;
+    }
   }
 
-  .heatmapLegend {
-    color: #9ca3af;
+  .habitInsight {
+    &.achievement {
+      background: #451a03;
+      border-color: #d97706;
+      color: #fbbf24;
+    }
+
+    &.success {
+      background: #064e3b;
+      border-color: #059669;
+      color: #34d399;
+    }
+
+    &.warning {
+      background: #450a0a;
+      border-color: #dc2626;
+      color: #f87171;
+    }
+
+    &.milestone {
+      background: #581c87;
+      border-color: #7c3aed;
+      color: #a78bfa;
+    }
   }
 
-  .summaryCard {
+  .habitHeatmap {
     background: #1f2937;
     border-color: #374151;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 
-    &:hover {
-      background: #374151;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    .heatmapHeader {
+      .habitEmoji {
+        background: #374151;
+      }
+
+      h3 {
+        color: #f9fafb;
+      }
+
+      .yearLabel {
+        background: #4b5563;
+        color: #d1d5db;
+      }
     }
-  }
 
-  .summaryValue {
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+    .heatmapContainer {
+      background: #374151;
+    }
 
-  .summaryLabel {
-    color: #9ca3af;
+    .dayLabel {
+      color: #9ca3af;
+    }
+
+    .heatmapDay {
+      background: #4b5563;
+      border-color: #6b7280;
+
+      &:hover {
+        border-color: #9ca3af;
+      }
+
+      &.completed {
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      &.future {
+        background: #374151;
+        border-color: #4b5563;
+      }
+    }
   }
 } 
