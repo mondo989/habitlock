@@ -622,6 +622,10 @@
     color: #94a3b8;
   }
 
+  .welcomeContent p {
+    color: #cbd5e1;
+  }
+
   .feature {
     background: linear-gradient(135deg, #334155, #475569);
     border-color: rgba(255, 255, 255, 0.1);
@@ -638,6 +642,34 @@
   .mockHabitCard, .calendarPreview, .streakCard, .heatmapPreview, .insightCard {
     background: #1e293b;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    h4, h5 {
+      color: #f8fafc !important;
+    }
+    
+    p {
+      color: #cbd5e1 !important;
+    }
+  }
+
+  .calendarHeader {
+    color: #f8fafc !important;
+  }
+
+  .streakCard {
+    .streakHeader {
+      h4 {
+        color: #f8fafc !important;
+      }
+      
+      p {
+        color: #94a3b8 !important;
+      }
+    }
+    
+    > p {
+      color: #94a3b8 !important;
+    }
   }
 
   .tips h4 {
@@ -665,6 +697,19 @@
     }
   }
 
+  .finalMessage {
+    background: linear-gradient(135deg, #1e40af, #2563eb);
+    border-color: #3b82f6;
+    
+    h4 {
+      color: #dbeafe;
+    }
+    
+    p {
+      color: #bfdbfe;
+    }
+  }
+
   .prevButton {
     background: #374151;
     color: #d1d5db;
@@ -681,6 +726,22 @@
     &:hover {
       background: #374151;
       color: #d1d5db;
+    }
+  }
+
+  .slideCounter {
+    color: #94a3b8;
+  }
+
+  .progressDot {
+    background: #475569;
+    
+    &.active {
+      background: #3b82f6;
+    }
+    
+    &:hover {
+      background: #60a5fa;
     }
   }
 }
