@@ -35,7 +35,7 @@ const AnimatedCalendar = () => {
 
   const [initialCompleted] = useState(() => getInitialCompletedDays());
 
-  // Calculate current week's completed days
+  // Calculate current week's completed days (Sunday-Saturday)
   const getCurrentWeekCount = (completedSet) => {
     const today = new Date();
     const startOfWeek = new Date(today);

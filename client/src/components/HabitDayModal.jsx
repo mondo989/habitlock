@@ -85,7 +85,33 @@ const HabitDayModal = ({
             {habits.filter(habit => habit && habit.id).map(habit => {
               const isSelected = selectedHabits.includes(habit.id);
               const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
-              const weekStat = weekStats?.[habit.id] || { completions: 0, goal: habit.weeklyGoal, percentage: 0 };
+              const originalWeekStat = weekStats?.[habit.id] || { completions: 0, goal: habit.weeklyGoal, percentage: 0 };
+              
+              // Calculate dynamic weekly stats based on current selection
+              const wasOriginallyCompleted = completedHabits.includes(habit.id);
+              const isCurrentlySelected = isSelected;
+              
+              let adjustedCompletions = originalWeekStat.completions;
+              
+              // Adjust the completion count based on pending changes
+              if (wasOriginallyCompleted && !isCurrentlySelected) {
+                // Was completed, now deselected - subtract 1
+                adjustedCompletions = Math.max(0, adjustedCompletions - 1);
+              } else if (!wasOriginallyCompleted && isCurrentlySelected) {
+                // Wasn't completed, now selected - add 1
+                adjustedCompletions = adjustedCompletions + 1;
+              }
+              
+              const adjustedPercentage = habit.weeklyGoal > 0 
+                ? (adjustedCompletions / habit.weeklyGoal) * 100 
+                : 0;
+              
+              const weekStat = {
+                ...originalWeekStat,
+                completions: adjustedCompletions,
+                percentage: adjustedPercentage,
+                hasMetGoal: adjustedCompletions >= habit.weeklyGoal
+              };
               
               return (
                 <div 
@@ -93,7 +119,7 @@ const HabitDayModal = ({
                   className={`
                     ${styles.habitItem}
                     ${isSelected ? styles.selected : ''}
-                    ${hasMetGoal ? styles.goalMet : ''}
+                    ${weekStat.hasMetGoal ? styles.goalMet : ''}
                   `}
                   onClick={() => handleHabitToggle(habit.id)}
                 >
@@ -126,7 +152,7 @@ const HabitDayModal = ({
                             />
                           </div>
                         </div>
-                        {hasMetGoal && (
+                        {weekStat.hasMetGoal && (
                           <div className={styles.goalMetBadge}>🎯 Goal achieved!</div>
                         )}
                       </div>

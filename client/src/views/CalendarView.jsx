@@ -5,6 +5,7 @@ import HabitDayModal from '../components/HabitDayModal';
 import HabitStatsModal from '../components/HabitStatsModal';
 import { useHabits } from '../hooks/useHabits';
 import { useCalendar } from '../hooks/useCalendar';
+import { getWeekStatsForDate } from '../utils/streakUtils';
 import styles from './CalendarView.module.scss';
 
 const CalendarView = () => {
@@ -35,6 +36,7 @@ const CalendarView = () => {
     monthDisplayName,
     streaks,
     weekStats,
+    calendarEntries,
     loading: calendarLoading,
     error: calendarError,
     goToNextMonth,
@@ -44,6 +46,11 @@ const CalendarView = () => {
     getCompletedHabits,
     hasHabitMetWeeklyGoal,
   } = useCalendar(habits);
+
+  // Calculate week stats for the selected date's week
+  const selectedWeekStats = selectedDate 
+    ? getWeekStatsForDate(habits, calendarEntries, new Date(selectedDate))
+    : weekStats;
 
   const handleCreateHabit = () => {
     setModalMode('create');
@@ -300,7 +307,7 @@ const CalendarView = () => {
         habits={habits}
         completedHabits={selectedDate ? getCompletedHabits(selectedDate) : []}
         hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
-        weekStats={weekStats}
+        weekStats={selectedWeekStats}
       />
 
       {/* Habit Stats Modal */}

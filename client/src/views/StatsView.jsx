@@ -6,6 +6,7 @@ import {
   getHabitStatsForRange, 
   generateHeatmapData 
 } from '../utils/streakUtils';
+import { getWeekBoundaries } from '../utils/dateUtils';
 import styles from './StatsView.module.scss';
 
 const StatsView = () => {
@@ -61,7 +62,9 @@ const StatsView = () => {
     const now = new Date();
     const currentYear = now.getFullYear();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    // Get proper Sunday-Saturday week boundaries for current week
+    const currentWeekBoundaries = getWeekBoundaries(now);
     
     return habits.map(habit => {
       const currentStreak = streaks[habit.id] || 0;
@@ -72,27 +75,28 @@ const StatsView = () => {
         now.toISOString().split('T')[0],
         calendarEntries
       );
-      const sevenDayStats = getHabitStatsForRange(
+      // Use proper Sunday-Saturday week boundaries for this week's stats
+      const currentWeekStats = getHabitStatsForRange(
         habit.id, 
-        sevenDaysAgo.toISOString().split('T')[0],
-        now.toISOString().split('T')[0],
+        currentWeekBoundaries.start,
+        currentWeekBoundaries.end,
         calendarEntries
       );
       const heatmapData = generateHeatmapData(habit.id, currentYear, calendarEntries);
       
-      // Calculate weekly goal progress
-      const currentWeekProgress = Math.min(sevenDayStats.completedDays, habit.weeklyGoal || 7);
+      // Calculate weekly goal progress using proper week boundaries
+      const currentWeekProgress = Math.min(currentWeekStats.completedDays, habit.weeklyGoal || 7);
       const weeklyGoalPercentage = ((currentWeekProgress / (habit.weeklyGoal || 7)) * 100);
       
       // Generate insights
-      const insights = generateInsights(habit, currentStreak, bestStreak, thirtyDayStats, sevenDayStats);
+      const insights = generateInsights(habit, currentStreak, bestStreak, thirtyDayStats, currentWeekStats);
       
       return {
         habit,
         currentStreak,
         bestStreak,
         thirtyDayStats,
-        sevenDayStats,
+        currentWeekStats,
         heatmapData,
         weeklyGoalPercentage,
         currentWeekProgress,
@@ -269,7 +273,7 @@ const StatsView = () => {
       <div className={styles.habitDetailsSection}>
         <h2>🎯 Habit Performance</h2>
         <div className={styles.habitDetailsGrid}>
-          {statsData.map(({ habit, currentStreak, bestStreak, thirtyDayStats, sevenDayStats, weeklyGoalPercentage, currentWeekProgress, insights }) => (
+          {statsData.map(({ habit, currentStreak, bestStreak, thirtyDayStats, currentWeekStats, weeklyGoalPercentage, currentWeekProgress, insights }) => (
             <div key={habit.id} className={styles.habitDetailCard}>
               <div className={styles.habitHeader}>
                 <span 
@@ -322,7 +326,7 @@ const StatsView = () => {
                   <div className={styles.metricLabel}>30-Day</div>
                 </div>
                 <div className={styles.metric}>
-                  <div className={styles.metricValue}>{sevenDayStats.completedDays}</div>
+                  <div className={styles.metricValue}>{currentWeekStats.completedDays}</div>
                   <div className={styles.metricLabel}>This Week</div>
                 </div>
               </div>

@@ -45,11 +45,11 @@ export const generateCalendarMatrix = (year, month) => {
   return matrix;
 };
 
-// Get week boundaries (Monday to Sunday) for a given date
+// Get week boundaries (Sunday to Saturday) for a given date
 export const getWeekBoundaries = (date) => {
   const day = dayjs(date);
-  const startOfWeek = day.startOf('isoWeek'); // Monday
-  const endOfWeek = day.endOf('isoWeek'); // Sunday
+  const startOfWeek = day.startOf('week'); // Sunday
+  const endOfWeek = day.endOf('week'); // Saturday
   
   return {
     start: startOfWeek.format('YYYY-MM-DD'),

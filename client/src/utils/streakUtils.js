@@ -125,12 +125,17 @@ export const getHabitStatsForRange = (habitId, startDate, endDate, calendarEntri
 // Get weekly stats for all habits in current week
 export const getCurrentWeekStats = (habits, calendarEntries) => {
   const today = new Date();
+  return getWeekStatsForDate(habits, calendarEntries, today);
+};
+
+// Get weekly stats for all habits for a specific date's week
+export const getWeekStatsForDate = (habits, calendarEntries, date) => {
   const stats = {};
   
   habits.forEach(habit => {
-    const completions = calculateWeeklyCompletions(habit.id, today, calendarEntries);
-    const hasMetGoal = hasMetWeeklyGoal(habit, today, calendarEntries);
-    const percentage = getWeeklyCompletionPercentage(habit, today, calendarEntries);
+    const completions = calculateWeeklyCompletions(habit.id, date, calendarEntries);
+    const hasMetGoal = hasMetWeeklyGoal(habit, date, calendarEntries);
+    const percentage = getWeeklyCompletionPercentage(habit, date, calendarEntries);
     
     stats[habit.id] = {
       completions,
