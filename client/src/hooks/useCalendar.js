@@ -84,19 +84,28 @@ export const useCalendar = (habits = []) => {
 
     try {
       setError(null);
-      const entry = calendarEntries[date] || { date, completedHabits: [] };
-      const { completedHabits } = entry;
+      const entry = calendarEntries[date] || { date, completedHabits: [], habits: {} };
+      const { completedHabits, habits: habitDetails = {} } = entry;
       
       let updatedHabits;
+      let updatedHabitDetails = { ...habitDetails };
+      
       if (completedHabits.includes(habitId)) {
         // Remove habit from completed list
         updatedHabits = completedHabits.filter(id => id !== habitId);
+        // Remove habit details
+        delete updatedHabitDetails[habitId];
       } else {
         // Add habit to completed list
         updatedHabits = [...completedHabits, habitId];
+        // Add habit completion details with timestamp
+        updatedHabitDetails[habitId] = {
+          completedAt: new Date().toISOString(),
+          habitId: habitId,
+        };
       }
 
-      await updateCalendarEntry(auth.currentUser.uid, date, updatedHabits);
+      await updateCalendarEntry(auth.currentUser.uid, date, updatedHabits, updatedHabitDetails);
       return true;
     } catch (err) {
       setError('Failed to update calendar entry');
@@ -158,20 +167,27 @@ export const useCalendar = (habits = []) => {
 
       while (current.isBefore(end) || current.isSame(end, 'day')) {
         const dateStr = current.format('YYYY-MM-DD');
-        const entry = calendarEntries[dateStr] || { date: dateStr, completedHabits: [] };
-        const { completedHabits } = entry;
+        const entry = calendarEntries[dateStr] || { date: dateStr, completedHabits: [], habits: {} };
+        const { completedHabits, habits: habitDetails = {} } = entry;
         
         let updatedHabits;
+        let updatedHabitDetails = { ...habitDetails };
+        
         if (completed && !completedHabits.includes(habitId)) {
           updatedHabits = [...completedHabits, habitId];
+          updatedHabitDetails[habitId] = {
+            completedAt: new Date().toISOString(),
+            habitId: habitId,
+          };
         } else if (!completed && completedHabits.includes(habitId)) {
           updatedHabits = completedHabits.filter(id => id !== habitId);
+          delete updatedHabitDetails[habitId];
         } else {
           updatedHabits = completedHabits;
         }
 
         if (JSON.stringify(updatedHabits) !== JSON.stringify(completedHabits)) {
-          await updateCalendarEntry(auth.currentUser.uid, dateStr, updatedHabits);
+          await updateCalendarEntry(auth.currentUser.uid, dateStr, updatedHabits, updatedHabitDetails);
         }
 
         current = current.add(1, 'day');

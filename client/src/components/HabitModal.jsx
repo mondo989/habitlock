@@ -186,20 +186,12 @@ const HabitModal = ({
                   <button
                     key={color}
                     type="button"
-                    className={`${styles.colorOption} ${
-                      formData.color === color ? styles.selected : ''
-                    }`}
+                    className={styles.colorOption}
                     style={{ backgroundColor: color }}
                     onClick={() => handleInputChange('color', color)}
                   />
                 ))}
               </div>
-              <input
-                type="color"
-                value={formData.color}
-                onChange={(e) => handleInputChange('color', e.target.value)}
-                className={styles.colorPicker}
-              />
             </div>
           </div>
 

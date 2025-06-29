@@ -50,8 +50,15 @@ export const deleteHabit = async (userId, habitId) => {
       const entry = entries[date];
       if (entry.completedHabits && entry.completedHabits.includes(habitId)) {
         const filteredHabits = entry.completedHabits.filter(id => id !== habitId);
+        const updatedHabitDetails = { ...(entry.habits || {}) };
+        delete updatedHabitDetails[habitId]; // Remove habit details
+        
         if (filteredHabits.length > 0) {
-          updates[date] = { ...entry, completedHabits: filteredHabits };
+          updates[date] = { 
+            ...entry, 
+            completedHabits: filteredHabits,
+            habits: updatedHabitDetails
+          };
         } else {
           updates[date] = null; // Remove entry if no habits left
         }
@@ -76,7 +83,7 @@ export const subscribeToHabits = (userId, callback) => {
 };
 
 // Calendar entry operations
-export const updateCalendarEntry = async (userId, date, completedHabits) => {
+export const updateCalendarEntry = async (userId, date, completedHabits, habitDetails = {}) => {
   const entryRef = ref(database, `calendarEntries/${userId}/${date}`);
   if (completedHabits.length === 0) {
     await remove(entryRef);
@@ -84,6 +91,7 @@ export const updateCalendarEntry = async (userId, date, completedHabits) => {
     await set(entryRef, {
       date,
       completedHabits,
+      habits: habitDetails, // Store detailed habit completion info with timestamps
     });
   }
 };

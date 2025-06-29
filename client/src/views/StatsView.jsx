@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useHabits } from '../hooks/useHabits';
 import { useCalendar } from '../hooks/useCalendar';
 import { 
@@ -11,8 +11,21 @@ import styles from './StatsView.module.scss';
 const StatsView = () => {
   const { habits, loading: habitsLoading } = useHabits();
   const { calendarEntries, streaks, loading: calendarLoading } = useCalendar(habits);
+  const [activeTooltip, setActiveTooltip] = useState(null);
 
   const loading = habitsLoading || calendarLoading;
+
+  // Close tooltip when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActiveTooltip(null);
+    };
+
+    if (activeTooltip) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [activeTooltip]);
 
   // Generate insights and recommendations
   const generateInsights = (habit, currentStreak, bestStreak, thirtyDay, sevenDay) => {
@@ -386,26 +399,92 @@ const StatsView = () => {
                           return <div key={dayOfWeek} className={styles.heatmapDayEmpty}></div>;
                         }
                         
-                        const tooltipText = day.completed 
-                          ? `${habit.emoji} ${habit.name}\n${day.formattedDate}, ${day.weekday}${day.completionTime ? `\nCompleted at ${new Date(day.completionTime).toLocaleTimeString()}` : ''}`
-                          : day.isFuture 
-                            ? `${day.formattedDate}, ${day.weekday}\nFuture date`
-                            : `${day.formattedDate}, ${day.weekday}\nNo activity`;
+                        const tooltipId = `${habit.id}-${day.date}`;
+                        const isTooltipActive = activeTooltip?.id === tooltipId;
+
+                        const handleDayClick = (e) => {
+                          e.stopPropagation();
+                          if (isTooltipActive) {
+                            setActiveTooltip(null);
+                          } else {
+                            const rect = e.target.getBoundingClientRect();
+                            const tooltipHeight = 120;
+                            const tooltipWidth = 240;
+                            
+                            // Calculate position to keep tooltip in viewport
+                            let x = rect.left + rect.width / 2;
+                            let y = rect.top - tooltipHeight - 10;
+                            
+                            // Adjust if too close to top
+                            if (y < 10) {
+                              y = rect.bottom + 10;
+                            }
+                            
+                            // Adjust if too close to right edge
+                            if (x + tooltipWidth / 2 > window.innerWidth - 20) {
+                              x = window.innerWidth - tooltipWidth / 2 - 20;
+                            }
+                            
+                            // Adjust if too close to left edge
+                            if (x - tooltipWidth / 2 < 20) {
+                              x = tooltipWidth / 2 + 20;
+                            }
+                            
+                            setActiveTooltip({ id: tooltipId, x, y });
+                          }
+                        };
 
                         return (
-                          <div
-                            key={day.date}
-                            className={`${styles.heatmapDay} ${day.completed ? styles.completed : ''} ${day.isFuture ? styles.future : ''}`}
-                            style={{
-                              backgroundColor: day.completed 
-                                ? habit.color 
-                                : day.isFuture 
-                                  ? '#f9fafb' 
-                                  : '#e5e7eb',
-                              opacity: day.completed ? 0.9 : day.isFuture ? 0.3 : 0.5,
-                            }}
-                            title={tooltipText}
-                          />
+                          <div key={day.date} className={styles.heatmapDayWrapper}>
+                            <div
+                              className={`${styles.heatmapDay} ${day.completed ? styles.completed : ''} ${day.isFuture ? styles.future : ''}`}
+                              style={{
+                                '--habit-color': habit.color,
+                              }}
+                              onClick={handleDayClick}
+                              title={day.completed 
+                                ? `${habit.emoji} ${habit.name} - ${day.formattedDate}, ${day.weekday}`
+                                : `${day.formattedDate}, ${day.weekday} - ${day.isFuture ? 'Future date' : 'No activity'}`
+                              }
+                            />
+                            
+                            {isTooltipActive && (
+                              <div 
+                                className={styles.heatmapTooltip}
+                                style={{
+                                  left: `${activeTooltip.x}px`,
+                                  top: `${activeTooltip.y}px`,
+                                  transform: 'translateX(-50%)'
+                                }}
+                              >
+                                <div className={styles.habitTooltipContent}>
+                                  {day.completed ? (
+                                    <>
+                                      <div className={styles.tooltipHeader}>
+                                        <span className={styles.tooltipEmoji}>{habit.emoji}</span>
+                                        <span className={styles.tooltipHabitName}>{habit.name}</span>
+                                      </div>
+                                      <div className={styles.tooltipDate}>{day.formattedDate}, {day.weekday}</div>
+                                      <div className={styles.tooltipTime}>
+                                        {day.completionTime 
+                                          ? `Completed: ${new Date(day.completionTime).toLocaleString()}`
+                                          : 'Completed (time not recorded)'
+                                        }
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className={styles.tooltipDate}>{day.formattedDate}, {day.weekday}</div>
+                                      <div className={styles.tooltipStatus}>
+                                        {day.isFuture ? 'Future date' : 'No activity'}
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                                <div className={styles.tooltipArrow}></div>
+                              </div>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
