@@ -43,6 +43,7 @@ const CalendarView = () => {
     goToPrevMonth,
     goToToday,
     toggleHabitCompletion,
+    setDayHabits,
     getCompletedHabits,
     hasHabitMetWeeklyGoal,
   } = useCalendar(habits);
@@ -97,20 +98,9 @@ const CalendarView = () => {
   // Handle saving habits for a specific day
   const handleSaveDayHabits = async (date, selectedHabits) => {
     try {
-      // Filter out any undefined or falsy values
+      // Filter out any undefined or falsy values and set all habits for the day at once
       const validSelectedHabits = selectedHabits.filter(habitId => habitId != null && habitId !== '');
-      const currentCompleted = getCompletedHabits(date).filter(habitId => habitId != null && habitId !== '');
-      
-      // Calculate what habits need to be toggled
-      const toAdd = validSelectedHabits.filter(habitId => !currentCompleted.includes(habitId));
-      const toRemove = currentCompleted.filter(habitId => !validSelectedHabits.includes(habitId));
-      
-      // Toggle each habit that needs to change
-      for (const habitId of [...toAdd, ...toRemove]) {
-        if (habitId != null && habitId !== '') {
-          await toggleHabitCompletion(date, habitId);
-        }
-      }
+      await setDayHabits(date, validSelectedHabits);
     } catch (error) {
       console.error('Error saving day habits:', error);
       // You could add user notification here

@@ -114,6 +114,39 @@ export const useCalendar = (habits = []) => {
     }
   };
 
+  // Set all completed habits for a specific date in a single operation
+  const setDayHabits = async (date, habitIds) => {
+    if (!auth.currentUser) {
+      setError('User not authenticated');
+      return false;
+    }
+
+    try {
+      setError(null);
+      
+      // Filter out any invalid habit IDs
+      const validHabitIds = habitIds.filter(habitId => habitId != null && habitId !== '');
+      
+      // Create habit details for all completed habits
+      const habitDetails = {};
+      const timestamp = new Date().toISOString();
+      
+      validHabitIds.forEach(habitId => {
+        habitDetails[habitId] = {
+          completedAt: timestamp,
+          habitId: habitId,
+        };
+      });
+
+      await updateCalendarEntry(auth.currentUser.uid, date, validHabitIds, habitDetails);
+      return true;
+    } catch (err) {
+      setError('Failed to update calendar entry');
+      console.error('Error updating calendar entry:', err);
+      return false;
+    }
+  };
+
   // Get completed habits for a specific date
   const getCompletedHabits = (date) => {
     const entry = calendarEntries[date];
@@ -224,6 +257,7 @@ export const useCalendar = (habits = []) => {
     
     // Habit completion operations
     toggleHabitCompletion,
+    setDayHabits,
     bulkToggleHabit,
     
     // Data getters
