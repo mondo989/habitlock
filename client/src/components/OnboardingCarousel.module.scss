@@ -1,0 +1,718 @@
+// OnboardingCarousel.module.scss
+.onboardingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.onboardingModal {
+  background: white;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.progressIndicator {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.progressDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.active {
+    background: #3b82f6;
+    transform: scale(1.25);
+  }
+
+  &:hover {
+    transform: scale(1.1);
+    background: #93c5fd;
+  }
+}
+
+.skipButton {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+}
+
+.slideContainer {
+  padding: 0 32px;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+}
+
+.slideContent {
+  width: 100%;
+  animation: slideIn 0.3s ease-out;
+}
+
+.slideHeader {
+  text-align: center;
+  margin-bottom: 32px;
+
+  h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px;
+    letter-spacing: -0.025em;
+  }
+
+  .slideSubtitle {
+    font-size: 1.125rem;
+    color: #64748b;
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+.slideBody {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// Welcome slide styles
+.welcomeContent {
+  text-align: center;
+
+  .heroIcon {
+    font-size: 4rem;
+    margin-bottom: 24px;
+  }
+
+  p {
+    font-size: 1.125rem;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 32px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.featureList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  
+  .featureIcon {
+    font-size: 1.5rem;
+  }
+  
+  span:last-child {
+    font-weight: 500;
+    color: #334155;
+  }
+}
+
+// Instruction content styles
+.instructionContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.mockupContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.mockHabitCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 250px;
+
+  .mockEmoji {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+    background: #dbeafe;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mockHabitInfo {
+    h4 {
+      margin: 0 0 4px;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+  }
+}
+
+.tips {
+  h4 {
+    margin: 0 0 16px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    li {
+      padding: 8px 0;
+      font-size: 0.9375rem;
+      color: #475569;
+      line-height: 1.5;
+      
+      strong {
+        color: #0f172a;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Tracking demo styles
+.trackingDemo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 16px;
+}
+
+.calendarPreview {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  .calendarHeader {
+    text-align: center;
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: #0f172a;
+  }
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendarDay {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+
+  &.completed {
+    background: #10b981;
+    color: white;
+    border-color: #059669;
+  }
+
+  &.today {
+    background: #3b82f6;
+    color: white;
+    border-color: #2563eb;
+  }
+}
+
+// Streak demo styles
+.streakDemo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 16px;
+}
+
+.streakCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 280px;
+
+  .streakHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .streakEmoji {
+      width: 40px;
+      height: 40px;
+      font-size: 1.25rem;
+      background: #dbeafe;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    div:nth-child(2) {
+      flex: 1;
+
+      h4 {
+        margin: 0 0 4px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.8125rem;
+        color: #64748b;
+      }
+    }
+
+    .streakBadge {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+  }
+
+  .progressBar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+
+    .progressFill {
+      height: 100%;
+      background: #10b981;
+      transition: width 0.3s ease;
+    }
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+}
+
+// Analytics demo styles
+.analyticsDemo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 32px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 16px;
+}
+
+.heatmapPreview {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  h5 {
+    margin: 0 0 12px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+}
+
+.miniHeatmap {
+  .heatmapRow {
+    display: flex;
+    gap: 3px;
+  }
+
+  .daySquare {
+    width: 16px;
+    height: 16px;
+    background: #e5e7eb;
+    border-radius: 3px;
+
+    &.active {
+      background: #10b981;
+    }
+  }
+}
+
+.insightCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  span {
+    font-size: 1.25rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: #059669;
+  }
+}
+
+// Success content styles
+.successContent {
+  text-align: center;
+}
+
+.strategyGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.strategyCard {
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  text-align: center;
+
+  .strategyIcon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  h4 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #64748b;
+    line-height: 1.4;
+  }
+}
+
+.finalMessage {
+  padding: 24px;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  border-radius: 16px;
+  border: 1px solid #3b82f6;
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e40af;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+    color: #1e40af;
+    line-height: 1.5;
+  }
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fafbfc;
+}
+
+.prevButton, .nextButton {
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.prevButton {
+  background: #f8fafc;
+  color: #64748b;
+
+  &:hover:not(:disabled) {
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.nextButton {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+
+  &:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  }
+}
+
+.slideCounter {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .onboardingModal {
+    margin: 20px;
+    max-width: none;
+    border-radius: 20px;
+  }
+
+  .modalHeader, .slideContainer, .modalFooter {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .slideHeader h2 {
+    font-size: 1.75rem;
+  }
+
+  .instructionContent {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .strategyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .featureList {
+    grid-template-columns: 1fr;
+  }
+
+  .modalFooter {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .prevButton, .nextButton {
+    width: 100%;
+  }
+}
+
+// Dark mode support
+:global(html.dark-mode) {
+  .onboardingModal {
+    background: #1e293b;
+    color: #f8fafc;
+  }
+
+  .modalHeader {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .modalFooter {
+    border-top-color: rgba(255, 255, 255, 0.1);
+    background: #0f172a;
+  }
+
+  .slideHeader h2 {
+    color: #f8fafc;
+  }
+
+  .slideSubtitle {
+    color: #94a3b8;
+  }
+
+  .feature {
+    background: linear-gradient(135deg, #334155, #475569);
+    border-color: rgba(255, 255, 255, 0.1);
+    
+    span:last-child {
+      color: #e2e8f0;
+    }
+  }
+
+  .mockupContainer, .trackingDemo, .streakDemo, .analyticsDemo {
+    background: linear-gradient(135deg, #334155, #475569);
+  }
+
+  .mockHabitCard, .calendarPreview, .streakCard, .heatmapPreview, .insightCard {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .tips h4 {
+    color: #f8fafc;
+  }
+
+  .tips li {
+    color: #cbd5e1;
+    
+    strong {
+      color: #f8fafc;
+    }
+  }
+
+  .strategyCard {
+    background: linear-gradient(135deg, #334155, #475569);
+    border-color: rgba(255, 255, 255, 0.1);
+
+    h4 {
+      color: #f8fafc;
+    }
+
+    p {
+      color: #cbd5e1;
+    }
+  }
+
+  .prevButton {
+    background: #374151;
+    color: #d1d5db;
+
+    &:hover:not(:disabled) {
+      background: #4b5563;
+      color: #f9fafb;
+    }
+  }
+
+  .skipButton {
+    color: #9ca3af;
+
+    &:hover {
+      background: #374151;
+      color: #d1d5db;
+    }
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+} 

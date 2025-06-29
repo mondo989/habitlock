@@ -5,6 +5,7 @@ import CalendarView from './views/CalendarView';
 import StatsView from './views/StatsView';
 import ThemeToggle from './components/ThemeToggle';
 import LandingPage from './components/LandingPage';
+import OnboardingCarousel from './components/OnboardingCarousel';
 import styles from './App.module.scss';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
   const [authError, setAuthError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -47,8 +49,15 @@ function App() {
       if (user) {
         console.log('User authenticated:', user.uid, user.email);
         setAuthError(null);
+        
+        // Check if this is a first-time user
+        const hasCompletedOnboarding = localStorage.getItem('habitlock_onboarding_completed');
+        if (!hasCompletedOnboarding) {
+          setShowOnboarding(true);
+        }
       } else {
         console.log('No user authenticated');
+        setShowOnboarding(false);
       }
     });
 
@@ -66,6 +75,10 @@ function App() {
     } catch (error) {
       console.error('Sign out failed:', error);
     }
+  };
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
   };
 
   if (isLoading) {
@@ -219,6 +232,11 @@ function App() {
             </p>
           </div>
         </footer>
+
+        {/* Onboarding Modal */}
+        {showOnboarding && (
+          <OnboardingCarousel onComplete={handleOnboardingComplete} />
+        )}
       </div>
     </ThemeProvider>
   );
