@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { initializeAuth, auth, onAuthChange, signOutUser, getUserInfo } from './services/firebase';
+import analytics from './services/analytics';
 import { ThemeProvider } from './context/ThemeContext';
 import CalendarView from './views/CalendarView';
 import StatsView from './views/StatsView';
@@ -34,6 +35,9 @@ function App() {
       try {
         setAuthError(null);
         await initializeAuth();
+        
+        // Initialize analytics after authentication is ready
+        analytics.initializeClarity();
       } catch (error) {
         console.error('Authentication initialization failed:', error);
         setAuthError('Failed to initialize authentication. Please refresh the page.');
@@ -50,10 +54,17 @@ function App() {
         console.log('User authenticated:', user.uid, user.email);
         setAuthError(null);
         
+        // Track user authentication for analytics (optional)
+        analytics.trackUserAction('user_authenticated', {
+          userId: user.uid,
+          email: user.email,
+        });
+        
         // Check if this is a first-time user
         const hasCompletedOnboarding = localStorage.getItem('habitlock_onboarding_completed');
         if (!hasCompletedOnboarding) {
           setShowOnboarding(true);
+          analytics.trackEvent('onboarding_started');
         }
       } else {
         console.log('No user authenticated');
@@ -79,6 +90,7 @@ function App() {
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
+    analytics.trackEvent('onboarding_completed');
   };
 
   if (isLoading) {
