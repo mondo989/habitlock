@@ -160,6 +160,12 @@ const HabitDayModal = ({
                   </div>
                   
                   <div className={styles.habitActions}>
+                    <div className={styles.checkbox}>
+                      <div className={`${styles.checkmark} ${isSelected ? styles.checked : ''}`}>
+                        {isSelected && '✓'}
+                      </div>
+                    </div>
+                    
                     <button 
                       className={styles.editButton}
                       onClick={(e) => handleEditHabit(e, habit)}
@@ -170,12 +176,6 @@ const HabitDayModal = ({
                         <path d="m18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                       </svg>
                     </button>
-                    
-                    <div className={styles.checkbox}>
-                      <div className={`${styles.checkmark} ${isSelected ? styles.checked : ''}`}>
-                        {isSelected && '✓'}
-                      </div>
-                    </div>
                   </div>
                 </div>
               );

@@ -26,11 +26,14 @@ const HabitModal = ({
     '🔥', '⭐', '✨', '🎉', '🌟', '💎', '🚀', '📈'
   ];
 
-  // Predefined colors
+  // Predefined colors - 24 beautiful, distinct colors
   const predefinedColors = [
     '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
     '#8b5cf6', '#06b6d4', '#f97316', '#84cc16',
-    '#ec4899', '#6366f1', '#14b8a6', '#f43f5e'
+    '#ec4899', '#6366f1', '#14b8a6', '#f43f5e',
+    '#0ea5e9', '#dc2626', '#059669', '#d97706',
+    '#7c3aed', '#0891b2', '#ea580c', '#65a30d',
+    '#db2777', '#4f46e5', '#0d9488', '#be123c'
   ];
 
   useEffect(() => {
