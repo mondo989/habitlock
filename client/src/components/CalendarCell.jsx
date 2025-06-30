@@ -11,7 +11,8 @@ const CalendarCell = ({
   onDayClick,
   hasHabitMetWeeklyGoal,
   isCurrentMonth = true,
-  isToday = false 
+  isToday = false,
+  animationIndex = 0
 }) => {
   const { date } = day;
 
@@ -24,14 +25,28 @@ const CalendarCell = ({
     );
   }, [habits, completedHabits]);
 
+  // Calculate sequential loading animation delays
+  const loadingAnimationStyle = useMemo(() => {
+    const baseDelay = animationIndex * 0.05; // 50ms between each cell
+    const backgroundDelay = baseDelay;
+    const emojiDelay = baseDelay + 0.15; // Emoji appears 150ms after background
+    
+    return {
+      '--loading-delay': `${baseDelay}s`,
+      '--background-delay': `${backgroundDelay}s`,
+      '--emoji-delay': `${emojiDelay}s`,
+    };
+  }, [animationIndex]);
+
   // Generate background gradient for multiple habits
   const backgroundStyle = useMemo(() => {
-    if (completedHabitDetails.length === 0) return {};
+    if (completedHabitDetails.length === 0) return loadingAnimationStyle;
 
     if (completedHabitDetails.length === 1) {
       const habit = completedHabitDetails[0];
       const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
       return {
+        ...loadingAnimationStyle,
         backgroundColor: hasMetGoal ? habit.color : `${habit.color}40`,
       };
     }
@@ -158,11 +173,12 @@ const CalendarCell = ({
     const scaleVariation = 0.98 + random(0, 0.04, 100); // 0.98-1.02 scale
     
     return {
-      background: selectedGradient,
-      animation: `${animationType} ${animationDuration.toFixed(1)}s ease-in-out infinite alternate`,
-      animationDelay: `${animationDelay.toFixed(1)}s`,
-      opacity: Math.min(baseOpacity + 0.3, 1.0), // Boost visibility but cap at 100%
-      willChange: 'background, transform',
+      ...loadingAnimationStyle,
+      '--gradient-background': selectedGradient, // Store gradient in CSS variable instead of applying directly
+      '--gradient-animation': `${animationType} ${animationDuration.toFixed(1)}s ease-in-out infinite alternate`,
+      '--gradient-animation-delay': `calc(var(--background-delay, 0.1s) + ${animationDelay.toFixed(1)}s)`,
+      '--final-opacity': Math.min(baseOpacity + 0.3, 1.0), // Boost visibility but cap at 100%
+      willChange: 'background, transform, opacity',
       '--gradient0': gradientVariations[0],
       '--gradient1': gradientVariations[1],
       '--gradient2': gradientVariations[2],
@@ -209,6 +225,7 @@ const CalendarCell = ({
     <div
       className={`
         ${styles.calendarCell}
+        ${styles.loadingCell}
         ${!isCurrentMonth ? styles.otherMonth : ''}
         ${isToday ? styles.today : ''}
         ${completedHabitDetails.length > 0 ? styles.hasCompletions : ''}
@@ -226,8 +243,8 @@ const CalendarCell = ({
       </div>
       
       {completedHabitDetails.length > 0 && (
-        <div className={styles.habitEmojis}>
-          {completedHabitDetails.map(habit => {
+        <div className={`${styles.habitEmojis} ${styles.loadingEmojis}`}>
+          {completedHabitDetails.map((habit, emojiIndex) => {
             const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
             
             // Individual tooltip content for each emoji
@@ -250,8 +267,12 @@ const CalendarCell = ({
                 <span
                   className={`
                     ${styles.habitEmoji}
+                    ${styles.loadingEmoji}
                     ${hasMetGoal ? styles.glowing : ''}
                   `}
+                  style={{
+                    '--emoji-index-delay': `${(animationIndex * 0.05) + 0.15 + (emojiIndex * 0.1)}s`
+                  }}
                   onClick={(e) => handleHabitClick(e, habit.id)}
                 >
                   {habit.emoji}

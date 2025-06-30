@@ -28,8 +28,10 @@ const CalendarGrid = ({
       <div className={styles.calendarWeeks}>
         {calendarMatrix.map((week, weekIndex) => (
           <div key={weekIndex} className={styles.calendarWeek}>
-            {week.map((day) => {
+            {week.map((day, dayIndex) => {
               const completedHabits = getCompletedHabits(day.date);
+              // Calculate sequential animation delay - start from top-left, go row by row
+              const animationIndex = weekIndex * 7 + dayIndex;
               
               return (
                 <CalendarCell
@@ -43,6 +45,7 @@ const CalendarGrid = ({
                   hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
                   isCurrentMonth={day.isCurrentMonth}
                   isToday={day.isToday}
+                  animationIndex={animationIndex}
                 />
               );
             })}
