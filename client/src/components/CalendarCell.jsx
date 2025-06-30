@@ -71,94 +71,104 @@ const CalendarCell = ({
       return min + ((val - Math.floor(val)) * (max - min));
     };
 
-    // Create smoother gradient patterns with overlapping stops
+    // Create ultra-smooth gradient blends with seamless color transitions
     const gradientVariations = [];
     
-    // Helper function to create smooth color transitions
-    const createSmoothStops = (colors, method = 'even') => {
-      if (method === 'overlapping') {
-        return colors.map((color, i) => {
-          const basePos = (i / (colors.length - 1)) * 100;
-          const spread = 15; // Overlap amount
-          const start = Math.max(0, basePos - spread);
-          const end = Math.min(100, basePos + spread);
-          return `${color} ${start}% ${end}%`;
-        }).join(', ');
-      } else {
-        return colors.join(', ');
+    // Helper function to create perfectly smooth color transitions with no hard lines
+    const createSmoothGradient = (colors, type = 'linear') => {
+      if (colors.length === 2) {
+        // Two colors: create perfect blend
+        const [color1, color2] = colors;
+        if (type === 'radial') {
+          return `radial-gradient(circle at center, ${color1} 0%, ${color2} 100%)`;
+        } else if (type === 'conic') {
+          return `conic-gradient(from 0deg at center, ${color1} 0%, ${color2} 50%, ${color1} 100%)`;
+        }
+        return `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
       }
+      
+      // Multiple colors: create seamless transitions with natural spacing
+      const step = 100 / (colors.length - 1);
+      const smoothStops = colors.map((color, i) => {
+        const position = i * step;
+        return `${color} ${position}%`;
+      }).join(', ');
+      
+      if (type === 'radial') {
+        const centerX = Math.floor(random(40, 60, 20));
+        const centerY = Math.floor(random(40, 60, 21));
+        return `radial-gradient(ellipse 150% 120% at ${centerX}% ${centerY}%, ${smoothStops})`;
+      } else if (type === 'conic') {
+        // For conic, add the first color at the end to create seamless loop
+        const conicStops = [...colors, colors[0]];
+        const conicStep = 100 / (conicStops.length - 1);
+        const conicSmoothStops = conicStops.map((color, i) => {
+          const position = i * conicStep;
+          return `${color} ${position}%`;
+        }).join(', ');
+        return `conic-gradient(from ${Math.floor(random(0, 360, 30))}deg at center, ${conicSmoothStops})`;
+      }
+      
+      const angle = Math.floor(random(45, 135, 1));
+      return `linear-gradient(${angle}deg, ${smoothStops})`;
     };
     
-    // Pattern 1: Smooth diagonal with overlapping stops
-    const angle1 = Math.floor(random(45, 315, 1));
-    gradientVariations.push(`linear-gradient(${angle1}deg, ${createSmoothStops(colors, 'overlapping')})`);
+    // Pattern 1: Smooth linear gradient with natural angle
+    gradientVariations.push(createSmoothGradient(colors, 'linear'));
     
-    // Pattern 2: Radial with natural positioning
-    const radialX = Math.floor(random(30, 70, 20));
-    const radialY = Math.floor(random(30, 70, 21));
-    gradientVariations.push(`radial-gradient(ellipse at ${radialX}% ${radialY}%, ${colors.join(', ')})`);
+    // Pattern 2: Soft radial gradient with natural positioning
+    gradientVariations.push(createSmoothGradient(colors, 'radial'));
     
-    // Pattern 3: Conic with smooth transitions
-    const conicAngle = Math.floor(random(0, 360, 30));
-    const conicX = Math.floor(random(40, 60, 31));
-    const conicY = Math.floor(random(40, 60, 32));
-    const smoothConicColors = [...colors, colors[0]]; // Complete the circle smoothly
-    gradientVariations.push(`conic-gradient(from ${conicAngle}deg at ${conicX}% ${conicY}%, ${smoothConicColors.join(', ')})`);
+    // Pattern 3: Gentle conic gradient with seamless color loop
+    gradientVariations.push(createSmoothGradient(colors, 'conic'));
     
-    // Pattern 4: Layered gradients with transparency based on completion
-    const angle2 = Math.floor(random(0, 180, 40));
+    // Pattern 4: Layered gradient with transparency blend
+    const layeredAngle = Math.floor(random(90, 270, 40));
     const layeredColors = colors.map((color, i) => {
-      // Layer opacity scales with base completion, but adds variety between layers
-      const layerOpacity = baseOpacity * (0.7 + (0.3 * (i / colors.length)));
-      const layerHex = Math.floor(layerOpacity * 255).toString(16).padStart(2, '0');
-      return color.includes('#') ? `${color}${layerHex}` : color;
-    });
-    gradientVariations.push(`linear-gradient(${angle2}deg, ${layeredColors.join(', ')})`);
+      const position = (i / (colors.length - 1)) * 100;
+      const opacity = baseOpacity * (0.6 + (0.4 * (i / colors.length)));
+      const hexOpacity = Math.floor(opacity * 255).toString(16).padStart(2, '0');
+      const transparentColor = color.includes('#') ? `${color}${hexOpacity}` : color;
+      return `${transparentColor} ${position}%`;
+    }).join(', ');
+    gradientVariations.push(`linear-gradient(${layeredAngle}deg, ${layeredColors})`);
     
-    // Pattern 5: Smooth radial burst with completion-based intensity
-    const burstIntensity = baseOpacity * random(0.4, 0.8, 50);
-    const burstColors = colors.flatMap(color => [
-      color, 
-      color.includes('#') ? `${color}${Math.floor(burstIntensity * 255).toString(16).padStart(2, '0')}` : color, 
-      color
-    ]);
-    gradientVariations.push(`radial-gradient(circle at center, ${burstColors.join(', ')})`);
-    
-    // Pattern 6: Flowing wave pattern
-    const waveAngle = Math.floor(random(60, 120, 60));
-    const waveColors = colors.map((color, i) => {
-      const pos1 = (i / colors.length) * 60;
-      const pos2 = pos1 + 40;
-      return `${color} ${pos1}% ${pos2}%`;
-    });
-    gradientVariations.push(`linear-gradient(${waveAngle}deg, ${waveColors.join(', ')})`);
+    // Pattern 5: Soft multi-point radial with natural blending
+    const multiRadialX = Math.floor(random(25, 75, 50));
+    const multiRadialY = Math.floor(random(25, 75, 51));
+    const multiRadialColors = colors.map((color, i) => {
+      const position = (i / (colors.length - 1)) * 80; // Use 80% to ensure smooth falloff
+      return `${color} ${position}%`;
+    }).join(', ');
+    gradientVariations.push(`radial-gradient(circle at ${multiRadialX}% ${multiRadialY}%, ${multiRadialColors})`);
 
-    // Animation parameters - simpler for better performance
-    const animationDuration = 3 + random(2, 4, 80); // 3-7s
-    const animationDelay = random(0, 2, 81); // 0-2s delay
-    const animationDirection = random(0, 1, 82) > 0.5 ? 'alternate' : 'alternate-reverse';
+    // Choose a single primary gradient pattern that's most pleasing
+    const primaryPattern = Math.floor(random(0, 3, 90)); // Focus on first 3 patterns
+    const selectedGradient = gradientVariations[primaryPattern];
     
-    // Simpler animation types that work reliably
-    const animationTypes = ['smoothFlow', 'gentlePulse', 'softRotate', 'waveMotion'];
-    const animationType = animationTypes[Math.floor(random(0, animationTypes.length, 90))];
+    // Create subtle animation parameters
+    const animationDuration = 4 + random(2, 6, 80); // 4-10s for gentle movement
+    const animationDelay = random(0, 3, 81); // 0-3s stagger
     
-    // Subtle animation properties
-    const scaleVariation = 0.97 + random(0, 0.06, 100); // 0.97-1.03 scale
-    const rotationSpeed = 0.8 + random(0, 0.4, 101); // 0.8-1.2 rotation multiplier
+    // Use only the smoothest animation types
+    const smoothAnimations = ['smoothFlow', 'gentlePulse'];
+    const animationType = smoothAnimations[Math.floor(random(0, smoothAnimations.length, 90))];
+    
+    // Very subtle animation properties to avoid jarring transitions
+    const scaleVariation = 0.98 + random(0, 0.04, 100); // 0.98-1.02 scale
     
     return {
-      background: gradientVariations[0],
-      animation: `${animationType} ${animationDuration.toFixed(1)}s ease-in-out infinite ${animationDirection}`,
+      background: selectedGradient,
+      animation: `${animationType} ${animationDuration.toFixed(1)}s ease-in-out infinite alternate`,
       animationDelay: `${animationDelay.toFixed(1)}s`,
-      opacity: baseOpacity + 0.2, // Add slight base boost for visibility
+      opacity: Math.min(baseOpacity + 0.3, 1.0), // Boost visibility but cap at 100%
+      willChange: 'background, transform',
       '--gradient0': gradientVariations[0],
       '--gradient1': gradientVariations[1],
       '--gradient2': gradientVariations[2],
       '--gradient3': gradientVariations[3],
       '--gradient4': gradientVariations[4],
-      '--gradient5': gradientVariations[5],
       '--scale-variation': scaleVariation,
-      '--rotation-speed': rotationSpeed,
       '--animation-seed': (combinedHash % 1000) / 1000,
     };
   }, [completedHabitDetails, hasHabitMetWeeklyGoal, date]);

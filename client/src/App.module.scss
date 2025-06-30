@@ -499,29 +499,105 @@
 
 @media (max-width: 480px) {
   .navContent {
-    flex-direction: column;
-    height: auto;
     padding: 8px 12px;
-    gap: 8px;
+    height: 48px;
+    min-height: 48px;
+  }
+
+  .nav .logo h1 {
+    font-size: 1.125rem;
+  }
+
+  .nav .logoEmoji {
+    font-size: 1.25rem;
   }
 
   .navTabs {
-    width: 100%;
+    gap: 2px;
+    flex: 1;
     justify-content: center;
+    max-width: 200px;
   }
 
   .navTab {
+    padding: 4px 8px;
+    font-size: 0.6875rem;
+    border-radius: 4px;
     flex: 1;
     text-align: center;
+    min-width: 0;
+    white-space: nowrap;
   }
 
   .navActions {
-    order: -1;
-    justify-content: center;
+    gap: 8px;
   }
 
-  .main {
-    padding-top: 8px;
+  .userProfile {
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .profileImage {
+    width: 24px;
+    height: 24px;
+  }
+
+  .userName {
+    display: none; // Hide username on very small screens
+  }
+
+  .userStatus {
+    display: none; // Hide status on very small screens
+  }
+
+  .dropdownArrow {
+    font-size: 0.5rem;
+  }
+
+  .profileDropdown {
+    min-width: 180px;
+    right: -8px; // Adjust position for smaller screens
+  }
+}
+
+// Extra small screens (< 360px)
+@media (max-width: 360px) {
+  .navContent {
+    padding: 6px 8px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .nav .logo h1 {
+    font-size: 1rem;
+  }
+
+  .nav .logoEmoji {
+    font-size: 1.125rem;
+  }
+
+  .navTabs {
+    gap: 1px;
+    max-width: 160px;
+  }
+
+  .navTab {
+    padding: 3px 6px;
+    font-size: 0.625rem;
+  }
+
+  .profileImage {
+    width: 20px;
+    height: 20px;
+  }
+
+  .userProfile {
+    padding: 3px;
+  }
+
+  .profileDropdown {
+    min-width: 160px;
   }
 }
 

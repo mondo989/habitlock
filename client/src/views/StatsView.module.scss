@@ -657,22 +657,23 @@
   top: auto;
   left: auto;
   right: auto;
-  z-index: 9999;
-  background: rgba(15, 23, 42, 0.95);
+  z-index: 10000;
+  background: rgba(15, 23, 42, 0.96);
   color: white;
   padding: 16px 20px;
   border-radius: 12px;
   font-size: 0.875rem;
   line-height: 1.5;
-  min-width: 220px;
-  max-width: 300px;
+  min-width: 240px;
+  max-width: 320px;
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 4px 16px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  pointer-events: none;
-  animation: tooltipFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    0 12px 48px rgba(0, 0, 0, 0.4),
+    0 6px 24px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px);
+  pointer-events: auto;
+  animation: tooltipFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .tooltipArrow {
@@ -682,23 +683,24 @@
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 6px solid rgba(0, 0, 0, 0.9);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(15, 23, 42, 0.96);
 }
 
 /* Dark mode support for tooltips */
 [data-theme='dark'] .heatmapTooltip {
-  background: rgba(15, 23, 42, 0.95);
+  background: rgba(15, 23, 42, 0.96);
   color: #f8fafc;
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    0 4px 16px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 12px 48px rgba(0, 0, 0, 0.6),
+    0 6px 24px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 [data-theme='dark'] .tooltipArrow {
-  border-top-color: rgba(15, 23, 42, 0.95);
+  border-top-color: rgba(15, 23, 42, 0.96);
 }
 
 @keyframes tooltipFadeIn {

@@ -412,16 +412,16 @@ const StatsView = () => {
                             setActiveTooltip(null);
                           } else {
                             const rect = e.target.getBoundingClientRect();
-                            const tooltipHeight = 120;
-                            const tooltipWidth = 240;
+                            const tooltipHeight = 140;
+                            const tooltipWidth = 260;
                             
-                            // Calculate position to keep tooltip in viewport
+                            // Calculate initial position centered above the square
                             let x = rect.left + rect.width / 2;
-                            let y = rect.top - tooltipHeight - 10;
+                            let y = rect.top - tooltipHeight - 12;
                             
-                            // Adjust if too close to top
-                            if (y < 10) {
-                              y = rect.bottom + 10;
+                            // Adjust if too close to top - show below instead
+                            if (y < 20) {
+                              y = rect.bottom + 12;
                             }
                             
                             // Adjust if too close to right edge
@@ -434,7 +434,17 @@ const StatsView = () => {
                               x = tooltipWidth / 2 + 20;
                             }
                             
-                            setActiveTooltip({ id: tooltipId, x, y });
+                            // Ensure tooltip doesn't go below viewport
+                            if (y + tooltipHeight > window.innerHeight - 20) {
+                              y = rect.top - tooltipHeight - 12;
+                            }
+                            
+                            setActiveTooltip({ 
+                              id: tooltipId, 
+                              x: Math.round(x), 
+                              y: Math.round(y),
+                              rect: rect 
+                            });
                           }
                         };
 
@@ -456,10 +466,13 @@ const StatsView = () => {
                               <div 
                                 className={styles.heatmapTooltip}
                                 style={{
+                                  position: 'fixed',
                                   left: `${activeTooltip.x}px`,
                                   top: `${activeTooltip.y}px`,
-                                  transform: 'translateX(-50%)'
+                                  transform: 'translateX(-50%)',
+                                  zIndex: 10000
                                 }}
+                                onClick={(e) => e.stopPropagation()}
                               >
                                 <div className={styles.habitTooltipContent}>
                                   {day.completed ? (
