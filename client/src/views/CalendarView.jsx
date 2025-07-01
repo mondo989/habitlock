@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CalendarGrid from '../components/CalendarGrid';
 import HabitModal from '../components/HabitModal';
 import HabitDayModal from '../components/HabitDayModal';
 import HabitStatsModal from '../components/HabitStatsModal';
+import AchievementCelebrationModal from '../components/AchievementCelebrationModal';
 import { useHabits } from '../hooks/useHabits';
 import { useCalendar } from '../hooks/useCalendar';
-import { getWeekStatsForDate } from '../utils/streakUtils';
+import { getWeekStatsForDate, getHabitStatsForRange, getBestStreak } from '../utils/streakUtils';
+import { checkAndUpdateAchievements, getUserAchievements } from '../services/achievements';
+import { getUserInfo } from '../services/firebase';
 import styles from './CalendarView.module.scss';
 
 const CalendarView = () => {
@@ -21,6 +24,10 @@ const CalendarView = () => {
   // State for habit stats modal
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState(null);
+
+  // State for achievement celebration
+  const [celebrationAchievement, setCelebrationAchievement] = useState(null);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   const {
     habits,
@@ -52,6 +59,62 @@ const CalendarView = () => {
   const selectedWeekStats = selectedDate 
     ? getWeekStatsForDate(habits, calendarEntries, new Date(selectedDate))
     : weekStats;
+
+  // Check for achievements when habits are completed
+  useEffect(() => {
+    const checkAchievements = async () => {
+      const userInfo = getUserInfo();
+      if (!userInfo?.uid || !habits.length || !Object.keys(calendarEntries).length) {
+        return;
+      }
+
+      try {
+        // Generate stats data similar to StatsView for achievement checking
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        
+        const statsData = habits.map(habit => {
+          const currentStreak = streaks[habit.id] || 0;
+          const bestStreak = getBestStreak(habit.id, calendarEntries);
+          const thirtyDayStats = getHabitStatsForRange(
+            habit.id, 
+            thirtyDaysAgo.toISOString().split('T')[0],
+            now.toISOString().split('T')[0],
+            calendarEntries
+          );
+          const weekStat = weekStats[habit.id];
+          const weeklyGoalPercentage = weekStat?.percentage || 0;
+          
+          return {
+            habit,
+            currentStreak,
+            bestStreak,
+            thirtyDayStats,
+            weeklyGoalPercentage
+          };
+        });
+
+        // Check for new achievements
+        const { newCompletions } = await checkAndUpdateAchievements(userInfo.uid, statsData);
+        
+        if (newCompletions.length > 0) {
+          console.log('New achievements earned in calendar:', newCompletions.map(a => a.title));
+          
+          // Show celebration modal for the first new achievement
+          const firstNewAchievement = newCompletions[0];
+          setCelebrationAchievement(firstNewAchievement);
+          setShowCelebration(true);
+        }
+      } catch (error) {
+        console.error('Error checking achievements in calendar:', error);
+      }
+    };
+
+    // Only check achievements when we have habits and calendar data
+    if (habits.length > 0 && Object.keys(calendarEntries).length > 0) {
+      checkAchievements();
+    }
+  }, [habits, calendarEntries, streaks, weekStats]); // Trigger when completion data changes
 
   const handleCreateHabit = () => {
     setModalMode('create');
@@ -310,6 +373,16 @@ const CalendarView = () => {
         weekStats={weekStats}
         getCompletedHabits={getCompletedHabits}
         calendarMatrix={calendarMatrix}
+      />
+
+      {/* Achievement Celebration Modal */}
+      <AchievementCelebrationModal
+        achievement={celebrationAchievement}
+        isOpen={showCelebration}
+        onClose={() => {
+          setShowCelebration(false);
+          setCelebrationAchievement(null);
+        }}
       />
     </div>
   );

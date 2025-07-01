@@ -151,7 +151,10 @@ function App() {
         {/* Navigation Header */}
         <nav className={styles.nav}>
           <div className={styles.navContent}>
-            <div className={styles.logo}>
+            <div 
+              className={styles.logo}
+              onClick={() => setCurrentView('calendar')}
+            >
               <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
               <h1>HabitLock</h1>
             </div>
