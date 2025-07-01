@@ -43,6 +43,18 @@
   }
 }
 
+.modalLogo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 .closeButton {
   width: 32px;
   height: 32px;

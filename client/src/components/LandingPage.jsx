@@ -64,7 +64,7 @@ const LandingPage = () => {
       <nav className={styles.navbar}>
         <div className={styles.navContent}>
           <div className={styles.navLogo}>
-            <span className={styles.logoEmoji}>🎯</span>
+            <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
             <span className={styles.logoText}>HabitLock</span>
           </div>
           <div className={styles.navActions}>
@@ -239,7 +239,7 @@ const LandingPage = () => {
         <div className={styles.container}>
           <div className={styles.footerContent}>
             <div className={styles.footerLogo}>
-              <span className={styles.logoEmoji}>🎯</span>
+              <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
               <span>HabitLock</span>
             </div>
             <p>Built with ❤️ for building better habits</p>

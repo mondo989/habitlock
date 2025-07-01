@@ -7,12 +7,14 @@ import {
   generateHeatmapData 
 } from '../utils/streakUtils';
 import { getWeekBoundaries } from '../utils/dateUtils';
+import BadgesModal from '../components/BadgesModal';
 import styles from './StatsView.module.scss';
 
 const StatsView = () => {
   const { habits, loading: habitsLoading } = useHabits();
   const { calendarEntries, streaks, loading: calendarLoading } = useCalendar(habits);
   const [activeTooltip, setActiveTooltip] = useState(null);
+  const [isBadgesModalOpen, setIsBadgesModalOpen] = useState(false);
 
   const loading = habitsLoading || calendarLoading;
 
@@ -134,21 +136,208 @@ const StatsView = () => {
     return insights;
   }, [statsData]);
 
-  // Get achievement badges
-  const achievements = useMemo(() => {
-    if (!statsData) return [];
+  // Get comprehensive badge system for preview
+  const badgeSystem = useMemo(() => {
+    if (!statsData) return { featured: [], all: [] };
     
-    const badges = [];
     const totalCompletions = statsData.reduce((sum, d) => sum + d.thirtyDayStats.completedDays, 0);
     const maxStreak = Math.max(...statsData.map(d => d.bestStreak));
+    const currentMaxStreak = Math.max(...statsData.map(d => d.currentStreak));
     const perfectWeeks = statsData.filter(d => d.weeklyGoalPercentage >= 100).length;
-    
-    if (totalCompletions >= 100) badges.push({ emoji: '💯', title: 'Century Club', desc: '100+ completions' });
-    if (maxStreak >= 30) badges.push({ emoji: '🔥', title: 'Streak Master', desc: '30+ day streak' });
-    if (perfectWeeks >= 3) badges.push({ emoji: '🎯', title: 'Goal Crusher', desc: '3+ perfect weeks' });
-    if (statsData.length >= 5) badges.push({ emoji: '🌟', title: 'Multi-Tracker', desc: '5+ habits tracked' });
-    
-    return badges;
+    const avgCompletionRate = Math.round(
+      statsData.reduce((sum, d) => sum + d.thirtyDayStats.completionRate, 0) / statsData.length
+    );
+
+    // Define all possible badges with progress calculation
+    const allBadges = [
+      // Basic achievement badges
+      {
+        id: 'first_steps',
+        emoji: '👶',
+        title: 'First Steps',
+        desc: 'Complete your first habit',
+        category: 'Milestones',
+        rarity: 'common',
+        earned: totalCompletions > 0,
+        progress: totalCompletions > 0 ? 100 : 0,
+        priority: 1000 // High priority for beginners
+      },
+      {
+        id: 'habit_explorer',
+        emoji: '🧭',
+        title: 'Habit Explorer',
+        desc: 'Create your first habit',
+        category: 'Mastery',
+        rarity: 'common',
+        earned: statsData.length > 0,
+        progress: statsData.length > 0 ? 100 : 0,
+        priority: 999
+      },
+      {
+        id: 'multi_tasker',
+        emoji: '🤹',
+        title: 'Multi-Tasker',
+        desc: 'Track 3 habits simultaneously',
+        category: 'Mastery',
+        rarity: 'common',
+        earned: statsData.length >= 3,
+        progress: Math.min((statsData.length / 3) * 100, 100),
+        priority: statsData.length >= 2 ? 900 : 400 // Higher priority when close
+      },
+      {
+        id: 'multi_tracker',
+        emoji: '🌟',
+        title: 'Multi-Tracker',
+        desc: '5+ habits tracked',
+        category: 'Mastery',
+        rarity: 'uncommon',
+        earned: statsData.length >= 5,
+        progress: Math.min((statsData.length / 5) * 100, 100),
+        priority: statsData.length >= 3 ? 850 : 300
+      },
+      {
+        id: 'lifestyle_designer',
+        emoji: '🏗️',
+        title: 'Lifestyle Designer',
+        desc: 'Track 10+ habits simultaneously',
+        category: 'Mastery',
+        rarity: 'rare',
+        earned: statsData.length >= 10,
+        progress: Math.min((statsData.length / 10) * 100, 100),
+        priority: statsData.length >= 7 ? 700 : 200
+      },
+      
+      // Streak badges
+      {
+        id: 'fire_starter',
+        emoji: '🔥',
+        title: 'Fire Starter',
+        desc: 'Complete a 3-day streak',
+        category: 'Streaks',
+        rarity: 'common',
+        earned: currentMaxStreak >= 3,
+        progress: Math.min((currentMaxStreak / 3) * 100, 100),
+        priority: currentMaxStreak >= 2 ? 950 : 600
+      },
+      {
+        id: 'flame_keeper',
+        emoji: '🔥',
+        title: 'Flame Keeper',
+        desc: 'Maintain a 7-day streak',
+        category: 'Streaks',
+        rarity: 'common',
+        earned: currentMaxStreak >= 7,
+        progress: Math.min((currentMaxStreak / 7) * 100, 100),
+        priority: currentMaxStreak >= 5 ? 920 : 500
+      },
+      {
+        id: 'inferno_master',
+        emoji: '🔥',
+        title: 'Inferno Master',
+        desc: 'Achieve a 21-day streak',
+        category: 'Streaks',
+        rarity: 'uncommon',
+        earned: maxStreak >= 21,
+        progress: Math.min((maxStreak / 21) * 100, 100),
+        priority: maxStreak >= 14 ? 800 : 300
+      },
+      {
+        id: 'streak_master',
+        emoji: '🔥',
+        title: 'Streak Master',
+        desc: '30+ day streak',
+        category: 'Streaks',
+        rarity: 'rare',
+        earned: maxStreak >= 30,
+        progress: Math.min((maxStreak / 30) * 100, 100),
+        priority: maxStreak >= 21 ? 750 : 250
+      },
+
+      // Goal achievement badges
+      {
+        id: 'goal_getter',
+        emoji: '🎯',
+        title: 'Goal Getter',
+        desc: 'Achieve your first weekly goal',
+        category: 'Goals',
+        rarity: 'common',
+        earned: perfectWeeks >= 1,
+        progress: perfectWeeks >= 1 ? 100 : 0,
+        priority: perfectWeeks >= 0 ? 880 : 550
+      },
+      {
+        id: 'goal_crusher',
+        emoji: '🎯',
+        title: 'Goal Crusher',
+        desc: '3+ perfect weeks',
+        category: 'Goals',
+        rarity: 'uncommon',
+        earned: perfectWeeks >= 3,
+        progress: Math.min((perfectWeeks / 3) * 100, 100),
+        priority: perfectWeeks >= 2 ? 860 : 450
+      },
+      {
+        id: 'target_hunter',
+        emoji: '🎯',
+        title: 'Target Hunter',
+        desc: 'Hit 5 weekly goals',
+        category: 'Goals',
+        rarity: 'rare',
+        earned: perfectWeeks >= 5,
+        progress: Math.min((perfectWeeks / 5) * 100, 100),
+        priority: perfectWeeks >= 3 ? 780 : 350
+      },
+
+      // Milestone badges
+      {
+        id: 'century_club',
+        emoji: '💯',
+        title: 'Century Club',
+        desc: '100+ completions',
+        category: 'Milestones',
+        rarity: 'uncommon',
+        earned: totalCompletions >= 100,
+        progress: Math.min((totalCompletions / 100) * 100, 100),
+        priority: totalCompletions >= 75 ? 820 : 400
+      },
+      {
+        id: 'consistency_king',
+        emoji: '👑',
+        title: 'Consistency Royalty',
+        desc: '90%+ completion rate for 30 days',
+        category: 'Consistency',
+        rarity: 'rare',
+        earned: avgCompletionRate >= 90,
+        progress: Math.min((avgCompletionRate / 90) * 100, 100),
+        priority: avgCompletionRate >= 80 ? 830 : 350
+      },
+      {
+        id: 'perfect_week',
+        emoji: '⭐',
+        title: 'Perfect Week',
+        desc: '100% completion for 7 days straight',
+        category: 'Consistency',
+        rarity: 'uncommon',
+        earned: perfectWeeks >= 1,
+        progress: perfectWeeks >= 1 ? 100 : 0,
+        priority: perfectWeeks >= 0 ? 870 : 500
+      }
+    ];
+
+    // Sort badges by priority (earned first, then by proximity to achievement)
+    const sortedBadges = allBadges.sort((a, b) => {
+      // Earned badges get highest priority
+      if (a.earned && !b.earned) return -1;
+      if (!a.earned && b.earned) return 1;
+      
+      // Among earned or unearned, sort by priority score
+      return b.priority - a.priority;
+    });
+
+    // Take top 6 for featured display
+    const featured = sortedBadges.slice(0, 6);
+
+    return { featured, all: allBadges };
   }, [statsData]);
 
   if (loading) {
@@ -204,16 +393,50 @@ const StatsView = () => {
       </div>
 
       {/* Achievement Badges */}
-      {achievements.length > 0 && (
+      {badgeSystem.featured.length > 0 && (
         <div className={styles.achievementsSection}>
-          <h2>🏆 Your Achievements</h2>
+          <div className={styles.achievementsHeader}>
+            <div className={styles.headerText}>
+              <h2>🏆 Your Achievements</h2>
+              <p>Click on locked badges to discover all achievements</p>
+            </div>
+            <button 
+              className={styles.viewAllBadgesButton}
+              onClick={() => setIsBadgesModalOpen(true)}
+            >
+              View All Badges
+            </button>
+          </div>
           <div className={styles.achievementsGrid}>
-            {achievements.map((badge, index) => (
-              <div key={index} className={styles.achievementBadge}>
-                <div className={styles.badgeEmoji}>{badge.emoji}</div>
+            {badgeSystem.featured.map((badge, index) => (
+              <div 
+                key={badge.id} 
+                className={`${styles.achievementBadge} ${badge.earned ? styles.earned : styles.inProgress} ${!badge.earned ? styles.clickable : ''}`}
+                onClick={!badge.earned ? () => setIsBadgesModalOpen(true) : undefined}
+                title={!badge.earned ? 'Click to view all badges and see how to unlock this achievement' : ''}
+              >
+                <div className={styles.badgeEmoji}>
+                  {badge.earned ? badge.emoji : '🔒'}
+                </div>
                 <div className={styles.badgeInfo}>
                   <h4>{badge.title}</h4>
                   <p>{badge.desc}</p>
+                  {!badge.earned && badge.progress > 0 && (
+                    <div className={styles.progressInfo}>
+                      <div className={styles.progressBar}>
+                        <div 
+                          className={styles.progressFill}
+                          style={{ width: `${badge.progress}%` }}
+                        ></div>
+                      </div>
+                      <span className={styles.progressText}>{Math.round(badge.progress)}%</span>
+                    </div>
+                  )}
+                  {!badge.earned && (
+                    <div className={styles.clickHint}>
+                      <span className={styles.clickText}>Click to explore all badges</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -512,6 +735,14 @@ const StatsView = () => {
           );
         })}
       </div>
+
+      {/* Badges Modal */}
+      <BadgesModal
+        isOpen={isBadgesModalOpen}
+        onClose={() => setIsBadgesModalOpen(false)}
+        statsData={statsData}
+        badgeData={badgeSystem.all}
+      />
     </div>
   );
 };

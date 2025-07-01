@@ -36,7 +36,10 @@ const AuthModal = ({ isOpen, onClose, user }) => {
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
-          <h2>Welcome to HabitLock</h2>
+          <div className={styles.modalLogo}>
+            <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
+            <h2>Welcome to HabitLock</h2>
+          </div>
           <button className={styles.closeButton} onClick={onClose}>×</button>
         </div>
         

@@ -1,0 +1,551 @@
+// BadgesModal.module.scss - Premium badges modal with Apple/Airbnb aesthetics
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease-out;
+  padding: 20px;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 24px;
+  width: 90vw;
+  max-width: 1000px;
+  max-height: 85vh;
+  overflow: hidden;
+  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 40px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+}
+
+.headerContent {
+  h2 {
+    margin: 0 0 4px 0;
+    font-size: 2rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+}
+
+.progressSummary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.progressCircle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.progressText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+
+  .earned {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .total {
+    font-size: 0.875rem;
+    opacity: 0.8;
+  }
+}
+
+.closeButton {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  color: white;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.125rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+  }
+}
+
+.modalBody {
+  padding: 32px 40px;
+  overflow-y: auto;
+  max-height: calc(85vh - 120px);
+}
+
+.badgeCategory {
+  margin-bottom: 40px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.categoryTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &::before {
+    content: '';
+    width: 4px;
+    height: 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+  }
+}
+
+.badgesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.badgeCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  border: 2px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, transparent);
+    transition: background 0.3s ease;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+      0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  &.earned {
+    border-color: rgba(34, 197, 94, 0.2);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.02) 0%, rgba(34, 197, 94, 0.05) 100%);
+
+    &::before {
+      background: linear-gradient(90deg, #10b981, #059669);
+    }
+
+    &:hover {
+      border-color: rgba(34, 197, 94, 0.3);
+      box-shadow: 
+        0 20px 25px -5px rgba(34, 197, 94, 0.15),
+        0 10px 10px -5px rgba(34, 197, 94, 0.1);
+    }
+  }
+
+  &.locked {
+    opacity: 0.6;
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.02) 0%, rgba(107, 114, 128, 0.05) 100%);
+
+    &::before {
+      background: linear-gradient(90deg, #6b7280, #4b5563);
+    }
+
+    &:hover {
+      opacity: 0.8;
+      border-color: rgba(107, 114, 128, 0.2);
+    }
+  }
+
+  // Rarity styling
+  &.common {
+    &.earned::before { background: linear-gradient(90deg, #10b981, #059669); }
+  }
+
+  &.uncommon {
+    &.earned::before { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+  }
+
+  &.rare {
+    &.earned::before { background: linear-gradient(90deg, #8b5cf6, #7c3aed); }
+  }
+
+  &.epic {
+    &.earned::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+  }
+
+  &.legendary {
+    &.earned::before { background: linear-gradient(90deg, #ef4444, #dc2626); }
+  }
+}
+
+.badgeIconContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.badgeIcon {
+  font-size: 3rem;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+
+  &.unlocked {
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+.badgeGlow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%);
+  animation: pulse 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+.rarityIndicator {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 3;
+
+  &.common { background: #10b981; }
+  &.uncommon { background: #3b82f6; }
+  &.rare { background: #8b5cf6; }
+  &.epic { background: #f59e0b; }
+  &.legendary { 
+    background: linear-gradient(45deg, #ef4444, #f59e0b);
+    animation: sparkle 1.5s ease-in-out infinite;
+  }
+}
+
+.badgeInfo {
+  text-align: center;
+}
+
+.badgeTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.badgeDescription {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.badgeProgress {
+  .progressLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.earnedIndicator {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.checkmark {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: 0 4px 8px -2px rgba(16, 185, 129, 0.4);
+}
+
+// Hover Tooltip
+.hoverTooltip {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 20px;
+  border-radius: 16px;
+  max-width: 300px;
+  z-index: 10001;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: tooltipSlideIn 0.3s ease-out;
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  .tooltipEmoji {
+    font-size: 2rem;
+  }
+
+  h4 {
+    margin: 0 0 4px 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+}
+
+.rarityTag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.common { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+  &.uncommon { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+  &.rare { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
+  &.epic { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+  &.legendary { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+}
+
+.tooltipDescription {
+  margin: 0 0 12px 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.tooltipStatus {
+  .statusEarned {
+    color: #10b981;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  .statusLocked {
+    color: #9ca3af;
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tooltipSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+}
+
+// Dark mode support
+:global(html.dark-mode) {
+  .modalContent {
+    background: #1f2937;
+    color: white;
+  }
+
+  .badgeCard {
+    background: #374151;
+    border-color: rgba(75, 85, 99, 0.3);
+
+    &.earned {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.1) 100%);
+    }
+
+    &.locked {
+      background: linear-gradient(135deg, rgba(107, 114, 128, 0.05) 0%, rgba(107, 114, 128, 0.1) 100%);
+    }
+  }
+
+  .categoryTitle {
+    color: #f9fafb;
+  }
+
+  .badgeTitle {
+    color: #f9fafb;
+  }
+
+  .badgeDescription {
+    color: #d1d5db;
+  }
+
+  .badgeIcon {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+
+    &.unlocked {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #1f2937;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: 10px;
+  }
+
+  .modalContent {
+    width: 95vw;
+    max-height: 90vh;
+    border-radius: 20px;
+  }
+
+  .modalHeader {
+    padding: 24px 20px;
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+
+    .headerContent h2 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .modalBody {
+    padding: 24px 20px;
+  }
+
+  .badgesGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .badgeCard {
+    padding: 20px;
+  }
+
+  .hoverTooltip {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    top: auto;
+    max-width: none;
+  }
+} 

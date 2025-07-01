@@ -518,8 +518,10 @@
   color: white;
 }
 
-.logoEmoji {
-  font-size: 1.5rem;
+.logoIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 // Animations
