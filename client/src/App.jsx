@@ -99,7 +99,7 @@ function App() {
         <div className={styles.app}>
           <div className={styles.loadingScreen}>
             <div className={styles.logo}>
-              <span className={styles.logoEmoji}>🎯</span>
+              <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
               <h1>HabitLock</h1>
             </div>
             <div className={styles.spinner}></div>
@@ -116,7 +116,7 @@ function App() {
         <div className={styles.app}>
           <div className={styles.errorScreen}>
             <div className={styles.logo}>
-              <span className={styles.logoEmoji}>🎯</span>
+              <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
               <h1>HabitLock</h1>
             </div>
             <div className={styles.errorContent}>
@@ -152,7 +152,7 @@ function App() {
         <nav className={styles.nav}>
           <div className={styles.navContent}>
             <div className={styles.logo}>
-              <span className={styles.logoEmoji}>🎯</span>
+              <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
               <h1>HabitLock</h1>
             </div>
             

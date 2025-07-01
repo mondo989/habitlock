@@ -54,6 +54,13 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
+.logoIcon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
 .spinner {
   width: 48px;
   height: 48px;
@@ -124,6 +131,12 @@
 
 .nav .logoEmoji {
   font-size: 1.75rem;
+}
+
+.nav .logoIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .navTabs {
@@ -407,6 +420,11 @@
     font-size: 1.5rem;
   }
 
+  .nav .logoIcon {
+    width: 28px;
+    height: 28px;
+  }
+
   .navTabs {
     gap: 4px;
   }
@@ -491,6 +509,11 @@
       font-size: 2rem;
     }
 
+    .logoIcon {
+      width: 40px;
+      height: 40px;
+    }
+
     p {
       font-size: 1rem;
     }
@@ -510,6 +533,11 @@
 
   .nav .logoEmoji {
     font-size: 1.25rem;
+  }
+
+  .nav .logoIcon {
+    width: 24px;
+    height: 24px;
   }
 
   .navTabs {
