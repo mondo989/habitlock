@@ -194,11 +194,15 @@
 .mobileNavTabs {
   display: none;
   background: white;
-  border-bottom: 1px solid #e5e7eb;
-  position: sticky;
-  top: 64px;
+  border-top: 1px solid #e5e7eb;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 90;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 0;
 }
 
 .mobileNavTab {
@@ -229,12 +233,12 @@
     &::after {
       content: '';
       position: absolute;
-      bottom: 0;
+      top: 0;
       left: 0;
       right: 0;
       height: 3px;
       background: #3b82f6;
-      border-radius: 3px 3px 0 0;
+      border-radius: 0 0 3px 3px;
     }
   }
 }
@@ -442,6 +446,7 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  padding-bottom: 0; // Default no bottom padding
 }
 
 // Footer
@@ -508,10 +513,14 @@
     display: none;
   }
 
-  // Show mobile navigation tabs
+  // Show mobile navigation tabs at bottom
   .mobileNavTabs {
     display: flex;
-    top: 56px;
+  }
+
+  // Add bottom padding to main content to account for bottom navigation
+  .main {
+    padding-bottom: 80px; // Height of mobile nav + some spacing
   }
 
   .navActions {
@@ -572,6 +581,7 @@
 
   .footer {
     padding: 12px;
+    margin-bottom: 80px; // Add margin to push footer above mobile nav
   }
 
   .footerContent p {
@@ -620,10 +630,6 @@
     height: 24px;
   }
 
-  .mobileNavTabs {
-    top: 48px;
-  }
-
   .mobileNavTab {
     padding: 10px 6px;
     gap: 3px;
@@ -636,6 +642,15 @@
 
   .mobileTabText {
     font-size: 0.6875rem;
+  }
+
+  // Adjust padding for smaller mobile nav
+  .main {
+    padding-bottom: 76px;
+  }
+
+  .footer {
+    margin-bottom: 76px;
   }
 
   .navActions {
@@ -686,10 +701,6 @@
     font-size: 1.125rem;
   }
 
-  .mobileNavTabs {
-    top: 44px;
-  }
-
   .mobileNavTab {
     padding: 8px 4px;
     gap: 2px;
@@ -702,6 +713,15 @@
 
   .mobileTabText {
     font-size: 0.625rem;
+  }
+
+  // Adjust padding for extra small screens
+  .main {
+    padding-bottom: 72px;
+  }
+
+  .footer {
+    margin-bottom: 72px;
   }
 
   .profileImage {
@@ -788,7 +808,8 @@
   // Mobile navigation dark mode
   .mobileNavTabs {
     background: #1f2937;
-    border-bottom-color: #374151;
+    border-top-color: #374151;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
   }
 
   .mobileNavTab {
@@ -805,6 +826,22 @@
       
       &::after {
         background: #60a5fa;
+      }
+    }
+  }
+
+  // Calendar subtle today button dark mode
+  :global(.calendarView) {
+    .subtleTodayButton {
+      background: rgba(96, 165, 250, 0.12);
+      border-color: rgba(96, 165, 250, 0.25);
+      color: #60a5fa;
+      
+      &:hover {
+        background: rgba(96, 165, 250, 0.18);
+        border-color: rgba(96, 165, 250, 0.35);
+        color: #93c5fd;
+        box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
       }
     }
   }

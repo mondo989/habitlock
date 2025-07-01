@@ -200,30 +200,35 @@ const CalendarView = () => {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.monthControls}>
+          {/* Subtle Today Button */}
           <button 
-            className={styles.navButton}
-            onClick={goToPrevMonth}
-            title="Previous month"
-          >
-            ←
-          </button>
-          <h1 className={styles.monthTitle}>{monthDisplayName}</h1>
-          <button 
-            className={styles.navButton}
-            onClick={goToNextMonth}
-            title="Next month"
-          >
-            →
-          </button>
-        </div>
-
-        <div className={styles.headerActions}>
-          <button 
-            className={styles.todayButton}
+            className={styles.subtleTodayButton}
             onClick={goToToday}
+            title="Jump to today"
           >
             Today
           </button>
+          
+          <div className={styles.monthNavigation}>
+            <button 
+              className={styles.navButton}
+              onClick={goToPrevMonth}
+              title="Previous month"
+            >
+              ←
+            </button>
+            <h1 className={styles.monthTitle}>{monthDisplayName}</h1>
+            <button 
+              className={styles.navButton}
+              onClick={goToNextMonth}
+              title="Next month"
+            >
+              →
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.headerActions}>
           <button 
             className={styles.addHabitButton}
             onClick={handleCreateHabit}

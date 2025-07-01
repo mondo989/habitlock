@@ -3,6 +3,42 @@ import { mergeAchievementsWithBadgeData, getUserAchievements } from '../services
 import { getUserInfo } from '../services/firebase';
 import styles from './BadgesModal.module.scss';
 
+// Animated Counter Component
+const AnimatedCounter = ({ value, duration = 1500, className = '' }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    let startTime = null;
+    let animationFrame = null;
+
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const currentValue = Math.floor(easeOutQuart * value);
+      
+      setDisplayValue(currentValue);
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    // Start animation
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [value, duration]);
+
+  return <span className={className}>{displayValue}</span>;
+};
+
 const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false, achievements = {} }) => {
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const [firebaseAchievements, setFirebaseAchievements] = useState({});
@@ -264,10 +300,40 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
         </div>
         <div className={styles.progressSummary}>
           <div className={styles.progressCircle}>
-            <div className={styles.progressText}>
-              <span className={styles.earned}>{earnedCount}</span>
-              <span className={styles.total}>/{totalCount}</span>
+            <div className={styles.progressRing}>
+              <svg className={styles.progressSvg} viewBox="0 0 120 120">
+                <circle
+                  className={styles.progressTrack}
+                  cx="60"
+                  cy="60"  
+                  r="54"
+                  fill="none"
+                  strokeWidth="8"
+                />
+                <circle
+                  className={styles.progressBar}
+                  cx="60"
+                  cy="60"
+                  r="54"
+                  fill="none"
+                  strokeWidth="8"
+                  strokeDasharray={`${2 * Math.PI * 54}`}
+                  strokeDashoffset={`${2 * Math.PI * 54 * (1 - earnedCount / totalCount)}`}
+                />
+              </svg>
+              <div className={styles.progressText}>
+                <AnimatedCounter 
+                  value={earnedCount} 
+                  duration={2000}
+                  className={styles.earned}
+                />
+                <span className={styles.separator}>/</span>
+                <span className={styles.total}>{totalCount}</span>
+              </div>
             </div>
+          </div>
+          <div className={styles.progressLabel}>
+            Achievements Unlocked
           </div>
         </div>
         {!isFullPage && (
