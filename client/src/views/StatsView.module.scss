@@ -156,6 +156,39 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
+
+  // Desktop: Show up to 8 badges (4 columns on large screens)
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(4, 1fr);
+    
+    .achievementBadge:nth-child(n+9) {
+      display: none;
+    }
+  }
+
+  // Large desktop: Still limit to 8 badges
+  @media (min-width: 1400px) {
+    grid-template-columns: repeat(4, 1fr);
+    
+    .achievementBadge:nth-child(n+9) {
+      display: none;
+    }
+  }
+
+  // Medium screens: Show up to 8 badges (2 columns)
+  @media (min-width: 768px) and (max-width: 1199px) {
+    grid-template-columns: repeat(2, 1fr);
+    
+    .achievementBadge:nth-child(n+9) {
+      display: none;
+    }
+  }
+
+  // Mobile: Show all 9 badges (1 column)
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
 
 .achievementBadge {

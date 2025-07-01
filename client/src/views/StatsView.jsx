@@ -217,7 +217,7 @@ const StatsView = () => {
         rarity: 'common',
         earned: currentMaxStreak >= 3,
         progress: Math.min((currentMaxStreak / 3) * 100, 100),
-        priority: currentMaxStreak >= 2 ? 950 : 600
+        priority: currentMaxStreak >= 3 ? 1000 : (currentMaxStreak >= 2 ? 970 : (currentMaxStreak >= 1 ? 750 : 600))
       },
       {
         id: 'flame_keeper',
@@ -228,7 +228,7 @@ const StatsView = () => {
         rarity: 'common',
         earned: currentMaxStreak >= 7,
         progress: Math.min((currentMaxStreak / 7) * 100, 100),
-        priority: currentMaxStreak >= 5 ? 920 : 500
+        priority: currentMaxStreak >= 7 ? 990 : (currentMaxStreak >= 5 ? 940 : (currentMaxStreak >= 4 ? 700 : 500))
       },
       {
         id: 'inferno_master',
@@ -239,7 +239,7 @@ const StatsView = () => {
         rarity: 'uncommon',
         earned: maxStreak >= 21,
         progress: Math.min((maxStreak / 21) * 100, 100),
-        priority: maxStreak >= 14 ? 800 : 300
+        priority: maxStreak >= 21 ? 970 : (maxStreak >= 18 ? 820 : (maxStreak >= 14 ? 650 : 300))
       },
       {
         id: 'streak_master',
@@ -250,7 +250,7 @@ const StatsView = () => {
         rarity: 'rare',
         earned: maxStreak >= 30,
         progress: Math.min((maxStreak / 30) * 100, 100),
-        priority: maxStreak >= 21 ? 750 : 250
+        priority: maxStreak >= 30 ? 950 : (maxStreak >= 25 ? 780 : (maxStreak >= 21 ? 580 : 250))
       },
 
       // Goal achievement badges
@@ -262,8 +262,8 @@ const StatsView = () => {
         category: 'Goals',
         rarity: 'common',
         earned: perfectWeeks >= 1,
-        progress: perfectWeeks >= 1 ? 100 : 0,
-        priority: perfectWeeks >= 0 ? 880 : 550
+        progress: perfectWeeks >= 1 ? 100 : (avgCompletionRate >= 70 ? 85 : avgCompletionRate >= 50 ? 60 : 30),
+        priority: perfectWeeks >= 1 ? 1000 : (avgCompletionRate >= 80 ? 920 : (avgCompletionRate >= 60 ? 800 : 550))
       },
       {
         id: 'goal_crusher',
@@ -274,7 +274,7 @@ const StatsView = () => {
         rarity: 'uncommon',
         earned: perfectWeeks >= 3,
         progress: Math.min((perfectWeeks / 3) * 100, 100),
-        priority: perfectWeeks >= 2 ? 860 : 450
+        priority: perfectWeeks >= 3 ? 980 : (perfectWeeks >= 2 ? 890 : (perfectWeeks >= 1 ? 720 : 450))
       },
       {
         id: 'target_hunter',
@@ -285,7 +285,7 @@ const StatsView = () => {
         rarity: 'rare',
         earned: perfectWeeks >= 5,
         progress: Math.min((perfectWeeks / 5) * 100, 100),
-        priority: perfectWeeks >= 3 ? 780 : 350
+        priority: perfectWeeks >= 5 ? 960 : (perfectWeeks >= 4 ? 840 : (perfectWeeks >= 3 ? 680 : 350))
       },
 
       // Milestone badges
@@ -298,7 +298,7 @@ const StatsView = () => {
         rarity: 'uncommon',
         earned: totalCompletions >= 100,
         progress: Math.min((totalCompletions / 100) * 100, 100),
-        priority: totalCompletions >= 75 ? 820 : 400
+        priority: totalCompletions >= 100 ? 980 : (totalCompletions >= 80 ? 860 : (totalCompletions >= 60 ? 700 : 400))
       },
       {
         id: 'consistency_king',
@@ -309,7 +309,7 @@ const StatsView = () => {
         rarity: 'rare',
         earned: avgCompletionRate >= 90,
         progress: Math.min((avgCompletionRate / 90) * 100, 100),
-        priority: avgCompletionRate >= 80 ? 830 : 350
+        priority: avgCompletionRate >= 90 ? 970 : (avgCompletionRate >= 85 ? 870 : (avgCompletionRate >= 80 ? 750 : 350))
       },
       {
         id: 'perfect_week',
@@ -319,8 +319,8 @@ const StatsView = () => {
         category: 'Consistency',
         rarity: 'uncommon',
         earned: perfectWeeks >= 1,
-        progress: perfectWeeks >= 1 ? 100 : 0,
-        priority: perfectWeeks >= 0 ? 870 : 500
+        progress: perfectWeeks >= 1 ? 100 : (avgCompletionRate >= 70 ? 80 : avgCompletionRate >= 50 ? 60 : 30),
+        priority: perfectWeeks >= 1 ? 990 : (avgCompletionRate >= 80 ? 910 : (avgCompletionRate >= 60 ? 780 : 500))
       }
     ];
 
@@ -334,8 +334,8 @@ const StatsView = () => {
       return b.priority - a.priority;
     });
 
-    // Take top 6 for featured display
-    const featured = sortedBadges.slice(0, 6);
+    // Take top 8 for desktop, 9 for mobile (responsive handled via CSS)
+    const featured = sortedBadges.slice(0, 9);
 
     return { featured, all: allBadges };
   }, [statsData]);
