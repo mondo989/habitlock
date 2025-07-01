@@ -23,6 +23,26 @@ const HabitDayModal = ({
     }
   }, [isOpen, completedHabits]);
 
+  // Add keyboard shortcuts - moved to top to maintain hooks order
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      const hasChanges = JSON.stringify(selectedHabits.sort()) !== JSON.stringify(completedHabits.sort());
+      
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleCancel();
+      } else if (e.key === 'Enter' && hasChanges) {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, selectedHabits, completedHabits]);
+
   const handleHabitToggle = (habitId) => {
     if (!habitId || habitId === '') {
       console.warn('Invalid habit ID provided to handleHabitToggle:', habitId);
@@ -192,6 +212,14 @@ const HabitDayModal = ({
         <div className={styles.modalFooter}>
           <div className={styles.summary}>
             {selectedHabits.length} of {habits.length} habits selected
+            <div className={styles.keyboardHints}>
+              <span className={styles.keyHint}>
+                <span className={styles.key}>↵</span> Save
+              </span>
+              <span className={styles.keyHint}>
+                <span className={styles.key}>Esc</span> Cancel
+              </span>
+            </div>
           </div>
           <div className={styles.actions}>
             <button 

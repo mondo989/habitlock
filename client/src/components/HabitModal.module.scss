@@ -262,11 +262,44 @@
 // Actions
 .actions {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  justify-content: flex-end;
   margin-top: 24px;
   padding-top: 24px;
   border-top: 1px solid #f3f4f6;
+}
+
+.keyboardHints {
+  display: flex;
+  gap: 12px;
+  opacity: 0.7;
+  align-self: flex-start;
+}
+
+.keyHint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.key {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.6875rem;
+  font-family: monospace;
+  font-weight: 600;
+  color: #6b7280;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
 }
 
 .cancelButton, .saveButton {
@@ -342,6 +375,10 @@
 
   .actions {
     flex-direction: column-reverse;
+
+    .buttons {
+      flex-direction: column-reverse;
+    }
 
     .cancelButton, .saveButton {
       width: 100%;
@@ -455,6 +492,17 @@
   .modalFooter {
     border-top-color: #4b5563;
     background: #374151;
+  }
+
+  .keyHint {
+    color: #6b7280;
+  }
+
+  .key {
+    background: #4b5563;
+    border-color: #6b7280;
+    color: #9ca3af;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
 
   .cancelButton {

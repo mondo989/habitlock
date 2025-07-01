@@ -90,6 +90,21 @@ const AchievementCelebrationModal = ({ achievement, isOpen, onClose }) => {
     }
   }, [isOpen, achievement]);
 
+  // Add keyboard shortcuts
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' || e.key === 'Enter') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   const handleClose = () => {
     setShowContent(false);
     setShowConfetti(false);

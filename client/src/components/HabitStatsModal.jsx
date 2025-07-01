@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import dayjs from 'dayjs';
 import styles from './HabitStatsModal.module.scss';
 
@@ -13,6 +13,19 @@ const HabitStatsModal = ({
   calendarMatrix 
 }) => {
   if (!isOpen || !habit) return null;
+
+  // Add keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   // Calculate comprehensive stats
   const stats = useMemo(() => {

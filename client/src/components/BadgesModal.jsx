@@ -289,6 +289,21 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
   const earnedCount = badges.filter(b => b.earned).length;
   const totalCount = badges.length;
 
+  // Add keyboard shortcuts
+  useEffect(() => {
+    if (!isOpen && !isFullPage) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !isFullPage) {
+        e.preventDefault();
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isFullPage, onClose]);
+
   if (!isOpen && !isFullPage) return null;
 
   const content = (

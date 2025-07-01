@@ -102,6 +102,27 @@ const HabitModal = ({
     }
   };
 
+  // Add keyboard shortcuts
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      } else if (e.key === 'Enter' && !isSubmitting) {
+        // Only handle Enter if not focused on a textarea
+        if (e.target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          handleSubmit(e);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isSubmitting, formData]); // Include formData to ensure latest form state
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -237,21 +258,31 @@ const HabitModal = ({
 
           {/* Action Buttons */}
           <div className={styles.actions}>
-            <button
-              type="button"
-              onClick={onClose}
-              className={styles.cancelButton}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className={styles.saveButton}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Saving...' : (mode === 'edit' ? 'Update Habit' : 'Create Habit')}
-            </button>
+            <div className={styles.keyboardHints}>
+              <span className={styles.keyHint}>
+                <span className={styles.key}>↵</span> Save
+              </span>
+              <span className={styles.keyHint}>
+                <span className={styles.key}>Esc</span> Cancel
+              </span>
+            </div>
+            <div className={styles.buttons}>
+              <button
+                type="button"
+                onClick={onClose}
+                className={styles.cancelButton}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className={styles.saveButton}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Saving...' : (mode === 'edit' ? 'Update Habit' : 'Create Habit')}
+              </button>
+            </div>
           </div>
         </form>
       </div>
