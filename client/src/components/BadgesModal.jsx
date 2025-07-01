@@ -265,7 +265,9 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData }) => {
                       {badge.earned && (
                         <div className={styles.badgeGlow}></div>
                       )}
-                      <div className={`${styles.rarityIndicator} ${styles[badge.rarity || 'common']}`}></div>
+                      {!badge.earned && (
+                        <div className={`${styles.rarityIndicator} ${styles[badge.rarity || 'common']}`}></div>
+                      )}
                     </div>
                     
                     <div className={styles.badgeInfo}>
