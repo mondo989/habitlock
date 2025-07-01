@@ -19,21 +19,36 @@ const HabitModal = ({
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Common emojis for habits
+  // Common emojis for habits - expanded to 48 emojis (6 rows × 8 columns)
   const commonEmojis = [
-    '📝', '💪', '🏃‍♂️', '📚', '🧘‍♀️', '💧', '🥗', '😴', 
+    // Row 1 - Basic habits & activities
+    '📝', '💪', '🏃‍♂️', '📚', '🧘‍♀️', '💧', '🥗', '😴',
+    // Row 2 - Goals & productivity  
     '🎯', '💼', '🎨', '🎵', '📱', '🌱', '☕', '🧹',
-    '🔥', '⭐', '✨', '🎉', '🌟', '💎', '🚀', '📈'
+    // Row 3 - Achievement & motivation
+    '🔥', '⭐', '✨', '🎉', '🌟', '💎', '🚀', '📈',
+    // Row 4 - Health & wellness
+    '🏋️‍♀️', '🚶‍♂️', '🧠', '❤️', '🍎', '🥤', '💊', '🛁',
+    // Row 5 - Learning & creativity
+    '✍️', '🔬', '💻', '📖', '🎭', '🎪', '🎬', '📷',
+    // Row 6 - Lifestyle & hobbies
+    '🏠', '🌺', '🎸', '🍳', '🧧', '🎲', '⚽', '🎮'
   ];
 
-  // Predefined colors - 24 beautiful, distinct colors
+  // Predefined colors - 48 diverse, vibrant colors (6 rows × 8 columns)
   const predefinedColors = [
-    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
-    '#8b5cf6', '#06b6d4', '#f97316', '#84cc16',
-    '#ec4899', '#6366f1', '#14b8a6', '#f43f5e',
-    '#0ea5e9', '#dc2626', '#059669', '#d97706',
-    '#7c3aed', '#0891b2', '#ea580c', '#65a30d',
-    '#db2777', '#4f46e5', '#0d9488', '#be123c'
+    // Row 1 - Vibrant Primary & Secondary Colors
+    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16',
+    // Row 2 - Bright & Bold Colors
+    '#ff6b35', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#fab1a0', '#fd79a8', '#6c5ce7',
+    // Row 3 - Rich & Deep Colors
+    '#2d3436', '#636e72', '#00b894', '#00cec9', '#e17055', '#d63031', '#a29bfe', '#fd79a8',
+    // Row 4 - Warm & Earthy Tones
+    '#e67e22', '#e74c3c', '#f39c12', '#f1c40f', '#27ae60', '#2ecc71', '#16a085', '#1abc9c',
+    // Row 5 - Cool & Professional
+    '#3498db', '#9b59b6', '#34495e', '#95a5a6', '#7f8c8d', '#bdc3c7', '#ecf0f1', '#2c3e50',
+    // Row 6 - Unique & Special Colors
+    '#ff7675', '#74b9ff', '#00b894', '#fdcb6e', '#6c5ce7', '#fd79a8', '#55a3ff', '#26de81'
   ];
 
   useEffect(() => {
