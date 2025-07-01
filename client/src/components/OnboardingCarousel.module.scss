@@ -82,6 +82,8 @@
   min-height: 500px;
   display: flex;
   align-items: center;
+  touch-action: pan-y pinch-zoom; // Allow vertical scrolling but enable horizontal swipes
+  user-select: none; // Prevent text selection during swipes
 }
 
 .slideContent {
@@ -508,12 +510,24 @@
 }
 
 .modalFooter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 24px 32px;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   background: #fafbfc;
+}
+
+.mobileSwipeHint {
+  display: none;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #64748b;
+  padding: 8px 0;
+  font-weight: 500;
+}
+
+.desktopNavigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .prevButton, .nextButton {
@@ -560,15 +574,49 @@
 
 // Responsive design
 @media (max-width: 768px) {
+  .onboardingOverlay {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: max(16px, env(safe-area-inset-top, 16px));
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .onboardingModal {
-    margin: 20px;
+    width: calc(100vw - 32px);
     max-width: none;
+    max-height: calc(100vh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    overflow: hidden;
   }
 
   .modalHeader, .slideContainer, .modalFooter {
     padding-left: 20px;
     padding-right: 20px;
+  }
+
+  .modalHeader {
+    flex-shrink: 0;
+    padding-bottom: 16px;
+  }
+
+  .slideContainer {
+    flex: 1;
+    min-height: 0; // Allow flexbox to shrink
+    padding-top: 16px;
+    padding-bottom: 16px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    
+    // Ensure scrollable content
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .slideHeader h2 {
@@ -589,12 +637,53 @@
   }
 
   .modalFooter {
-    flex-direction: column;
-    gap: 16px;
+    flex-shrink: 0;
+    padding-top: 16px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
+    // Better mobile footer layout
+    background: linear-gradient(180deg, transparent 0%, #fafbfc 20%);
+  }
+
+  .mobileSwipeHint {
+    display: block;
+    margin-bottom: 16px;
+    background: rgba(59, 130, 246, 0.05);
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    font-weight: 600;
+  }
+
+  .desktopNavigation {
+    flex-direction: row;
+    gap: 12px;
   }
 
   .prevButton, .nextButton {
-    width: 100%;
+    flex: 1;
+    padding: 14px 16px;
+    font-size: 1rem;
+    min-height: 48px; // Better touch target
+  }
+
+  .slideCounter {
+    display: none; // Hide on mobile since it's shown in swipe hint
+  }
+
+  // Better touch targets for progress dots
+  .progressDot {
+    width: 12px;
+    height: 12px;
+    margin: 4px; // Larger touch area
+  }
+
+  // Disable hover effects on mobile
+  .prevButton:hover:not(:disabled),
+  .nextButton:hover,
+  .progressDot:hover {
+    transform: none;
+    box-shadow: none;
   }
 }
 
@@ -612,6 +701,10 @@
   .modalFooter {
     border-top-color: rgba(255, 255, 255, 0.1);
     background: #0f172a;
+    
+    @media (max-width: 768px) {
+      background: linear-gradient(180deg, transparent 0%, #0f172a 20%);
+    }
   }
 
   .slideHeader h2 {
@@ -731,6 +824,12 @@
 
   .slideCounter {
     color: #94a3b8;
+  }
+
+  .mobileSwipeHint {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
   }
 
   .progressDot {

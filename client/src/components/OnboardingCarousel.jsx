@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styles from './OnboardingCarousel.module.scss';
 
 const OnboardingCarousel = ({ onComplete }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const slideRef = useRef(null);
+
+  // Minimum swipe distance required
+  const minSwipeDistance = 50;
 
   const slides = [
     {
@@ -204,6 +210,31 @@ const OnboardingCarousel = ({ onComplete }) => {
     }
   ];
 
+  // Touch event handlers for swipe gestures
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentSlide < slides.length - 1) {
+      nextSlide();
+    }
+    if (isRightSwipe && currentSlide > 0) {
+      prevSlide();
+    }
+  };
+
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
@@ -253,7 +284,13 @@ const OnboardingCarousel = ({ onComplete }) => {
           </button>
         </div>
 
-        <div className={styles.slideContainer}>
+        <div 
+          className={styles.slideContainer}
+          ref={slideRef}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           <div className={styles.slideContent}>
             <div className={styles.slideHeader}>
               <h2>{slides[currentSlide].title}</h2>
@@ -266,24 +303,30 @@ const OnboardingCarousel = ({ onComplete }) => {
         </div>
 
         <div className={styles.modalFooter}>
-          <button
-            className={styles.prevButton}
-            onClick={prevSlide}
-            disabled={currentSlide === 0}
-          >
-            Previous
-          </button>
-          
-          <div className={styles.slideCounter}>
-            {currentSlide + 1} of {slides.length}
+          <div className={styles.mobileSwipeHint}>
+            👆 Swipe to navigate • {currentSlide + 1} of {slides.length}
           </div>
           
-          <button
-            className={styles.nextButton}
-            onClick={nextSlide}
-          >
-            {currentSlide === slides.length - 1 ? 'Get Started!' : 'Next'}
-          </button>
+          <div className={styles.desktopNavigation}>
+            <button
+              className={styles.prevButton}
+              onClick={prevSlide}
+              disabled={currentSlide === 0}
+            >
+              Previous
+            </button>
+            
+            <div className={styles.slideCounter}>
+              {currentSlide + 1} of {slides.length}
+            </div>
+            
+            <button
+              className={styles.nextButton}
+              onClick={nextSlide}
+            >
+              {currentSlide === slides.length - 1 ? 'Get Started!' : 'Next'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

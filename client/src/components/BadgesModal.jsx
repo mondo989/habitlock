@@ -3,7 +3,7 @@ import { mergeAchievementsWithBadgeData, getUserAchievements } from '../services
 import { getUserInfo } from '../services/firebase';
 import styles from './BadgesModal.module.scss';
 
-const BadgesModal = ({ isOpen, onClose, statsData, badgeData }) => {
+const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false, achievements = {} }) => {
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const [firebaseAchievements, setFirebaseAchievements] = useState({});
 
@@ -196,13 +196,19 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData }) => {
   // Load Firebase achievements
   useEffect(() => {
     const loadAchievements = async () => {
-      if (!isOpen) return;
+      if (!isOpen && !isFullPage) return;
+      
+      // If achievements are passed as props (for full page), use them directly
+      if (isFullPage && achievements) {
+        setFirebaseAchievements(achievements);
+        return;
+      }
       
       const userInfo = getUserInfo();
       if (userInfo?.uid) {
         try {
-          const achievements = await getUserAchievements(userInfo.uid);
-          setFirebaseAchievements(achievements);
+          const userAchievements = await getUserAchievements(userInfo.uid);
+          setFirebaseAchievements(userAchievements);
         } catch (error) {
           console.error('Error loading achievements in modal:', error);
         }
@@ -210,7 +216,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData }) => {
     };
 
     loadAchievements();
-  }, [isOpen]);
+  }, [isOpen, isFullPage, achievements]);
 
   // Calculate earned badges
   const badges = useMemo(() => {
@@ -247,113 +253,123 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData }) => {
   const earnedCount = badges.filter(b => b.earned).length;
   const totalCount = badges.length;
 
-  if (!isOpen) return null;
+  if (!isOpen && !isFullPage) return null;
 
-  return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <div className={styles.headerContent}>
-            <h2>🏆 Achievement Badges</h2>
-            <p>Your journey to habit mastery</p>
-          </div>
-          <div className={styles.progressSummary}>
-            <div className={styles.progressCircle}>
-              <div className={styles.progressText}>
-                <span className={styles.earned}>{earnedCount}</span>
-                <span className={styles.total}>/{totalCount}</span>
-              </div>
+  const content = (
+    <div className={`${styles.modalContent} ${isFullPage ? styles.fullPage : ''}`} onClick={isFullPage ? undefined : e => e.stopPropagation()}>
+      <div className={styles.modalHeader}>
+        <div className={styles.headerContent}>
+          <h2>🏆 Achievement Badges</h2>
+          <p>Your journey to habit mastery</p>
+        </div>
+        <div className={styles.progressSummary}>
+          <div className={styles.progressCircle}>
+            <div className={styles.progressText}>
+              <span className={styles.earned}>{earnedCount}</span>
+              <span className={styles.total}>/{totalCount}</span>
             </div>
           </div>
+        </div>
+        {!isFullPage && (
           <button className={styles.closeButton} onClick={onClose}>
             ✕
           </button>
-        </div>
+        )}
+      </div>
 
-        <div className={styles.modalBody}>
-          {Object.entries(badgesByCategory).map(([category, categoryBadges]) => (
-            <div key={category} className={styles.badgeCategory}>
-              <h3 className={styles.categoryTitle}>{category}</h3>
-              <div className={styles.badgesGrid}>
-                {categoryBadges.map(badge => (
-                  <div
-                    key={badge.id}
-                    className={`${styles.badgeCard} ${badge.earned ? styles.earned : styles.locked} ${styles[badge.rarity || 'common']}`}
-                    onMouseEnter={() => setHoveredBadge(badge)}
-                    onMouseLeave={() => setHoveredBadge(null)}
-                  >
-                    <div className={styles.badgeIconContainer}>
-                      <div className={`${styles.badgeIcon} ${badge.earned ? styles.unlocked : ''}`}>
-                        {badge.earned ? badge.emoji : '🔒'}
-                      </div>
-                      {badge.earned && (
-                        <div className={styles.badgeGlow}></div>
-                      )}
-                      {!badge.earned && (
-                        <div className={`${styles.rarityIndicator} ${styles[badge.rarity || 'common']}`}></div>
-                      )}
+      <div className={styles.modalBody}>
+        {Object.entries(badgesByCategory).map(([category, categoryBadges]) => (
+          <div key={category} className={styles.badgeCategory}>
+            <h3 className={styles.categoryTitle}>{category}</h3>
+            <div className={styles.badgesGrid}>
+              {categoryBadges.map(badge => (
+                <div
+                  key={badge.id}
+                  className={`${styles.badgeCard} ${badge.earned ? styles.earned : styles.locked} ${styles[badge.rarity || 'common']}`}
+                  onMouseEnter={() => setHoveredBadge(badge)}
+                  onMouseLeave={() => setHoveredBadge(null)}
+                >
+                  <div className={styles.badgeIconContainer}>
+                    <div className={`${styles.badgeIcon} ${badge.earned ? styles.unlocked : ''}`}>
+                      {badge.earned ? badge.emoji : '🔒'}
                     </div>
-                    
-                    <div className={styles.badgeInfo}>
-                      <h4 className={styles.badgeTitle}>
-                        {badge.title}
-                        {badge.completionCount > 1 && (
-                          <span className={styles.completionCount}>×{badge.completionCount}</span>
-                        )}
-                      </h4>
-                      <p className={styles.badgeDescription}>{badge.description}</p>
-                      {!badge.earned && (
-                        <div className={styles.badgeProgress}>
-                          <div className={styles.progressLabel}>Locked</div>
-                        </div>
-                      )}
-                      {badge.earned && badge.displayText && (
-                        <div className={styles.completionInfo}>
-                          <div className={styles.completionText}>{badge.displayText}</div>
-                        </div>
-                      )}
-                    </div>
-
                     {badge.earned && (
-                      <div className={styles.earnedIndicator}>
-                        <div className={styles.checkmark}>✓</div>
+                      <div className={styles.badgeGlow}></div>
+                    )}
+                    {!badge.earned && (
+                      <div className={`${styles.rarityIndicator} ${styles[badge.rarity || 'common']}`}></div>
+                    )}
+                  </div>
+                  
+                  <div className={styles.badgeInfo}>
+                    <h4 className={styles.badgeTitle}>
+                      {badge.title}
+                      {badge.completionCount > 1 && (
+                        <span className={styles.completionCount}>×{badge.completionCount}</span>
+                      )}
+                    </h4>
+                    <p className={styles.badgeDescription}>{badge.description}</p>
+                    {!badge.earned && (
+                      <div className={styles.badgeProgress}>
+                        <div className={styles.progressLabel}>Locked</div>
+                      </div>
+                    )}
+                    {badge.earned && badge.displayText && (
+                      <div className={styles.completionInfo}>
+                        <div className={styles.completionText}>{badge.displayText}</div>
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Hover Tooltip */}
-        {hoveredBadge && (
-          <div className={styles.hoverTooltip}>
-            <div className={styles.tooltipHeader}>
-              <span className={styles.tooltipEmoji}>{hoveredBadge.earned ? hoveredBadge.emoji : '🔒'}</span>
-              <div>
-                <h4>{hoveredBadge.title}</h4>
-                <span className={`${styles.rarityTag} ${styles[hoveredBadge.rarity || 'common']}`}>
-                  {hoveredBadge.rarity ? hoveredBadge.rarity.charAt(0).toUpperCase() + hoveredBadge.rarity.slice(1) : 'Common'}
-                </span>
-              </div>
+                  {badge.earned && (
+                    <div className={styles.earnedIndicator}>
+                      <div className={styles.checkmark}>✓</div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-            <p className={styles.tooltipDescription}>{hoveredBadge.description}</p>
-            {hoveredBadge.earned ? (
-              <div className={styles.tooltipStatus}>
-                <span className={styles.statusEarned}>✨ Achieved!</span>
-                {hoveredBadge.displayText && (
-                  <div className={styles.completionDetails}>{hoveredBadge.displayText}</div>
-                )}
-              </div>
-            ) : (
-              <div className={styles.tooltipStatus}>
-                <span className={styles.statusLocked}>🔒 Not yet unlocked</span>
-              </div>
-            )}
           </div>
-        )}
+        ))}
       </div>
+
+      {/* Hover Tooltip */}
+      {hoveredBadge && (
+        <div className={styles.hoverTooltip}>
+          <div className={styles.tooltipHeader}>
+            <span className={styles.tooltipEmoji}>{hoveredBadge.earned ? hoveredBadge.emoji : '🔒'}</span>
+            <div>
+              <h4>{hoveredBadge.title}</h4>
+              <span className={`${styles.rarityTag} ${styles[hoveredBadge.rarity || 'common']}`}>
+                {hoveredBadge.rarity ? hoveredBadge.rarity.charAt(0).toUpperCase() + hoveredBadge.rarity.slice(1) : 'Common'}
+              </span>
+            </div>
+          </div>
+          <p className={styles.tooltipDescription}>{hoveredBadge.description}</p>
+          {hoveredBadge.earned ? (
+            <div className={styles.tooltipStatus}>
+              <span className={styles.statusEarned}>✨ Achieved!</span>
+              {hoveredBadge.displayText && (
+                <div className={styles.completionDetails}>{hoveredBadge.displayText}</div>
+              )}
+            </div>
+          ) : (
+            <div className={styles.tooltipStatus}>
+              <span className={styles.statusLocked}>🔒 Not yet unlocked</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  if (isFullPage) {
+    return content;
+  }
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      {content}
     </div>
   );
 };

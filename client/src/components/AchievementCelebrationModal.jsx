@@ -185,8 +185,8 @@ const AchievementCelebrationModal = ({ achievement, isOpen, onClose }) => {
             className={styles.continueButton}
             onClick={handleClose}
           >
-            Continue Building
             <span>🚀</span>
+            Continue Tracking Habits
           </button>
         </div>
 

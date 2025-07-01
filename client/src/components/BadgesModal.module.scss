@@ -130,6 +130,15 @@
   padding: 32px 40px;
   overflow-y: auto;
   max-height: calc(85vh - 120px);
+  -webkit-overflow-scrolling: touch; // iOS momentum scrolling
+  scroll-behavior: smooth;
+  
+  // Ensure content can be scrolled to bottom
+  &:after {
+    content: '';
+    display: block;
+    height: 1px;
+  }
 }
 
 .badgeCategory {
@@ -547,20 +556,27 @@
 // Responsive design
 @media (max-width: 768px) {
   .modalOverlay {
-    padding: 10px;
+    padding: 8px;
+    align-items: flex-start;
+    padding-top: max(20px, env(safe-area-inset-top, 20px));
+    padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
   }
 
   .modalContent {
-    width: 95vw;
-    max-height: 90vh;
+    width: calc(100vw - 16px);
+    max-height: none;
+    min-height: calc(100vh - 40px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     border-radius: 20px;
+    display: flex;
+    flex-direction: column;
   }
 
   .modalHeader {
-    padding: 24px 20px;
+    padding: 20px 20px 16px;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     text-align: center;
+    flex-shrink: 0;
 
     .headerContent h2 {
       font-size: 1.5rem;
@@ -568,7 +584,20 @@
   }
 
   .modalBody {
-    padding: 24px 20px;
+    padding: 16px 20px 24px;
+    flex: 1;
+    overflow-y: auto;
+    max-height: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    
+    // Better touch scrolling on iOS
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    
+    // Ensure content can scroll to bottom with extra padding
+    padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
   }
 
   .badgesGrid {
@@ -578,14 +607,46 @@
 
   .badgeCard {
     padding: 20px;
+    
+    // Disable hover effects on mobile
+    &:hover {
+      transform: none;
+      box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
   }
 
   .hoverTooltip {
     position: fixed;
-    bottom: 20px;
+    bottom: max(20px, env(safe-area-inset-bottom, 20px));
     left: 20px;
     right: 20px;
     top: auto;
     max-width: none;
   }
+  
+  // Better category spacing on mobile
+  .badgeCategory {
+    margin-bottom: 32px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Full page styles
+.modalContent.fullPage {
+  position: static !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  max-width: none !important;
+  max-height: none !important;
+  transform: none !important;
+  width: 100%;
+  height: auto;
 } 

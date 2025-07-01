@@ -1,11 +1,24 @@
-import { useState } from 'react';
-import { signInWithGoogle } from '../services/firebase';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { signInWithGoogle, onAuthChange } from '../services/firebase';
 import ThemeToggle from './ThemeToggle';
 import AnimatedCalendar from './AnimatedCalendar';
 import styles from './LandingPage.module.scss';
 
 const LandingPage = () => {
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const navigate = useNavigate();
+
+  // Redirect authenticated users to calendar
+  useEffect(() => {
+    const unsubscribe = onAuthChange((user) => {
+      if (user) {
+        navigate('/calendar');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
 
   const handleGetStarted = async () => {
     setIsSigningIn(true);
