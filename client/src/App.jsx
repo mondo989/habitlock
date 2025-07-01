@@ -95,6 +95,7 @@ function AppLayout({ children }) {
             <h1>HabitLock</h1>
           </div>
           
+          {/* Desktop Navigation Tabs */}
           <div className={styles.navTabs}>
             <button
               className={`${styles.navTab} ${currentView === 'calendar' ? styles.active : ''}`}
@@ -171,6 +172,31 @@ function AppLayout({ children }) {
             </div>
           </div>
         </div>
+      </nav>
+
+      {/* Mobile Navigation Tabs */}
+      <nav className={styles.mobileNavTabs}>
+        <button
+          className={`${styles.mobileNavTab} ${currentView === 'calendar' ? styles.active : ''}`}
+          onClick={() => navigate('/calendar')}
+        >
+          <span className={styles.mobileTabIcon}>📅</span>
+          <span className={styles.mobileTabText}>Calendar</span>
+        </button>
+        <button
+          className={`${styles.mobileNavTab} ${currentView === 'stats' ? styles.active : ''}`}
+          onClick={() => navigate('/stats')}
+        >
+          <span className={styles.mobileTabIcon}>📊</span>
+          <span className={styles.mobileTabText}>Stats</span>
+        </button>
+        <button
+          className={`${styles.mobileNavTab} ${currentView === 'achievements' ? styles.active : ''}`}
+          onClick={() => navigate('/achievements')}
+        >
+          <span className={styles.mobileTabIcon}>🏆</span>
+          <span className={styles.mobileTabText}>Achievements</span>
+        </button>
       </nav>
 
       {/* Main Content */}

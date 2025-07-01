@@ -190,6 +190,66 @@
   }
 }
 
+// Mobile Navigation Tabs (hidden on desktop, shown on mobile)
+.mobileNavTabs {
+  display: none;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 64px;
+  z-index: 90;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.mobileNavTab {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  position: relative;
+  min-height: 60px;
+
+  &:hover {
+    background: #f8fafc;
+    color: #374151;
+  }
+
+  &.active {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.03);
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #3b82f6;
+      border-radius: 3px 3px 0 0;
+    }
+  }
+}
+
+.mobileTabIcon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.mobileTabText {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
 .navActions {
   display: flex;
   align-items: center;
@@ -344,8 +404,6 @@
   opacity: 0.8;
 }
 
-
-
 .userStatus {
   display: flex;
   align-items: center;
@@ -445,13 +503,15 @@
     height: 28px;
   }
 
+  // Hide desktop navigation tabs on mobile
   .navTabs {
-    gap: 4px;
+    display: none;
   }
 
-  .navTab {
-    padding: 6px 12px;
-    font-size: 0.75rem;
+  // Show mobile navigation tabs
+  .mobileNavTabs {
+    display: flex;
+    top: 56px;
   }
 
   .navActions {
@@ -560,21 +620,22 @@
     height: 24px;
   }
 
-  .navTabs {
-    gap: 2px;
-    flex: 1;
-    justify-content: center;
-    max-width: 200px;
+  .mobileNavTabs {
+    top: 48px;
   }
 
-  .navTab {
-    padding: 4px 8px;
+  .mobileNavTab {
+    padding: 10px 6px;
+    gap: 3px;
+    min-height: 56px;
+  }
+
+  .mobileTabIcon {
+    font-size: 1.125rem;
+  }
+
+  .mobileTabText {
     font-size: 0.6875rem;
-    border-radius: 4px;
-    flex: 1;
-    text-align: center;
-    min-width: 0;
-    white-space: nowrap;
   }
 
   .navActions {
@@ -625,13 +686,21 @@
     font-size: 1.125rem;
   }
 
-  .navTabs {
-    gap: 1px;
-    max-width: 160px;
+  .mobileNavTabs {
+    top: 44px;
   }
 
-  .navTab {
-    padding: 3px 6px;
+  .mobileNavTab {
+    padding: 8px 4px;
+    gap: 2px;
+    min-height: 52px;
+  }
+
+  .mobileTabIcon {
+    font-size: 1rem;
+  }
+
+  .mobileTabText {
     font-size: 0.625rem;
   }
 
@@ -716,6 +785,30 @@
     }
   }
 
+  // Mobile navigation dark mode
+  .mobileNavTabs {
+    background: #1f2937;
+    border-bottom-color: #374151;
+  }
+
+  .mobileNavTab {
+    color: #d1d5db;
+
+    &:hover {
+      background: #374151;
+      color: #f9fafb;
+    }
+
+    &.active {
+      color: #60a5fa;
+      background: rgba(96, 165, 250, 0.08);
+      
+      &::after {
+        background: #60a5fa;
+      }
+    }
+  }
+
   .navTab {
     color: #d1d5db;
 
@@ -791,8 +884,6 @@
       background: #991b1b;
     }
   }
-
-
 
   .userStatus {
     color: #10b981;
