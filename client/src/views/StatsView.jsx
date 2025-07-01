@@ -8,6 +8,13 @@ import {
 } from '../utils/streakUtils';
 import { getWeekBoundaries } from '../utils/dateUtils';
 import BadgesModal from '../components/BadgesModal';
+import { 
+  checkAndUpdateAchievements, 
+  getUserAchievements, 
+  backfillUserAchievements,
+  mergeAchievementsWithBadgeData 
+} from '../services/achievements';
+import { getUserInfo } from '../services/firebase';
 import styles from './StatsView.module.scss';
 
 const StatsView = () => {
@@ -15,6 +22,8 @@ const StatsView = () => {
   const { calendarEntries, streaks, loading: calendarLoading } = useCalendar(habits);
   const [activeTooltip, setActiveTooltip] = useState(null);
   const [isBadgesModalOpen, setIsBadgesModalOpen] = useState(false);
+  const [firebaseAchievements, setFirebaseAchievements] = useState({});
+  const [achievementsLoading, setAchievementsLoading] = useState(true);
 
   const loading = habitsLoading || calendarLoading;
 
@@ -337,7 +346,54 @@ const StatsView = () => {
     // Take top 8 for desktop, 9 for mobile (responsive handled via CSS)
     const featured = sortedBadges.slice(0, 9);
 
-    return { featured, all: allBadges };
+    // Merge with Firebase achievement data
+    const featuredWithAchievements = mergeAchievementsWithBadgeData(featured, firebaseAchievements);
+    const allWithAchievements = mergeAchievementsWithBadgeData(allBadges, firebaseAchievements);
+
+    return { 
+      featured: featuredWithAchievements, 
+      all: allWithAchievements 
+    };
+  }, [statsData, firebaseAchievements]);
+
+  // Load and update achievements when stats data changes
+  useEffect(() => {
+    const loadAchievements = async () => {
+      const userInfo = getUserInfo();
+      if (!userInfo?.uid || !statsData || statsData.length === 0) {
+        setAchievementsLoading(false);
+        return;
+      }
+
+      try {
+        setAchievementsLoading(true);
+        
+        // Check for existing achievements
+        let achievements = await getUserAchievements(userInfo.uid);
+        
+        // Backfill if no achievements exist
+        if (Object.keys(achievements).length === 0) {
+          console.log('No achievements found, backfilling...');
+          achievements = await backfillUserAchievements(userInfo.uid, statsData);
+        }
+        
+        // Check for new achievements based on current stats
+        const { newCompletions, allAchievements } = await checkAndUpdateAchievements(userInfo.uid, statsData);
+        
+        if (newCompletions.length > 0) {
+          console.log('New achievements earned:', newCompletions.map(a => a.title));
+          // Could show a celebration notification here
+        }
+        
+        setFirebaseAchievements(allAchievements);
+      } catch (error) {
+        console.error('Error loading achievements:', error);
+      } finally {
+        setAchievementsLoading(false);
+      }
+    };
+
+    loadAchievements();
   }, [statsData]);
 
   if (loading) {
@@ -413,7 +469,7 @@ const StatsView = () => {
                 key={badge.id} 
                 className={`${styles.achievementBadge} ${badge.earned ? styles.earned : styles.inProgress} ${!badge.earned ? styles.clickable : ''}`}
                 onClick={!badge.earned ? () => setIsBadgesModalOpen(true) : undefined}
-                title={!badge.earned ? 'Click to view all badges and see how to unlock this achievement' : ''}
+                title={badge.displayText || (!badge.earned ? 'Click to view all badges and see how to unlock this achievement' : '')}
               >
                 <div className={styles.badgeEmoji}>
                   {badge.earned ? badge.emoji : '🔒'}
@@ -421,6 +477,21 @@ const StatsView = () => {
                 <div className={styles.badgeInfo}>
                   <h4>{badge.title}</h4>
                   <p>{badge.desc}</p>
+                  {badge.earned && badge.achievement && (
+                    <div className={styles.completionDate}>
+                      {badge.achievement.completionCount > 1 
+                        ? `${badge.title} ×${badge.achievement.completionCount}` 
+                        : `Earned on ${new Intl.DateTimeFormat('en-US', {
+                            month: 'long',
+                            day: 'numeric', 
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          }).format(badge.achievement.lastCompletedAt.toDate ? badge.achievement.lastCompletedAt.toDate() : new Date(badge.achievement.lastCompletedAt))}`
+                      }
+                    </div>
+                  )}
                   {!badge.earned && badge.progress > 0 && (
                     <div className={styles.progressInfo}>
                       <div className={styles.progressBar}>

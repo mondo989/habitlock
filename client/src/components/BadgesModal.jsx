@@ -1,8 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { mergeAchievementsWithBadgeData, getUserAchievements } from '../services/achievements';
+import { getUserInfo } from '../services/firebase';
 import styles from './BadgesModal.module.scss';
 
 const BadgesModal = ({ isOpen, onClose, statsData, badgeData }) => {
   const [hoveredBadge, setHoveredBadge] = useState(null);
+  const [firebaseAchievements, setFirebaseAchievements] = useState({});
 
   // Comprehensive badge definitions with requirements
   const badgeDefinitions = [
@@ -190,22 +193,43 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData }) => {
     },
   ];
 
+  // Load Firebase achievements
+  useEffect(() => {
+    const loadAchievements = async () => {
+      if (!isOpen) return;
+      
+      const userInfo = getUserInfo();
+      if (userInfo?.uid) {
+        try {
+          const achievements = await getUserAchievements(userInfo.uid);
+          setFirebaseAchievements(achievements);
+        } catch (error) {
+          console.error('Error loading achievements in modal:', error);
+        }
+      }
+    };
+
+    loadAchievements();
+  }, [isOpen]);
+
   // Calculate earned badges
   const badges = useMemo(() => {
     // If badgeData is provided, use it directly
     if (badgeData && badgeData.length > 0) {
-      return badgeData;
+      return mergeAchievementsWithBadgeData(badgeData, firebaseAchievements);
     }
     
     // Fallback to old calculation method
     if (!statsData) return [];
     
-    return badgeDefinitions.map(badge => ({
+    const calculatedBadges = badgeDefinitions.map(badge => ({
       ...badge,
       earned: badge.requirement(statsData),
       progress: badge.earned ? 100 : 0 // Could add more sophisticated progress calculation
     }));
-  }, [statsData, badgeData]);
+
+    return mergeAchievementsWithBadgeData(calculatedBadges, firebaseAchievements);
+  }, [statsData, badgeData, firebaseAchievements]);
 
   // Group badges by category
   const badgesByCategory = useMemo(() => {
@@ -271,11 +295,21 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData }) => {
                     </div>
                     
                     <div className={styles.badgeInfo}>
-                      <h4 className={styles.badgeTitle}>{badge.title}</h4>
+                      <h4 className={styles.badgeTitle}>
+                        {badge.title}
+                        {badge.completionCount > 1 && (
+                          <span className={styles.completionCount}>×{badge.completionCount}</span>
+                        )}
+                      </h4>
                       <p className={styles.badgeDescription}>{badge.description}</p>
                       {!badge.earned && (
                         <div className={styles.badgeProgress}>
                           <div className={styles.progressLabel}>Locked</div>
+                        </div>
+                      )}
+                      {badge.earned && badge.displayText && (
+                        <div className={styles.completionInfo}>
+                          <div className={styles.completionText}>{badge.displayText}</div>
                         </div>
                       )}
                     </div>
@@ -308,6 +342,9 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData }) => {
             {hoveredBadge.earned ? (
               <div className={styles.tooltipStatus}>
                 <span className={styles.statusEarned}>✨ Achieved!</span>
+                {hoveredBadge.displayText && (
+                  <div className={styles.completionDetails}>{hoveredBadge.displayText}</div>
+                )}
               </div>
             ) : (
               <div className={styles.tooltipStatus}>

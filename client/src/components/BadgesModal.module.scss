@@ -316,6 +316,19 @@
   font-weight: 700;
   color: #1f2937;
   margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.completionCount {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .badgeDescription {
@@ -332,6 +345,21 @@
     color: #9ca3af;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+  }
+}
+
+.completionInfo {
+  margin-top: 8px;
+  
+  .completionText {
+    font-size: 0.75rem;
+    color: #10b981;
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    white-space: pre-line;
   }
 }
 
@@ -422,6 +450,18 @@
     font-weight: 500;
     font-size: 0.875rem;
   }
+}
+
+.completionDetails {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #d1d5db;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: pre-line;
 }
 
 // Animations
