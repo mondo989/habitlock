@@ -1,6 +1,6 @@
 .calendarView {
   min-height: 100vh;
-  background: #fafbfc;
+  background: #f8fafc;
   padding: 32px;
   display: flex;
   flex-direction: column;
@@ -564,7 +564,7 @@
 // Dark mode styles
 :global(html.dark-mode) {
   .calendarView {
-    background: #0f1419;
+    background: #1a1f2e;
   }
 
   .loading, .error {

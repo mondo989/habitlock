@@ -6,7 +6,7 @@
   padding: 16px 14px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  background: white;
+  background: rgba(255, 255, 255, 0.8);
   display: flex;
   flex-direction: column;
   overflow: visible;
@@ -18,7 +18,7 @@
 
   &.otherMonth {
     opacity: 0.35;
-    background: rgba(248, 250, 252, 0.5);
+    background: rgba(248, 250, 252, 0.3);
 
     .dayNumber {
       color: #cbd5e1;
@@ -26,7 +26,7 @@
   }
 
   &.today {
-    background: rgba(59, 130, 246, 0.03);
+    background: rgba(59, 130, 246, 0.05);
     
     &::before {
       content: '';
@@ -50,6 +50,7 @@
   }
 
   &.hasCompletions {
+    background: transparent !important;
     color: white;
 
     .dayNumber {
@@ -163,72 +164,78 @@
   }
 }
 
-// Animated gradient class
+// Animated gradient class - optimized for background animations
 .animatedGradient {
-  background: var(--gradient0) !important;
-  will-change: background, transform;
+  background: var(--gradient-background) !important;
+  will-change: background-position, background-size;
+  animation: var(--gradient-animation);
+  animation-delay: var(--gradient-animation-delay);
+  background-size: 300% 300%;
+  background-position: 0% 50%;
+  
+  // Ensure smooth rendering
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-// 1. Smooth Flow - Ultra-smooth gradient transitions with seamless color blending
-@keyframes smoothFlow {
+// 1. Gradient Flow - Smooth background position movement
+@keyframes gradientFlow {
   0% { 
-    background: var(--gradient0);
-    background-size: 250% 250%;
-    background-position: 0% 50%;
-    transform: scale(var(--scale-variation, 1));
-    filter: blur(0px) saturate(1);
-  }
-  33% { 
-    background: var(--gradient1);
+    background-position: -50% 50%;
     background-size: 300% 300%;
-    background-position: 50% 0%;
-    transform: scale(calc(var(--scale-variation, 1) * 1.005));
-    filter: blur(0.5px) saturate(1.1);
-  }
-  66% { 
-    background: var(--gradient2);
-    background-size: 250% 250%;
-    background-position: 100% 50%;
-    transform: scale(calc(var(--scale-variation, 1) * 0.995));
-    filter: blur(0px) saturate(0.9);
-  }
-  100% { 
-    background: var(--gradient0);
-    background-size: 250% 250%;
-    background-position: 0% 50%;
-    transform: scale(var(--scale-variation, 1));
-    filter: blur(0px) saturate(1);
-  }
-}
-
-// 2. Gentle Pulse - Soft breathing effect with natural color flow
-@keyframes gentlePulse {
-  0% { 
-    background: var(--gradient0);
-    background-size: 180% 180%;
-    background-position: center center;
-    transform: scale(var(--scale-variation, 1));
-    filter: brightness(1) contrast(1);
   }
   50% { 
-    background: var(--gradient1);
-    background-size: 220% 220%;
-    background-position: center center;
-    transform: scale(calc(var(--scale-variation, 1) * 1.01));
-    filter: brightness(1.05) contrast(1.02);
+    background-position: 150% 50%;
+    background-size: 350% 350%;
   }
   100% { 
-    background: var(--gradient0);
-    background-size: 180% 180%;
-    background-position: center center;
-    transform: scale(var(--scale-variation, 1));
-    filter: brightness(1) contrast(1);
+    background-position: -50% 50%;
+    background-size: 300% 300%;
   }
 }
 
-// Simple performance-focused animations with smooth transitions
-.animatedGradient {
-  transition: background 0.5s ease-in-out, opacity 0.3s ease-in-out;
+// 2. Gradient Shift - Diagonal gradient movement
+@keyframes gradientShift {
+  0% { 
+    background-position: -30% -30%;
+    background-size: 300% 300%;
+  }
+  25% { 
+    background-position: 130% -30%;
+    background-size: 350% 350%;
+  }
+  50% { 
+    background-position: 130% 130%;
+    background-size: 400% 400%;
+  }
+  75% { 
+    background-position: -30% 130%;
+    background-size: 350% 350%;
+  }
+  100% { 
+    background-position: -30% -30%;
+    background-size: 300% 300%;
+  }
+}
+
+// 3. Gradient Pulse - Gentle size and position animation
+@keyframes gradientPulse {
+  0% { 
+    background-size: 250% 250%;
+    background-position: 50% 50%;
+  }
+  33% { 
+    background-size: 350% 350%;
+    background-position: 20% 80%;
+  }
+  66% { 
+    background-size: 300% 300%;
+    background-position: 80% 20%;
+  }
+  100% { 
+    background-size: 250% 250%;
+    background-position: 50% 50%;
+  }
 }
 
 // Sequential loading animations for beautiful page load experience
@@ -236,38 +243,39 @@
   animation: cellFadeIn 0.4s ease-out var(--loading-delay, 0s) both;
   
   &.hasCompletions {
-          animation: 
+    animation: 
+      cellFadeIn 0.4s ease-out var(--loading-delay, 0s) both,
+      backgroundGlow 0.6s ease-out var(--background-delay, 0.1s) both;
+    
+    &.animatedGradient {
+      background: transparent !important;
+      opacity: 0;
+      animation: 
         cellFadeIn 0.4s ease-out var(--loading-delay, 0s) both,
-        backgroundGlow 0.6s ease-out var(--background-delay, 0.1s) both;
+        gradientReveal 0.6s ease-out var(--background-delay, 0.1s) both;
       
-      &.animatedGradient {
-        background: transparent !important;
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--gradient-background);
+        border-radius: inherit;
         opacity: 0;
+        z-index: -1;
         animation: 
-          cellFadeIn 0.4s ease-out var(--loading-delay, 0s) both,
-          gradientReveal 0.6s ease-out var(--background-delay, 0.1s) both;
-        
-        &::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: var(--gradient-background);
-          border-radius: inherit;
-          opacity: 0;
-          animation: 
-            gradientFadeIn 0.6s ease-out var(--background-delay, 0.1s) both,
-            var(--gradient-animation);
-          animation-delay: 
-            var(--background-delay, 0.1s),
-            var(--gradient-animation-delay);
-          z-index: -1;
-        }
+                  gradientFadeIn 0.6s ease-out var(--background-delay, 0.1s) both,
+        var(--gradient-animation);
+      animation-delay: 
+        var(--background-delay, 0.1s),
+        var(--gradient-animation-delay);
+      will-change: background-position, background-size, opacity;
+      background-size: 200% 200%;
+      background-position: 0% 50%;
       }
-    
-    
+    }
   }
 }
 
@@ -317,8 +325,6 @@
     opacity: var(--final-opacity, 1);
   }
 }
-
-
 
 @keyframes emojiPopIn {
   0% {
@@ -439,10 +445,10 @@
 // Dark mode styles
 :global(html.dark-mode) {
   .calendarCell {
-    background: #1a1d23;
+    background: rgba(31, 41, 55, 0.4);
 
     &.otherMonth {
-      background: rgba(17, 24, 39, 0.5);
+      background: rgba(17, 24, 39, 0.2);
 
       .dayNumber {
         color: #4b5563;
@@ -450,7 +456,7 @@
     }
 
     &.today {
-      background: rgba(59, 130, 246, 0.08);
+      background: rgba(59, 130, 246, 0.1);
 
       &::before {
         border-color: #3b82f6;
@@ -463,6 +469,8 @@
     }
 
     &.hasCompletions {
+      background: transparent !important;
+      
       .dayNumber {
         color: white;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);

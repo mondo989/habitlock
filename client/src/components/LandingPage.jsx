@@ -119,7 +119,7 @@ const LandingPage = () => {
                 ) : (
                   <>
                     <span className={styles.ctaIcon}>🚀</span>
-                    Start building better habits
+                    Sign In with Google
                   </>
                 )}
               </button>

@@ -2,6 +2,14 @@ import { useMemo } from 'react';
 import Tooltip from './Tooltip';
 import styles from './CalendarCell.module.scss';
 
+// Helper function to get day of year
+const getDayOfYear = (date) => {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  return Math.floor(diff / oneDay);
+};
+
 const CalendarCell = ({ 
   day, 
   habits, 
@@ -45,149 +53,146 @@ const CalendarCell = ({
     if (completedHabitDetails.length === 1) {
       const habit = completedHabitDetails[0];
       const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
+      // Ensure we have a valid color, fallback to a default if needed
+      const validColor = habit.color && habit.color.startsWith('#') && habit.color.length >= 7 ? habit.color : '#3b82f6';
+      
+      // Even single habits should get animated gradients for consistency
+      const seedHash = Math.abs((habit.id + date).split('').reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0));
+      const rng = {
+        next: () => Math.sin(seedHash) * 10000 - Math.floor(Math.sin(seedHash) * 10000),
+        range: (min, max) => min + (Math.sin(seedHash) * 10000 - Math.floor(Math.sin(seedHash) * 10000)) * (max - min),
+        int: (min, max) => Math.floor(min + (Math.sin(seedHash) * 10000 - Math.floor(Math.sin(seedHash) * 10000)) * (max - min))
+      };
+      
+      const color1 = hasMetGoal ? validColor : `${validColor}CC`;
+      const color2 = hasMetGoal ? `${validColor}DD` : `${validColor}99`;
+      
+      // Create a subtle gradient even for single habits
+      const angle = (seedHash % 360);
+      const primaryGradient = `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 50%, ${color1} 100%)`;
+      
+      const animationTypes = ['gradientFlow', 'gradientShift', 'gradientPulse'];
+      const animationType = animationTypes[seedHash % animationTypes.length];
+      const animationDuration = 10 + (seedHash % 8); // 10-18 seconds
+      const animationDelay = (seedHash % 3);
+      
       return {
         ...loadingAnimationStyle,
-        backgroundColor: hasMetGoal ? habit.color : `${habit.color}40`,
+        '--gradient-background': primaryGradient,
+        '--gradient-animation': `${animationType} ${animationDuration}s ease-in-out infinite`,
+        '--gradient-animation-delay': `calc(var(--background-delay, 0.1s) + ${animationDelay}s)`,
+        willChange: 'background-position, background-size',
       };
     }
 
-    // Multiple habits - create smooth animated gradients with dynamic opacity
-    // Calculate completion percentage for opacity scaling
-    const totalHabits = habits.length;
-    const completedCount = completedHabitDetails.length;
-    const completionPercentage = totalHabits > 0 ? completedCount / totalHabits : 0;
-    
-    // Base opacity starts lower and scales with completion
-    // 30% base opacity, scaling up to 100% when all habits complete
-    const baseOpacity = 0.3 + (completionPercentage * 0.7); // 0.3 to 1.0
-    
+    // Multiple habits - create clean animated gradients using only habit colors
     const colors = completedHabitDetails.map(habit => {
       const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
-      // Use the calculated opacity for non-goal habits, full color for goal-met habits
-      const opacity = hasMetGoal ? 1.0 : baseOpacity;
-      const hexOpacity = Math.floor(opacity * 255).toString(16).padStart(2, '0');
-      return hasMetGoal ? habit.color : `${habit.color}${hexOpacity}`;
-    });
+      // Ensure we have a valid color, fallback to a default if needed
+      const validColor = habit.color && habit.color.startsWith('#') && habit.color.length >= 7 ? habit.color : '#3b82f6';
+      return hasMetGoal ? validColor : `${validColor}CC`; // Use high opacity instead of low
+    }).filter(color => color && color !== '#000000'); // Remove any invalid or black colors
 
-    // Create a unique hash based on habit combination + date for deterministic randomness
-    const habitHash = completedHabitDetails
-      .map(h => h.id + h.emoji + h.color)
-      .join('')
-      .split('')
-      .reduce((a, b) => a + b.charCodeAt(0), 0);
+    // Create unique seed for consistent animations
+    const habitSignature = completedHabitDetails
+      .map(h => `${h.id}-${h.color}`)
+      .sort()
+      .join('|');
     
-    const dateHash = date.split('-').reduce((a, b) => a + parseInt(b), 0);
-    const combinedHash = habitHash + dateHash;
-
-    // Generate random but deterministic values for this specific combination
-    const seed = combinedHash;
-    const random = (min, max, offset = 0) => {
-      const val = Math.sin(seed + offset) * 10000;
-      return min + ((val - Math.floor(val)) * (max - min));
+    const dateNumbers = date.split('-').map(n => parseInt(n));
+    const dayOfYear = getDayOfYear(new Date(dateNumbers[0], dateNumbers[1] - 1, dateNumbers[2]));
+    
+    const createHash = (str) => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return Math.abs(hash);
     };
-
-    // Create ultra-smooth gradient blends with seamless color transitions
-    const gradientVariations = [];
     
-    // Helper function to create perfectly smooth color transitions with no hard lines
-    const createSmoothGradient = (colors, type = 'linear') => {
-      if (colors.length === 2) {
-        // Two colors: create perfect blend
-        const [color1, color2] = colors;
-        if (type === 'radial') {
-          return `radial-gradient(circle at center, ${color1} 0%, ${color2} 100%)`;
-        } else if (type === 'conic') {
-          return `conic-gradient(from 0deg at center, ${color1} 0%, ${color2} 50%, ${color1} 100%)`;
-        }
-        return `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
+    const seedHash = createHash(habitSignature + date);
+    
+    // Simple seeded random
+    class SeededRandom {
+      constructor(seed) {
+        this.seed = seed % 2147483647;
+        if (this.seed <= 0) this.seed += 2147483646;
       }
       
-      // Multiple colors: create seamless transitions with natural spacing
-      const step = 100 / (colors.length - 1);
-      const smoothStops = colors.map((color, i) => {
-        const position = i * step;
-        return `${color} ${position}%`;
-      }).join(', ');
+      next() {
+        this.seed = (this.seed * 16807) % 2147483647;
+        return (this.seed - 1) / 2147483646;
+      }
       
-      if (type === 'radial') {
-        const centerX = Math.floor(random(40, 60, 20));
-        const centerY = Math.floor(random(40, 60, 21));
-        return `radial-gradient(ellipse 150% 120% at ${centerX}% ${centerY}%, ${smoothStops})`;
-      } else if (type === 'conic') {
-        // For conic, add the first color at the end to create seamless loop
-        const conicStops = [...colors, colors[0]];
-        const conicStep = 100 / (conicStops.length - 1);
-        const conicSmoothStops = conicStops.map((color, i) => {
-          const position = i * conicStep;
+      range(min, max) {
+        return min + this.next() * (max - min);
+      }
+      
+      int(min, max) {
+        return Math.floor(this.range(min, max));
+      }
+    }
+    
+    const rng = new SeededRandom(seedHash);
+
+    // Safety check - if no valid colors, use default
+    if (colors.length === 0) {
+      colors.push('#3b82f6');
+    }
+
+    // Create simple, beautiful gradients using only habit colors
+    const gradientTypes = [
+      // Clean linear gradient
+      () => {
+        const angle = rng.int(0, 360);
+        const stops = colors.map((color, i) => {
+          const position = i * (100 / (colors.length - 1));
           return `${color} ${position}%`;
         }).join(', ');
-        return `conic-gradient(from ${Math.floor(random(0, 360, 30))}deg at center, ${conicSmoothStops})`;
-      }
+        return `linear-gradient(${angle}deg, ${stops})`;
+      },
       
-      const angle = Math.floor(random(45, 135, 1));
-      return `linear-gradient(${angle}deg, ${smoothStops})`;
-    };
+      // Radial gradient
+      () => {
+        const centerX = rng.int(30, 70);
+        const centerY = rng.int(30, 70);
+        const stops = colors.map((color, i) => {
+          const position = i * (100 / (colors.length - 1));
+          return `${color} ${position}%`;
+        }).join(', ');
+        return `radial-gradient(ellipse at ${centerX}% ${centerY}%, ${stops})`;
+      },
+      
+      // Conic gradient
+      () => {
+        const rotation = rng.int(0, 360);
+        const stops = colors.map((color, i) => {
+          const position = i * (360 / colors.length);
+          return `${color} ${position}deg`;
+        }).join(', ');
+        return `conic-gradient(from ${rotation}deg, ${stops})`;
+      }
+    ];
     
-    // Pattern 1: Smooth linear gradient with natural angle
-    gradientVariations.push(createSmoothGradient(colors, 'linear'));
+    const gradientType = gradientTypes[rng.int(0, gradientTypes.length)];
+    const primaryGradient = gradientType();
     
-    // Pattern 2: Soft radial gradient with natural positioning
-    gradientVariations.push(createSmoothGradient(colors, 'radial'));
-    
-    // Pattern 3: Gentle conic gradient with seamless color loop
-    gradientVariations.push(createSmoothGradient(colors, 'conic'));
-    
-    // Pattern 4: Layered gradient with transparency blend
-    const layeredAngle = Math.floor(random(90, 270, 40));
-    const layeredColors = colors.map((color, i) => {
-      const position = (i / (colors.length - 1)) * 100;
-      const opacity = baseOpacity * (0.6 + (0.4 * (i / colors.length)));
-      const hexOpacity = Math.floor(opacity * 255).toString(16).padStart(2, '0');
-      const transparentColor = color.includes('#') ? `${color}${hexOpacity}` : color;
-      return `${transparentColor} ${position}%`;
-    }).join(', ');
-    gradientVariations.push(`linear-gradient(${layeredAngle}deg, ${layeredColors})`);
-    
-    // Pattern 5: Soft multi-point radial with natural blending
-    const multiRadialX = Math.floor(random(25, 75, 50));
-    const multiRadialY = Math.floor(random(25, 75, 51));
-    const multiRadialColors = colors.map((color, i) => {
-      const position = (i / (colors.length - 1)) * 80; // Use 80% to ensure smooth falloff
-      return `${color} ${position}%`;
-    }).join(', ');
-    gradientVariations.push(`radial-gradient(circle at ${multiRadialX}% ${multiRadialY}%, ${multiRadialColors})`);
-
-    // Choose a single primary gradient pattern that's most pleasing
-    const primaryPattern = Math.floor(random(0, 3, 90)); // Focus on first 3 patterns
-    const selectedGradient = gradientVariations[primaryPattern];
-    
-    // Create subtle animation parameters
-    const animationDuration = 4 + random(2, 6, 80); // 4-10s for gentle movement
-    const animationDelay = random(0, 3, 81); // 0-3s stagger
-    
-    // Use only the smoothest animation types
-    const smoothAnimations = ['smoothFlow', 'gentlePulse'];
-    const animationType = smoothAnimations[Math.floor(random(0, smoothAnimations.length, 90))];
-    
-    // Very subtle animation properties to avoid jarring transitions
-    const scaleVariation = 0.98 + random(0, 0.04, 100); // 0.98-1.02 scale
+    // Animation parameters for smooth movement
+    const animationTypes = ['gradientFlow', 'gradientShift', 'gradientPulse'];
+    const animationType = animationTypes[rng.int(0, animationTypes.length)];
+    const animationDuration = rng.range(8, 16);
+    const animationDelay = rng.range(0, 2);
     
     return {
       ...loadingAnimationStyle,
-      '--gradient-background': selectedGradient, // Store gradient in CSS variable instead of applying directly
-      '--gradient-animation': `${animationType} ${animationDuration.toFixed(1)}s ease-in-out infinite alternate`,
+      '--gradient-background': primaryGradient,
+      '--gradient-animation': `${animationType} ${animationDuration.toFixed(1)}s ease-in-out infinite`,
       '--gradient-animation-delay': `calc(var(--background-delay, 0.1s) + ${animationDelay.toFixed(1)}s)`,
-      '--final-opacity': Math.min(baseOpacity + 0.3, 1.0), // Boost visibility but cap at 100%
-      willChange: 'background, transform, opacity',
-      '--gradient0': gradientVariations[0],
-      '--gradient1': gradientVariations[1],
-      '--gradient2': gradientVariations[2],
-      '--gradient3': gradientVariations[3],
-      '--gradient4': gradientVariations[4],
-      '--scale-variation': scaleVariation,
-      '--animation-seed': (combinedHash % 1000) / 1000,
+      willChange: 'background-position, background-size',
     };
-  }, [completedHabitDetails, hasHabitMetWeeklyGoal, date]);
+  }, [completedHabitDetails, hasHabitMetWeeklyGoal, date, habits.length]);
 
   // Generate tooltip content for day number
   const dayNumberTooltipContent = useMemo(() => {
@@ -229,7 +234,7 @@ const CalendarCell = ({
         ${!isCurrentMonth ? styles.otherMonth : ''}
         ${isToday ? styles.today : ''}
         ${completedHabitDetails.length > 0 ? styles.hasCompletions : ''}
-        ${completedHabitDetails.length > 1 ? styles.animatedGradient : ''}
+        ${completedHabitDetails.length > 0 ? styles.animatedGradient : ''}
       `}
       style={backgroundStyle}
       onClick={handleCellClick}
