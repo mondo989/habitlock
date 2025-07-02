@@ -5,9 +5,40 @@ import ThemeToggle from './ThemeToggle';
 import AnimatedCalendar from './AnimatedCalendar';
 import styles from './LandingPage.module.scss';
 
+// Import view assets
+import view1 from '../assets/view-1.png';
+import view2 from '../assets/view-2.png';
+import view3 from '../assets/view-3.png';
+
 const LandingPage = () => {
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const navigate = useNavigate();
+
+  // Define carousel data first
+  const carouselData = [
+    {
+      image: view1,
+      title: "Beautiful Visual Tracking",
+      subtitle: "See your progress at a glance",
+      description: "Watch your habits come to life with our stunning calendar view. Each completed day creates a unique, colorful gradient that grows more vibrant as you build consistency.",
+      highlight: "Visual streaks that motivate"
+    },
+    {
+      image: view2,
+      title: "Powerful Analytics & Insights",
+      subtitle: "Understand your patterns",
+      description: "Dive deep into your habit data with beautiful charts and statistics. Track weekly goals, identify patterns, and celebrate milestones with detailed progress insights.",
+      highlight: "Data-driven improvement"
+    },
+    {
+      image: view3,
+      title: "Effortless Habit Management",
+      subtitle: "Simple yet powerful",
+      description: "Add, edit, and organize your habits with our intuitive interface. Set meaningful goals, choose perfect emojis, and customize everything to match your lifestyle.",
+      highlight: "Personalized for you"
+    }
+  ];
 
   // Redirect authenticated users to calendar
   useEffect(() => {
@@ -29,6 +60,27 @@ const LandingPage = () => {
       setIsSigningIn(false);
     }
   };
+
+  // Carousel navigation
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % carouselData.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + carouselData.length) % carouselData.length);
+  };
+
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+  };
+
+  // Auto-advance carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % carouselData.length);
+    }, 8000); // Change slide every 8 seconds
+    return () => clearInterval(interval);
+  }, [carouselData.length]);
 
   const features = [
     {
@@ -142,6 +194,72 @@ const LandingPage = () => {
                   <AnimatedCalendar />
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Showcase Carousel */}
+      <section className={styles.showcase}>
+        <div className={styles.container}>
+          <div className={styles.sectionHeader}>
+            <h2>Experience HabitLock in action</h2>
+            <p>Discover the features that make building habits effortless and engaging</p>
+          </div>
+          
+          <div className={styles.carousel}>
+            <div className={styles.carouselContainer}>
+              <div 
+                className={styles.carouselTrack}
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+              >
+                {carouselData.map((slide, index) => (
+                  <div key={index} className={styles.carouselSlide}>
+                    <div className={styles.slideContent}>
+                      <div className={styles.slideImage}>
+                        <img src={slide.image} alt={slide.title} />
+                        <div className={styles.imageOverlay}></div>
+                      </div>
+                      <div className={styles.slideText}>
+                        <div className={styles.slideTextContent}>
+                          <div className={styles.slideHighlight}>{slide.highlight}</div>
+                          <h3 className={styles.slideTitle}>{slide.title}</h3>
+                          <p className={styles.slideSubtitle}>{slide.subtitle}</p>
+                          <p className={styles.slideDescription}>{slide.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Navigation */}
+            <div className={styles.carouselNav}>
+              <button 
+                className={styles.navButton} 
+                onClick={prevSlide}
+                aria-label="Previous slide"
+              >
+                ←
+              </button>
+              <div className={styles.carouselDots}>
+                {carouselData.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`${styles.dot} ${index === currentSlide ? styles.active : ''}`}
+                    onClick={() => goToSlide(index)}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+              <button 
+                className={styles.navButton} 
+                onClick={nextSlide}
+                aria-label="Next slide"
+              >
+                →
+              </button>
             </div>
           </div>
         </div>

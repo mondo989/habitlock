@@ -276,6 +276,221 @@
 
 
 
+// Showcase Carousel Section
+.showcase {
+  padding: 120px 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel {
+  position: relative;
+  margin-top: 80px;
+}
+
+.carouselContainer {
+  position: relative;
+  width: 100%;
+  height: 700px;
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.carouselTrack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.carouselSlide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  &:nth-child(1) {
+    transform: translateX(0%);
+  }
+  
+  &:nth-child(2) {
+    transform: translateX(100%);
+  }
+  
+  &:nth-child(3) {
+    transform: translateX(200%);
+  }
+}
+
+.slideContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 0;
+}
+
+.slideImage {
+  position: relative;
+  flex: 2;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  padding: 0;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.6s ease;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  
+  &:hover img {
+    transform: scale(1.02);
+  }
+}
+
+.imageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.1) 0%,
+    rgba(168, 85, 247, 0.1) 50%,
+    rgba(236, 72, 153, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.slideImage:hover .imageOverlay {
+  opacity: 1;
+}
+
+.slideText {
+  flex: 1;
+  padding: 20px 40px 40px 40px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  min-height: 180px;
+}
+
+.slideTextContent {
+  max-width: 600px;
+  text-align: center;
+  width: 100%;
+}
+
+.slideHighlight {
+  display: inline-block;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.slideTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 12px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.slideSubtitle {
+  font-size: 1.25rem;
+  color: #6366f1;
+  font-weight: 600;
+  margin: 0 0 20px;
+}
+
+.slideDescription {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #6b7280;
+  margin: 0;
+}
+
+.carouselNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
+  padding: 0 20px;
+}
+
+.navButton {
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 50%;
+  background: white;
+  color: #6366f1;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: #6366f1;
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.carouselDots {
+  display: flex;
+  gap: 12px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 50%;
+  background: #d1d5db;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #9ca3af;
+    transform: scale(1.2);
+  }
+  
+  &.active {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    transform: scale(1.3);
+  }
+}
+
 // Features Section
 .features {
   padding: 120px 0;
@@ -580,6 +795,58 @@
 
 
 
+  .showcase {
+    background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+  }
+
+  .carouselContainer {
+    background: #1f2937;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+  }
+
+  .slideImage {
+    background: #374151;
+  }
+
+  .slideText {
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  }
+
+  .slideTitle {
+    color: #f9fafb;
+  }
+
+  .slideSubtitle {
+    color: #a855f7;
+  }
+
+  .slideDescription {
+    color: #d1d5db;
+  }
+
+  .navButton {
+    background: #374151;
+    color: #a855f7;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      background: #6366f1;
+      color: white;
+    }
+  }
+
+  .dot {
+    background: #6b7280;
+
+    &:hover {
+      background: #9ca3af;
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    }
+  }
+
   .features {
     background: #1f2937;
   }
@@ -714,6 +981,24 @@
     grid-template-columns: 1fr;
     gap: 30px;
   }
+
+  // Carousel responsive
+  .carouselContainer {
+    height: 600px;
+  }
+
+  .slideImage {
+    padding: 0;
+  }
+
+  .slideText {
+    padding: 15px 30px 30px 30px;
+    min-height: 160px;
+  }
+
+  .slideTitle {
+    font-size: 2rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -755,7 +1040,7 @@
     font-size: 2.5rem;
   }
   
-  .features, .howItWorks, .testimonials, .finalCta {
+  .features, .howItWorks, .testimonials, .finalCta, .showcase {
     padding: 80px 0;
   }
   
@@ -772,6 +1057,48 @@
   
   .ctaContent h2 {
     font-size: 2.5rem;
+  }
+
+  // Carousel mobile styles
+  .carouselContainer {
+    height: 500px;
+    border-radius: 16px;
+  }
+
+  .slideImage {
+    padding: 0;
+  }
+
+  .slideText {
+    padding: 10px 20px 20px 20px;
+    min-height: 140px;
+  }
+
+  .slideTextContent {
+    max-width: 100%;
+  }
+
+  .slideTitle {
+    font-size: 1.75rem;
+  }
+
+  .slideSubtitle {
+    font-size: 1rem;
+  }
+
+  .slideDescription {
+    font-size: 1rem;
+  }
+
+  .navButton {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+
+  .carouselNav {
+    margin-top: 30px;
+    padding: 0 10px;
   }
 }
 
@@ -817,5 +1144,52 @@
   
   .featureCard, .testimonialCard {
     padding: 30px 20px;
+  }
+
+  // Carousel very small mobile
+  .carouselContainer {
+    height: 450px;
+    border-radius: 12px;
+  }
+
+  .slideImage {
+    padding: 0;
+  }
+
+  .slideText {
+    padding: 8px 16px 16px 16px;
+    min-height: 120px;
+  }
+
+  .slideTitle {
+    font-size: 1.5rem;
+  }
+
+  .slideSubtitle {
+    font-size: 0.9375rem;
+  }
+
+  .slideDescription {
+    font-size: 0.9375rem;
+  }
+
+  .slideHighlight {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+
+  .navButton {
+    width: 36px;
+    height: 36px;
+    font-size: 1.125rem;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .carouselDots {
+    gap: 8px;
   }
 } 
