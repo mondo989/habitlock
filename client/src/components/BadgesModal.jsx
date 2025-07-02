@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { usePostHog } from 'posthog-js/react';
 import { mergeAchievementsWithBadgeData, getUserAchievements } from '../services/achievements';
 import { getUserInfo } from '../services/firebase';
 import styles from './BadgesModal.module.scss';
@@ -42,6 +43,7 @@ const AnimatedCounter = ({ value, duration = 1500, className = '' }) => {
 const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false, achievements = {} }) => {
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const [firebaseAchievements, setFirebaseAchievements] = useState({});
+  const posthog = usePostHog();
 
   // Comprehensive badge definitions with requirements
   const badgeDefinitions = [
@@ -234,6 +236,14 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
     const loadAchievements = async () => {
       if (!isOpen && !isFullPage) return;
       
+      // Track modal opened
+      if (posthog) {
+        posthog.capture('badges_modal_opened', {
+          is_full_page: isFullPage,
+          user_id: getUserInfo()?.uid
+        });
+      }
+      
       // If achievements are passed as props (for full page), use them directly
       if (isFullPage && achievements) {
         setFirebaseAchievements(achievements);
@@ -252,7 +262,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
     };
 
     loadAchievements();
-  }, [isOpen, isFullPage, achievements]);
+  }, [isOpen, isFullPage, achievements, posthog]);
 
   // Calculate earned badges
   const badges = useMemo(() => {
@@ -289,6 +299,47 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
   const earnedCount = badges.filter(b => b.earned).length;
   const totalCount = badges.length;
 
+  // Track achievement stats
+  useEffect(() => {
+    if (badges.length > 0 && posthog) {
+      posthog.capture('achievement_stats', {
+        earned_count: earnedCount,
+        total_count: totalCount,
+        completion_rate: Math.round((earnedCount / totalCount) * 100),
+        user_id: getUserInfo()?.uid
+      });
+    }
+  }, [badges, earnedCount, totalCount, posthog]);
+
+  // Track badge hover events
+  const handleBadgeHover = (badge) => {
+    setHoveredBadge(badge);
+    if (posthog) {
+      posthog.capture('badge_hovered', {
+        badge_id: badge.id,
+        badge_name: badge.title,
+        badge_earned: badge.earned,
+        badge_rarity: badge.rarity,
+        user_id: getUserInfo()?.uid
+      });
+    }
+  };
+
+  const handleBadgeLeave = () => {
+    setHoveredBadge(null);
+  };
+
+  // Track modal close
+  const handleClose = () => {
+    if (posthog) {
+      posthog.capture('badges_modal_closed', {
+        time_spent: Date.now(), // You could track actual time spent
+        user_id: getUserInfo()?.uid
+      });
+    }
+    onClose();
+  };
+
   // Add keyboard shortcuts
   useEffect(() => {
     if (!isOpen && !isFullPage) return;
@@ -296,13 +347,13 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && !isFullPage) {
         e.preventDefault();
-        onClose();
+        handleClose();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isFullPage, onClose]);
+  }, [isOpen, isFullPage]);
 
   if (!isOpen && !isFullPage) return null;
 
@@ -352,7 +403,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
           </div>
         </div>
         {!isFullPage && (
-          <button className={styles.closeButton} onClick={onClose}>
+          <button className={styles.closeButton} onClick={handleClose}>
             ✕
           </button>
         )}
@@ -367,8 +418,8 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
                 <div
                   key={badge.id}
                   className={`${styles.badgeCard} ${badge.earned ? styles.earned : styles.locked} ${styles[badge.rarity || 'common']}`}
-                  onMouseEnter={() => setHoveredBadge(badge)}
-                  onMouseLeave={() => setHoveredBadge(null)}
+                  onMouseEnter={() => handleBadgeHover(badge)}
+                  onMouseLeave={handleBadgeLeave}
                 >
                   <div className={styles.badgeIconContainer}>
                     <div className={`${styles.badgeIcon} ${badge.earned ? styles.unlocked : ''}`}>
@@ -449,7 +500,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
   }
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
+    <div className={styles.modalOverlay} onClick={handleClose}>
       {content}
     </div>
   );

@@ -72,4 +72,4 @@ class AnalyticsService {
 // Create and export a singleton instance
 const analytics = new AnalyticsService();
 
-export default analytics; 
+export default analytics;

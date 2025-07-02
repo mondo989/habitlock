@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { usePostHog } from 'posthog-js/react';
 import { initializeAuth, auth, onAuthChange, signOutUser, getUserInfo } from './services/firebase';
 import analytics from './services/analytics';
 import { ThemeProvider } from './context/ThemeContext';
@@ -15,12 +16,40 @@ import styles from './App.module.scss';
 function AppLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const posthog = usePostHog();
   const [currentUser, setCurrentUser] = useState(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // Debug PostHog initialization
+  useEffect(() => {
+    console.log('PostHog debug:', {
+      posthog: !!posthog,
+      isReady: posthog ? 'available' : 'not available',
+      apiKey: import.meta.env.VITE_PUBLIC_POSTHOG_KEY ? 'set' : 'missing',
+      host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST
+    });
+    
+    if (posthog) {
+      posthog.capture('app_layout_mounted', {
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [posthog]);
+
   // Get current view from URL
   const currentView = location.pathname.substring(1) || 'calendar';
+
+  // Track navigation changes
+  useEffect(() => {
+    if (posthog) {
+      posthog.capture('page_viewed', {
+        page: currentView,
+        path: location.pathname,
+        user_id: getUserInfo()?.uid
+      });
+    }
+  }, [location.pathname, currentView, posthog]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -42,6 +71,22 @@ function AppLayout({ children }) {
       if (user) {
         console.log('User authenticated:', user.uid, user.email);
         
+        // Track user authentication for PostHog
+        if (posthog) {
+          posthog.identify(user.uid, {
+            email: user.email,
+            name: user.displayName,
+            avatar: user.photoURL
+          });
+          
+          posthog.capture('user_authenticated', {
+            user_id: user.uid,
+            email: user.email,
+            has_photo: !!user.photoURL,
+            provider: user.providerData?.[0]?.providerId
+          });
+        }
+        
         // Track user authentication for analytics (optional)
         analytics.trackUserAction('user_authenticated', {
           userId: user.uid,
@@ -53,31 +98,66 @@ function AppLayout({ children }) {
         if (!hasCompletedOnboarding) {
           setShowOnboarding(true);
           analytics.trackEvent('onboarding_started');
+          if (posthog) {
+            posthog.capture('onboarding_started', {
+              user_id: user.uid
+            });
+          }
         }
       } else {
         console.log('No user authenticated');
         setShowOnboarding(false);
+        if (posthog) {
+          posthog.capture('user_signed_out');
+        }
         // Redirect to landing page if not authenticated
         navigate('/');
       }
     });
 
     return () => unsubscribeAuth();
-  }, [navigate]);
+  }, [navigate, posthog]);
+
+  const handleNavigation = (path, viewName) => {
+    navigate(path);
+    if (posthog) {
+      posthog.capture('navigation_clicked', {
+        from_view: currentView,
+        to_view: viewName,
+        user_id: getUserInfo()?.uid
+      });
+    }
+  };
 
   const handleSignOut = async () => {
     try {
+      if (posthog) {
+        posthog.capture('sign_out_initiated', {
+          user_id: getUserInfo()?.uid
+        });
+      }
       await signOutUser();
       setShowProfileDropdown(false);
       navigate('/');
     } catch (error) {
       console.error('Sign out failed:', error);
+      if (posthog) {
+        posthog.capture('sign_out_failed', {
+          error: error.message,
+          user_id: getUserInfo()?.uid
+        });
+      }
     }
   };
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
     analytics.trackEvent('onboarding_completed');
+    if (posthog) {
+      posthog.capture('onboarding_completed', {
+        user_id: getUserInfo()?.uid
+      });
+    }
   };
 
   const userInfo = getUserInfo();
@@ -89,7 +169,7 @@ function AppLayout({ children }) {
         <div className={styles.navContent}>
           <div 
             className={styles.logo}
-            onClick={() => navigate('/calendar')}
+            onClick={() => handleNavigation('/calendar', 'calendar')}
           >
             <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
             <h1>HabitLock</h1>
@@ -99,19 +179,19 @@ function AppLayout({ children }) {
           <div className={styles.navTabs}>
             <button
               className={`${styles.navTab} ${currentView === 'calendar' ? styles.active : ''}`}
-              onClick={() => navigate('/calendar')}
+              onClick={() => handleNavigation('/calendar', 'calendar')}
             >
               📅 Calendar
             </button>
             <button
               className={`${styles.navTab} ${currentView === 'stats' ? styles.active : ''}`}
-              onClick={() => navigate('/stats')}
+              onClick={() => handleNavigation('/stats', 'stats')}
             >
               📊 Stats
             </button>
             <button
               className={`${styles.navTab} ${currentView === 'achievements' ? styles.active : ''}`}
-              onClick={() => navigate('/achievements')}
+              onClick={() => handleNavigation('/achievements', 'achievements')}
             >
               🏆 Achievements
             </button>
@@ -122,7 +202,15 @@ function AppLayout({ children }) {
             <div className={styles.navMeta}>
               <div 
                 className={styles.userProfile}
-                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                onClick={() => {
+                  setShowProfileDropdown(!showProfileDropdown);
+                  if (posthog) {
+                    posthog.capture('profile_dropdown_toggled', {
+                      opened: !showProfileDropdown,
+                      user_id: getUserInfo()?.uid
+                    });
+                  }
+                }}
               >
                 {userInfo?.photoURL && (
                   <img 
@@ -178,21 +266,21 @@ function AppLayout({ children }) {
       <nav className={styles.mobileNavTabs}>
         <button
           className={`${styles.mobileNavTab} ${currentView === 'calendar' ? styles.active : ''}`}
-          onClick={() => navigate('/calendar')}
+          onClick={() => handleNavigation('/calendar', 'calendar')}
         >
           <span className={styles.mobileTabIcon}>📅</span>
           <span className={styles.mobileTabText}>Calendar</span>
         </button>
         <button
           className={`${styles.mobileNavTab} ${currentView === 'stats' ? styles.active : ''}`}
-          onClick={() => navigate('/stats')}
+          onClick={() => handleNavigation('/stats', 'stats')}
         >
           <span className={styles.mobileTabIcon}>📊</span>
           <span className={styles.mobileTabText}>Stats</span>
         </button>
         <button
           className={`${styles.mobileNavTab} ${currentView === 'achievements' ? styles.active : ''}`}
-          onClick={() => navigate('/achievements')}
+          onClick={() => handleNavigation('/achievements', 'achievements')}
         >
           <span className={styles.mobileTabIcon}>🏆</span>
           <span className={styles.mobileTabText}>Achievements</span>
@@ -229,6 +317,7 @@ function ProtectedRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
+  const posthog = usePostHog();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -238,9 +327,21 @@ function ProtectedRoute({ children }) {
         
         // Initialize analytics after authentication is ready
         analytics.initializeClarity();
+        
+        // Track app initialization
+        if (posthog) {
+          posthog.capture('app_initialized');
+        }
       } catch (error) {
         console.error('Authentication initialization failed:', error);
         setAuthError('Failed to initialize authentication. Please refresh the page.');
+        
+        // Track initialization error
+        if (posthog) {
+          posthog.capture('app_initialization_failed', {
+            error: error.message
+          });
+        }
       }
     };
 
@@ -255,7 +356,7 @@ function ProtectedRoute({ children }) {
 
     // Cleanup listener on unmount
     return () => unsubscribeAuth();
-  }, []);
+  }, [posthog]);
 
   if (isLoading) {
     return (
@@ -285,7 +386,14 @@ function ProtectedRoute({ children }) {
             <p>{authError}</p>
             <button 
               className={styles.retryButton}
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                if (posthog) {
+                  posthog.capture('error_retry_clicked', {
+                    error_type: 'auth_initialization'
+                  });
+                }
+                window.location.reload();
+              }}
             >
               Try Again
             </button>
