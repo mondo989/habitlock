@@ -124,7 +124,7 @@
   }
 
   &.goalMet {
-    border-color: #f59e0b;
+    background: #f59e0b60;
     box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.1), 0 0 12px rgba(245, 158, 11, 0.15);
     
     &:hover {
@@ -543,7 +543,6 @@
     }
 
     &.goalMet {
-      border-color: #d97706;
       box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.2), 0 0 12px rgba(217, 119, 6, 0.25);
       
       &:hover {

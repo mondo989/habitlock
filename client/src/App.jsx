@@ -21,17 +21,11 @@ function AppLayout({ children }) {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Debug PostHog initialization
+  // Initialize analytics with PostHog instance
   useEffect(() => {
-    console.log('PostHog debug:', {
-      posthog: !!posthog,
-      isReady: posthog ? 'available' : 'not available',
-      apiKey: import.meta.env.VITE_PUBLIC_POSTHOG_KEY ? 'set' : 'missing',
-      host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST
-    });
-    
     if (posthog) {
-      posthog.capture('app_layout_mounted', {
+      analytics.setPostHog(posthog);
+      analytics.capture('app_layout_mounted', {
         timestamp: new Date().toISOString()
       });
     }
@@ -42,14 +36,12 @@ function AppLayout({ children }) {
 
   // Track navigation changes
   useEffect(() => {
-    if (posthog) {
-      posthog.capture('page_viewed', {
-        page: currentView,
-        path: location.pathname,
-        user_id: getUserInfo()?.uid
-      });
-    }
-  }, [location.pathname, currentView, posthog]);
+    analytics.capture('page_viewed', {
+      page: currentView,
+      path: location.pathname,
+      user_id: getUserInfo()?.uid
+    });
+  }, [location.pathname, currentView]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -71,21 +63,19 @@ function AppLayout({ children }) {
       if (user) {
         console.log('User authenticated:', user.uid, user.email);
         
-        // Track user authentication for PostHog
-        if (posthog) {
-          posthog.identify(user.uid, {
-            email: user.email,
-            name: user.displayName,
-            avatar: user.photoURL
-          });
-          
-          posthog.capture('user_authenticated', {
-            user_id: user.uid,
-            email: user.email,
-            has_photo: !!user.photoURL,
-            provider: user.providerData?.[0]?.providerId
-          });
-        }
+        // Track user authentication for analytics
+        analytics.identify(user.uid, {
+          email: user.email,
+          name: user.displayName,
+          avatar: user.photoURL
+        });
+        
+        analytics.capture('user_authenticated', {
+          user_id: user.uid,
+          email: user.email,
+          has_photo: !!user.photoURL,
+          provider: user.providerData?.[0]?.providerId
+        });
         
         // Track user authentication for analytics (optional)
         analytics.trackUserAction('user_authenticated', {
@@ -97,67 +87,53 @@ function AppLayout({ children }) {
         const hasCompletedOnboarding = localStorage.getItem('habitlock_onboarding_completed');
         if (!hasCompletedOnboarding) {
           setShowOnboarding(true);
-          analytics.trackEvent('onboarding_started');
-          if (posthog) {
-            posthog.capture('onboarding_started', {
-              user_id: user.uid
-            });
-          }
+          analytics.capture('onboarding_started', {
+            user_id: user.uid
+          });
         }
       } else {
         console.log('No user authenticated');
         setShowOnboarding(false);
-        if (posthog) {
-          posthog.capture('user_signed_out');
-        }
+        analytics.capture('user_signed_out');
         // Redirect to landing page if not authenticated
         navigate('/');
       }
     });
 
     return () => unsubscribeAuth();
-  }, [navigate, posthog]);
+  }, [navigate]);
 
   const handleNavigation = (path, viewName) => {
     navigate(path);
-    if (posthog) {
-      posthog.capture('navigation_clicked', {
-        from_view: currentView,
-        to_view: viewName,
-        user_id: getUserInfo()?.uid
-      });
-    }
+    analytics.capture('navigation_clicked', {
+      from_view: currentView,
+      to_view: viewName,
+      user_id: getUserInfo()?.uid
+    });
   };
 
   const handleSignOut = async () => {
     try {
-      if (posthog) {
-        posthog.capture('sign_out_initiated', {
-          user_id: getUserInfo()?.uid
-        });
-      }
+      analytics.capture('sign_out_initiated', {
+        user_id: getUserInfo()?.uid
+      });
       await signOutUser();
       setShowProfileDropdown(false);
       navigate('/');
     } catch (error) {
       console.error('Sign out failed:', error);
-      if (posthog) {
-        posthog.capture('sign_out_failed', {
-          error: error.message,
-          user_id: getUserInfo()?.uid
-        });
-      }
+      analytics.capture('sign_out_failed', {
+        error: error.message,
+        user_id: getUserInfo()?.uid
+      });
     }
   };
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
-    analytics.trackEvent('onboarding_completed');
-    if (posthog) {
-      posthog.capture('onboarding_completed', {
-        user_id: getUserInfo()?.uid
-      });
-    }
+    analytics.capture('onboarding_completed', {
+      user_id: getUserInfo()?.uid
+    });
   };
 
   const userInfo = getUserInfo();
@@ -204,12 +180,10 @@ function AppLayout({ children }) {
                 className={styles.userProfile}
                 onClick={() => {
                   setShowProfileDropdown(!showProfileDropdown);
-                  if (posthog) {
-                    posthog.capture('profile_dropdown_toggled', {
-                      opened: !showProfileDropdown,
-                      user_id: getUserInfo()?.uid
-                    });
-                  }
+                  analytics.capture('profile_dropdown_toggled', {
+                    opened: !showProfileDropdown,
+                    user_id: getUserInfo()?.uid
+                  });
                 }}
               >
                 {userInfo?.photoURL && (
@@ -317,7 +291,6 @@ function ProtectedRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
-  const posthog = usePostHog();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -329,19 +302,15 @@ function ProtectedRoute({ children }) {
         analytics.initializeClarity();
         
         // Track app initialization
-        if (posthog) {
-          posthog.capture('app_initialized');
-        }
+        analytics.capture('app_initialized');
       } catch (error) {
         console.error('Authentication initialization failed:', error);
         setAuthError('Failed to initialize authentication. Please refresh the page.');
         
         // Track initialization error
-        if (posthog) {
-          posthog.capture('app_initialization_failed', {
-            error: error.message
-          });
-        }
+        analytics.capture('app_initialization_failed', {
+          error: error.message
+        });
       }
     };
 
@@ -356,7 +325,7 @@ function ProtectedRoute({ children }) {
 
     // Cleanup listener on unmount
     return () => unsubscribeAuth();
-  }, [posthog]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -387,11 +356,9 @@ function ProtectedRoute({ children }) {
             <button 
               className={styles.retryButton}
               onClick={() => {
-                if (posthog) {
-                  posthog.capture('error_retry_clicked', {
-                    error_type: 'auth_initialization'
-                  });
-                }
+                analytics.capture('error_retry_clicked', {
+                  error_type: 'auth_initialization'
+                });
                 window.location.reload();
               }}
             >

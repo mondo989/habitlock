@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
-import { usePostHog } from 'posthog-js/react';
 import { mergeAchievementsWithBadgeData, getUserAchievements } from '../services/achievements';
 import { getUserInfo } from '../services/firebase';
+import analytics from '../services/analytics';
 import styles from './BadgesModal.module.scss';
 
 // Animated Counter Component
@@ -43,7 +43,6 @@ const AnimatedCounter = ({ value, duration = 1500, className = '' }) => {
 const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false, achievements = {} }) => {
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const [firebaseAchievements, setFirebaseAchievements] = useState({});
-  const posthog = usePostHog();
 
   // Comprehensive badge definitions with requirements
   const badgeDefinitions = [
@@ -237,12 +236,10 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
       if (!isOpen && !isFullPage) return;
       
       // Track modal opened
-      if (posthog) {
-        posthog.capture('badges_modal_opened', {
-          is_full_page: isFullPage,
-          user_id: getUserInfo()?.uid
-        });
-      }
+      analytics.capture('badges_modal_opened', {
+        is_full_page: isFullPage,
+        user_id: getUserInfo()?.uid
+      });
       
       // If achievements are passed as props (for full page), use them directly
       if (isFullPage && achievements) {
@@ -262,7 +259,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
     };
 
     loadAchievements();
-  }, [isOpen, isFullPage, achievements, posthog]);
+  }, [isOpen, isFullPage, achievements]);
 
   // Calculate earned badges
   const badges = useMemo(() => {
@@ -301,28 +298,26 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
 
   // Track achievement stats
   useEffect(() => {
-    if (badges.length > 0 && posthog) {
-      posthog.capture('achievement_stats', {
+    if (badges.length > 0) {
+      analytics.capture('achievement_stats', {
         earned_count: earnedCount,
         total_count: totalCount,
         completion_rate: Math.round((earnedCount / totalCount) * 100),
         user_id: getUserInfo()?.uid
       });
     }
-  }, [badges, earnedCount, totalCount, posthog]);
+  }, [badges, earnedCount, totalCount]);
 
   // Track badge hover events
   const handleBadgeHover = (badge) => {
     setHoveredBadge(badge);
-    if (posthog) {
-      posthog.capture('badge_hovered', {
-        badge_id: badge.id,
-        badge_name: badge.title,
-        badge_earned: badge.earned,
-        badge_rarity: badge.rarity,
-        user_id: getUserInfo()?.uid
-      });
-    }
+    analytics.capture('badge_hovered', {
+      badge_id: badge.id,
+      badge_name: badge.title,
+      badge_earned: badge.earned,
+      badge_rarity: badge.rarity,
+      user_id: getUserInfo()?.uid
+    });
   };
 
   const handleBadgeLeave = () => {
@@ -331,12 +326,10 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
 
   // Track modal close
   const handleClose = () => {
-    if (posthog) {
-      posthog.capture('badges_modal_closed', {
-        time_spent: Date.now(), // You could track actual time spent
-        user_id: getUserInfo()?.uid
-      });
-    }
+    analytics.capture('badges_modal_closed', {
+      time_spent: Date.now(), // You could track actual time spent
+      user_id: getUserInfo()?.uid
+    });
     onClose();
   };
 

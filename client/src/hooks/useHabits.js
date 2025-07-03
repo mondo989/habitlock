@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { usePostHog } from 'posthog-js/react';
 import { auth } from '../services/firebase';
 import {
   createHabit,
@@ -7,12 +6,12 @@ import {
   deleteHabit,
   subscribeToHabits,
 } from '../services/db';
+import analytics from '../services/analytics';
 
 export const useHabits = () => {
   const [habits, setHabits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const posthog = usePostHog();
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -22,16 +21,14 @@ export const useHabits = () => {
       setLoading(false);
       
       // Track habits loaded event
-      if (posthog) {
-        posthog.capture('habits_loaded', {
-          habit_count: habitsList.length,
-          user_id: auth.currentUser.uid
-        });
-      }
+      analytics.capture('habits_loaded', {
+        habit_count: habitsList.length,
+        user_id: auth.currentUser.uid
+      });
     });
 
     return unsubscribe;
-  }, [auth.currentUser, posthog]);
+  }, [auth.currentUser]);
 
   const addHabit = async (habitData) => {
     if (!auth.currentUser) {
@@ -44,14 +41,12 @@ export const useHabits = () => {
       const newHabit = await createHabit(auth.currentUser.uid, habitData);
       
       // Track habit creation
-      if (posthog) {
-        posthog.capture('habit_created', {
-          habit_name: habitData.name,
-          habit_category: habitData.category,
-          frequency: habitData.frequency,
-          user_id: auth.currentUser.uid
-        });
-      }
+      analytics.capture('habit_created', {
+        habit_name: habitData.name,
+        habit_category: habitData.category,
+        frequency: habitData.frequency,
+        user_id: auth.currentUser.uid
+      });
       
       return newHabit;
     } catch (err) {
@@ -59,12 +54,10 @@ export const useHabits = () => {
       console.error('Error creating habit:', err);
       
       // Track error
-      if (posthog) {
-        posthog.capture('habit_creation_failed', {
-          error: err.message,
-          user_id: auth.currentUser.uid
-        });
-      }
+      analytics.capture('habit_creation_failed', {
+        error: err.message,
+        user_id: auth.currentUser.uid
+      });
       
       return null;
     }
@@ -81,13 +74,11 @@ export const useHabits = () => {
       await updateHabit(auth.currentUser.uid, habitId, updates);
       
       // Track habit update
-      if (posthog) {
-        posthog.capture('habit_updated', {
-          habit_id: habitId,
-          updated_fields: Object.keys(updates),
-          user_id: auth.currentUser.uid
-        });
-      }
+      analytics.capture('habit_updated', {
+        habit_id: habitId,
+        updated_fields: Object.keys(updates),
+        user_id: auth.currentUser.uid
+      });
       
       return true;
     } catch (err) {
@@ -95,13 +86,11 @@ export const useHabits = () => {
       console.error('Error updating habit:', err);
       
       // Track error
-      if (posthog) {
-        posthog.capture('habit_update_failed', {
-          habit_id: habitId,
-          error: err.message,
-          user_id: auth.currentUser.uid
-        });
-      }
+      analytics.capture('habit_update_failed', {
+        habit_id: habitId,
+        error: err.message,
+        user_id: auth.currentUser.uid
+      });
       
       return false;
     }
@@ -120,14 +109,12 @@ export const useHabits = () => {
       await deleteHabit(auth.currentUser.uid, habitId);
       
       // Track habit deletion
-      if (posthog) {
-        posthog.capture('habit_deleted', {
-          habit_id: habitId,
-          habit_name: habitToDelete?.name,
-          days_tracked: habitToDelete?.completions?.length || 0,
-          user_id: auth.currentUser.uid
-        });
-      }
+      analytics.capture('habit_deleted', {
+        habit_id: habitId,
+        habit_name: habitToDelete?.name,
+        days_tracked: habitToDelete?.completions?.length || 0,
+        user_id: auth.currentUser.uid
+      });
       
       return true;
     } catch (err) {
@@ -135,13 +122,11 @@ export const useHabits = () => {
       console.error('Error deleting habit:', err);
       
       // Track error
-      if (posthog) {
-        posthog.capture('habit_deletion_failed', {
-          habit_id: habitId,
-          error: err.message,
-          user_id: auth.currentUser.uid
-        });
-      }
+      analytics.capture('habit_deletion_failed', {
+        habit_id: habitId,
+        error: err.message,
+        user_id: auth.currentUser.uid
+      });
       
       return false;
     }
