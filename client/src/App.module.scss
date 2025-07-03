@@ -168,24 +168,55 @@
   background: none;
   border: none;
   padding: 8px 16px;
-  border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
   color: #6b7280;
   transition: all 0.2s ease;
   font-size: 0.875rem;
+  text-decoration: none;
+  position: relative;
+  
+  // Gradient underline (hidden by default)
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #3b82f6 100%);
+    border-radius: 1px;
+    opacity: 0;
+    transform: scaleX(0);
+    transition: all 0.3s ease;
+    transform-origin: center;
+  }
 
   &:hover {
-    background: #f3f4f6;
     color: #374151;
+    
+    &::after {
+      opacity: 0.4;
+      transform: scaleX(0.7);
+    }
   }
 
   &.active {
-    background: #3b82f6;
-    color: white;
+    color: #1f2937;
+    font-weight: 600;
 
+    &::after {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+    
     &:hover {
-      background: #2563eb;
+      color: #1f2937;
+      
+      &::after {
+        opacity: 1;
+        transform: scaleX(1);
+      }
     }
   }
 }
@@ -221,24 +252,47 @@
   position: relative;
   min-height: 60px;
 
+  // Gradient underline for mobile (at bottom)
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 24px;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #3b82f6 100%);
+    border-radius: 1px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    transform-origin: center;
+  }
+
   &:hover {
-    background: #f8fafc;
     color: #374151;
+    
+    &::after {
+      opacity: 0.4;
+      transform: translateX(-50%) scaleX(0.7);
+    }
   }
 
   &.active {
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.03);
+    color: #1f2937;
+    font-weight: 600;
     
     &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: #3b82f6;
-      border-radius: 0 0 3px 3px;
+      opacity: 1;
+      transform: translateX(-50%) scaleX(1);
+    }
+    
+    &:hover {
+      color: #1f2937;
+      
+      &::after {
+        opacity: 1;
+        transform: translateX(-50%) scaleX(1);
+      }
     }
   }
 }
