@@ -24,10 +24,13 @@ function AppLayout({ children }) {
   // Initialize analytics with PostHog instance
   useEffect(() => {
     if (posthog) {
-      analytics.setPostHog(posthog);
-      analytics.capture('app_layout_mounted', {
-        timestamp: new Date().toISOString()
-      });
+      const initAnalytics = async () => {
+        await analytics.setPostHog(posthog);
+        analytics.capture('app_layout_mounted', {
+          timestamp: new Date().toISOString()
+        });
+      };
+      initAnalytics();
     }
   }, [posthog]);
 

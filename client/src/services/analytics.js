@@ -37,10 +37,42 @@ class AnalyticsService {
   }
 
   // Set PostHog instance (called from components)
-  setPostHog(posthogInstance) {
+  async setPostHog(posthogInstance) {
     this.posthog = posthogInstance;
     this.posthogAvailable = !!posthogInstance;
     this.initialized = true;
+    
+    // Test if PostHog is actually accessible
+    if (posthogInstance) {
+      await this.testPostHogConnection();
+    }
+  }
+
+  // Test if PostHog is blocked
+  async testPostHogConnection() {
+    if (!this.posthog) return false;
+    
+    try {
+      // Make a simple test request to see if PostHog is accessible
+      const testUrl = `${import.meta.env.VITE_PUBLIC_POSTHOG_HOST}/batch/`;
+      const response = await fetch(testUrl, { 
+        method: 'HEAD',
+        mode: 'no-cors' // This will succeed even if CORS blocked, but will fail if network blocked
+      });
+      return true;
+    } catch (error) {
+      // PostHog is blocked - disable it completely
+      if (import.meta.env.MODE === 'development') {
+        console.warn('Analytics: PostHog is blocked, disabling all tracking');
+      }
+      this.posthogAvailable = false;
+      
+      // Disable PostHog entirely to prevent internal retry loops
+      if (this.posthog && typeof this.posthog.opt_out_capturing === 'function') {
+        this.posthog.opt_out_capturing();
+      }
+      return false;
+    }
   }
 
   // Safe PostHog wrapper - prevents errors when blocked
@@ -60,8 +92,11 @@ class AnalyticsService {
       if (import.meta.env.MODE === 'development') {
         console.warn('Analytics: PostHog capture failed (likely blocked):', error.message);
       }
-      // Mark as unavailable to prevent future attempts
+      // Mark as unavailable and disable PostHog to prevent future attempts
       this.posthogAvailable = false;
+      if (this.posthog && typeof this.posthog.opt_out_capturing === 'function') {
+        this.posthog.opt_out_capturing();
+      }
     }
   }
 
@@ -76,6 +111,10 @@ class AnalyticsService {
         console.warn('Analytics: PostHog identify failed (likely blocked):', error.message);
       }
       this.posthogAvailable = false;
+      // Disable PostHog to prevent further errors
+      if (this.posthog && typeof this.posthog.opt_out_capturing === 'function') {
+        this.posthog.opt_out_capturing();
+      }
     }
   }
 
@@ -90,6 +129,10 @@ class AnalyticsService {
         console.warn('Analytics: PostHog alias failed (likely blocked):', error.message);
       }
       this.posthogAvailable = false;
+      // Disable PostHog to prevent further errors
+      if (this.posthog && typeof this.posthog.opt_out_capturing === 'function') {
+        this.posthog.opt_out_capturing();
+      }
     }
   }
 
@@ -104,6 +147,10 @@ class AnalyticsService {
         console.warn('Analytics: PostHog reset failed (likely blocked):', error.message);
       }
       this.posthogAvailable = false;
+      // Disable PostHog to prevent further errors
+      if (this.posthog && typeof this.posthog.opt_out_capturing === 'function') {
+        this.posthog.opt_out_capturing();
+      }
     }
   }
 
