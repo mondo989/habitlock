@@ -180,7 +180,7 @@
   &::after {
     content: '';
     position: absolute;
-    bottom: 4px;
+    bottom: -3px;
     left: 16px;
     right: 16px;
     height: 2px;
@@ -909,12 +909,7 @@
     }
 
     &.active {
-      background: #3b82f6;
       color: white;
-
-      &:hover {
-        background: #2563eb;
-      }
     }
   }
 
