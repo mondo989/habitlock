@@ -10,6 +10,7 @@ import AchievementsView from './views/AchievementsView';
 import ThemeToggle from './components/ThemeToggle';
 import LandingPage from './components/LandingPage';
 import OnboardingCarousel from './components/OnboardingCarousel';
+import { CalendarIcon, StatsIcon, AchievementsIcon } from './components/Icons';
 import styles from './App.module.scss';
 
 // Main App Layout component (for authenticated users)
@@ -160,19 +161,22 @@ function AppLayout({ children }) {
               className={`${styles.navTab} ${currentView === 'calendar' ? styles.active : ''}`}
               onClick={() => handleNavigation('/calendar', 'calendar')}
             >
-              📅 Calendar
+              <CalendarIcon className={styles.navIcon} />
+              Calendar
             </button>
             <button
               className={`${styles.navTab} ${currentView === 'stats' ? styles.active : ''}`}
               onClick={() => handleNavigation('/stats', 'stats')}
             >
-              📊 Stats
+              <StatsIcon className={styles.navIcon} />
+              Stats
             </button>
             <button
               className={`${styles.navTab} ${currentView === 'achievements' ? styles.active : ''}`}
               onClick={() => handleNavigation('/achievements', 'achievements')}
             >
-              🏆 Achievements
+              <AchievementsIcon className={styles.navIcon} />
+              Achievements
             </button>
           </div>
 
@@ -245,21 +249,27 @@ function AppLayout({ children }) {
           className={`${styles.mobileNavTab} ${currentView === 'calendar' ? styles.active : ''}`}
           onClick={() => handleNavigation('/calendar', 'calendar')}
         >
-          <span className={styles.mobileTabIcon}>📅</span>
+          <span className={styles.mobileTabIcon}>
+            <CalendarIcon className={styles.mobileNavIcon} />
+          </span>
           <span className={styles.mobileTabText}>Calendar</span>
         </button>
         <button
           className={`${styles.mobileNavTab} ${currentView === 'stats' ? styles.active : ''}`}
           onClick={() => handleNavigation('/stats', 'stats')}
         >
-          <span className={styles.mobileTabIcon}>📊</span>
+          <span className={styles.mobileTabIcon}>
+            <StatsIcon className={styles.mobileNavIcon} />
+          </span>
           <span className={styles.mobileTabText}>Stats</span>
         </button>
         <button
           className={`${styles.mobileNavTab} ${currentView === 'achievements' ? styles.active : ''}`}
           onClick={() => handleNavigation('/achievements', 'achievements')}
         >
-          <span className={styles.mobileTabIcon}>🏆</span>
+          <span className={styles.mobileTabIcon}>
+            <AchievementsIcon className={styles.mobileNavIcon} />
+          </span>
           <span className={styles.mobileTabText}>Achievements</span>
         </button>
       </nav>

@@ -78,6 +78,46 @@
       z-index: 2;
       position: relative;
     }
+    
+    // Make previous/next month days with completions much darker
+    &.otherMonth {
+      // Add a dark overlay that sits between gradient (z-index: -1) and content (z-index: 2)  
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6); // Dark overlay
+        border-radius: inherit;
+        z-index: 0; // Between gradient (-1) and content (2)
+        pointer-events: none;
+      }
+      
+      // Make text and emojis much more subdued
+      .dayNumber {
+        color: rgba(255, 255, 255, 0.7);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+        font-weight: 600;
+        font-size: 0.9375rem;
+        z-index: 3; // Above the overlay
+        position: relative;
+      }
+      
+      .habitEmoji {
+        opacity: 0.7;
+        filter: brightness(0.8) contrast(0.9);
+        z-index: 3; // Above the overlay
+        position: relative;
+      }
+      
+      // Also target the habitEmojis container
+      .habitEmojis {
+        z-index: 3;
+        position: relative;
+      }
+    }
   }
 }
 
@@ -509,6 +549,27 @@
       .dayNumber {
         color: white;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+      }
+      
+      &.otherMonth {
+        &::after {
+          background: rgba(0, 0, 0, 0.6); // Dark overlay for dark mode
+        }
+        
+        .dayNumber {
+          color: rgba(255, 255, 255, 0.6);
+          z-index: 3;
+        }
+        
+        .habitEmoji {
+          opacity: 0.6;
+          filter: brightness(0.7) contrast(0.8);
+          z-index: 3;
+        }
+        
+        .habitEmojis {
+          z-index: 3;
+        }
       }
       
       &.today .dayNumber {
