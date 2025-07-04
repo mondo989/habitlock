@@ -1,3 +1,5 @@
+@import '../styles/mixins.scss';
+
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -6,9 +8,7 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   z-index: 1000;
   animation: fadeIn 0.2s ease-out;
 }
@@ -16,9 +16,7 @@
 .modal {
   background: white;
   border-radius: 20px;
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.1),
-    0 8px 16px rgba(0, 0, 0, 0.05);
+  @include elevated-shadow;
   max-width: 480px;
   width: 90vw;
   max-height: 80vh;
@@ -28,46 +26,28 @@
 }
 
 .modalHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f8fafc;
-
-  h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1f2937;
-  }
+  @include modal-header;
+  @include gradient-light;
 }
 
 .modalLogo {
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 12px;
 }
 
 .logoIcon {
-  width: 32px;
-  height: 32px;
+  @include icon-lg;
   object-fit: contain;
 }
 
 .closeButton {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: #f3f4f6;
-  color: #6b7280;
-  border-radius: 8px;
-  cursor: pointer;
+  @include modal-close-button;
+  @include icon-lg;
+  position: relative;
+  top: auto;
+  right: auto;
   font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+  background: #f3f4f6;
 
   &:hover {
     background: #e5e7eb;
@@ -89,12 +69,13 @@
 
 .errorMessage {
   background: #fef2f2;
-  border: 1px solid #fecaca;
+  @include border-subtle;
+  border-color: #fecaca;
   color: #dc2626;
   padding: 12px 16px;
-  border-radius: 8px;
+  @include border-radius-sm;
   margin-bottom: 20px;
-  font-size: 0.875rem;
+  @include text-body;
   text-align: center;
 }
 
@@ -106,18 +87,15 @@
 }
 
 .providerButton {
+  @include button-base;
   width: 100%;
   padding: 14px 20px;
   border: 2px solid transparent;
-  border-radius: 12px;
+  @include border-radius-md;
   font-size: 1rem;
   font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   gap: 12px;
-  transition: all 0.2s ease;
   position: relative;
 
   &:disabled {
@@ -127,7 +105,7 @@
 
   &:not(:disabled):hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    @include card-shadow-hover;
   }
 }
 
@@ -171,14 +149,12 @@
 }
 
 .skipButton {
-  background: none;
-  border: none;
+  @include reset-button;
   color: #6b7280;
   font-size: 0.9rem;
-  cursor: pointer;
   padding: 8px 16px;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  @include transition-standard;
 
   &:hover {
     background: #f3f4f6;
@@ -199,10 +175,7 @@
   right: 0;
   bottom: 0;
   background: rgba(255, 255, 255, 0.95);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  @include flex-column-center;
   gap: 16px;
 
   p {
@@ -213,31 +186,30 @@
 }
 
 .spinner {
-  width: 32px;
-  height: 32px;
+  @include icon-lg;
   border: 3px solid #e5e7eb;
   border-top: 3px solid #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  @include border-radius-full;
+  @include spin-animation;
 }
 
 // Dark mode styles
-:global(html.dark-mode) {
-  .modal {
+.modal {
+  :global(html.dark-mode) & {
     background: #1f2937;
     color: #f9fafb;
   }
+}
 
-  .modalHeader {
+.modalHeader {
+  :global(html.dark-mode) & {
     background: #111827;
     border-bottom-color: #374151;
-
-    h2 {
-      color: #f9fafb;
-    }
   }
+}
 
-  .closeButton {
+.closeButton {
+  :global(html.dark-mode) & {
     background: #374151;
     color: #d1d5db;
 
@@ -246,18 +218,24 @@
       color: #f9fafb;
     }
   }
+}
 
-  .description {
+.description {
+  :global(html.dark-mode) & {
     color: #d1d5db;
   }
+}
 
-  .errorMessage {
+.errorMessage {
+  :global(html.dark-mode) & {
     background: #1f2937;
     border-color: #dc2626;
     color: #fca5a5;
   }
+}
 
-  .googleButton {
+.googleButton {
+  :global(html.dark-mode) & {
     background: #374151;
     color: #f9fafb;
     border-color: #4b5563;
@@ -267,12 +245,16 @@
       border-color: #6b7280;
     }
   }
+}
 
-  .skipSection {
+.skipSection {
+  :global(html.dark-mode) & {
     border-top-color: #374151;
   }
+}
 
-  .skipButton {
+.skipButton {
+  :global(html.dark-mode) & {
     color: #d1d5db;
 
     &:hover {
@@ -280,20 +262,26 @@
       color: #f9fafb;
     }
   }
+}
 
-  .skipText {
+.skipText {
+  :global(html.dark-mode) & {
     color: #9ca3af;
   }
+}
 
-  .loadingOverlay {
+.loadingOverlay {
+  :global(html.dark-mode) & {
     background: rgba(31, 41, 55, 0.95);
 
     p {
       color: #d1d5db;
     }
   }
+}
 
-  .spinner {
+.spinner {
+  :global(html.dark-mode) & {
     border-color: #374151;
     border-top-color: #60a5fa;
   }
@@ -321,7 +309,7 @@
 }
 
 // Mobile responsive
-@media (max-width: 768px) {
+@include mobile {
   .modal {
     max-width: 95vw;
     margin: 20px;

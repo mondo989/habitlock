@@ -1,9 +1,11 @@
+@import '../styles/mixins.scss';
+
 .statsView {
   min-height: 100vh;
   background: #f8fafc;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
+  @include flex-column-center;
+  align-items: stretch;
   gap: 32px;
 }
 
@@ -16,7 +18,7 @@
     margin: 0 0 12px;
     font-size: 2.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+    @include gradient-primary;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -25,35 +27,33 @@
   p {
     margin: 0;
     color: #6b7280;
-    font-size: 1.25rem;
+    @include text-large;
     font-weight: 500;
   }
 }
 
 // Loading and empty states
 .loading, .emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  @include flex-column-center;
   min-height: 60vh;
   color: #6b7280;
 
   h2 {
     margin: 16px 0 8px;
-    font-size: 1.5rem;
+    @include text-large;
     font-weight: 600;
     color: #1f2937;
   }
 
   p {
     margin: 0 0 24px;
-    font-size: 1.125rem;
+    @include text-large;
     text-align: center;
   }
 }
 
 .emptyIcon {
+  @include icon-xl;
   font-size: 4rem;
   margin-bottom: 16px;
   opacity: 0.7;
@@ -61,15 +61,15 @@
 
 .emptyTips {
   background: white;
-  border-radius: 16px;
+  @include border-radius-md;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f3f4f6;
-  max-width: 400px;
+  @include card-shadow;
+  @include border-subtle;
+  @include container-max-width;
 
   h3 {
     margin: 0 0 16px;
-    font-size: 1.125rem;
+    @include text-large;
     font-weight: 600;
     color: #1f2937;
   }
@@ -81,18 +81,17 @@
     li {
       margin-bottom: 8px;
       color: #4b5563;
-      font-size: 0.9375rem;
+      @include text-body;
     }
   }
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
+  @include icon-xl;
   border: 3px solid #e5e7eb;
   border-top: 3px solid #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  @include border-radius-full;
+  @include spin-animation;
 }
 
 // Achievement Badges
@@ -101,9 +100,7 @@
 }
 
 .achievementsHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  @include flex-between;
   margin-bottom: 20px;
 }
 
@@ -117,34 +114,24 @@
 
   p {
     margin: 0;
-    font-size: 0.875rem;
+    @include text-body;
     color: #6b7280;
     font-weight: 500;
   }
 }
 
 .viewAllBadgesButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  @include gradient-nav-light;
   color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
+  @include button-base;
+  @include border-radius-md;
+  @include flex-center;
   gap: 8px;
-  box-shadow: 
-    0 4px 6px -1px rgba(102, 126, 234, 0.4),
-    0 2px 4px -1px rgba(102, 126, 234, 0.06);
+  @include card-shadow;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 10px 15px -3px rgba(102, 126, 234, 0.4),
-      0 4px 6px -2px rgba(102, 126, 234, 0.05);
+    @include hover-lift;
+    @include elevated-shadow;
   }
 
   &:active {
@@ -158,16 +145,7 @@
   gap: 16px;
 
   // Desktop: Show up to 8 badges (4 columns on large screens)
-  @media (min-width: 1200px) {
-    grid-template-columns: repeat(4, 1fr);
-    
-    .achievementBadge:nth-child(n+9) {
-      display: none;
-    }
-  }
-
-  // Large desktop: Still limit to 8 badges
-  @media (min-width: 1400px) {
+  @include desktop {
     grid-template-columns: repeat(4, 1fr);
     
     .achievementBadge:nth-child(n+9) {
@@ -176,7 +154,7 @@
   }
 
   // Medium screens: Show up to 8 badges (2 columns)
-  @media (min-width: 768px) and (max-width: 1199px) {
+  @include tablet {
     grid-template-columns: repeat(2, 1fr);
     
     .achievementBadge:nth-child(n+9) {
@@ -185,35 +163,34 @@
   }
 
   // Mobile: Show all 9 badges (1 column)
-  @media (max-width: 767px) {
+  @include mobile {
     grid-template-columns: 1fr;
     gap: 12px;
   }
 }
 
 .achievementBadge {
-  border-radius: 16px;
+  @include border-radius-md;
   padding: 20px;
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 16px;
-  transition: all 0.3s ease;
+  @include transition-standard;
   position: relative;
   border: 2px solid transparent;
 
   &.earned {
     background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    @include card-shadow;
     border-color: #fbbf24;
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+      @include hover-lift;
+      @include elevated-shadow;
     }
 
     .badgeEmoji {
       background: white;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      @include card-shadow;
     }
 
     .badgeInfo h4 {
@@ -226,19 +203,19 @@
   }
 
   &.inProgress {
-    background: linear-gradient(135deg, rgba(107, 114, 128, 0.1), rgba(75, 85, 99, 0.15));
+    @include gradient-light;
     border-color: rgba(107, 114, 128, 0.3);
-    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
+    @include card-shadow;
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(107, 114, 128, 0.3);
+      @include hover-lift;
+      @include elevated-shadow;
       border-color: rgba(107, 114, 128, 0.4);
     }
 
     .badgeEmoji {
-      background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      @include gradient-light;
+      @include card-shadow;
     }
 
     .badgeInfo h4 {
@@ -268,12 +245,12 @@
         rgba(59, 130, 246, 0.1),
         transparent
       );
-      transition: left 0.6s ease;
+      @include transition-slow;
     }
 
     &:hover {
       transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(107, 114, 128, 0.4);
+      @include elevated-shadow;
       border-color: rgba(59, 130, 246, 0.5);
 
       &::before {
@@ -299,12 +276,9 @@
 
 .badgeEmoji {
   font-size: 2.5rem;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include border-radius-full;
+  @include icon-xl;
+  @include flex-center;
   flex-shrink: 0;
 }
 
@@ -313,19 +287,19 @@
 
   h4 {
     margin: 0 0 4px;
-    font-size: 1.125rem;
+    @include text-large;
     font-weight: 700;
   }
 
   p {
     margin: 0 0 8px;
-    font-size: 0.875rem;
+    @include text-body;
     font-weight: 500;
   }
 }
 
 .completionDate {
-  font-size: 0.75rem;
+  @include text-small;
   font-weight: 500;
   font-style: italic;
   opacity: 0.75;
@@ -344,8 +318,7 @@
 
 // Progress indicators for in-progress badges
 .progressInfo {
-  display: flex;
-  align-items: center;
+  @include flex-center;
   gap: 8px;
   margin-top: 8px;
 }
@@ -354,19 +327,19 @@
   flex: 1;
   height: 6px;
   background: rgba(107, 114, 128, 0.2);
-  border-radius: 3px;
+  @include border-radius-sm;
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  border-radius: 3px;
-  transition: width 0.3s ease;
+  @include gradient-primary;
+  @include border-radius-sm;
+  @include transition-standard;
 }
 
 .progressText {
-  font-size: 0.75rem;
+  @include text-small;
   font-weight: 600;
   color: #6b7280;
   min-width: 35px;
@@ -378,7 +351,7 @@
   margin-top: 8px;
   opacity: 0;
   transform: translateY(4px);
-  transition: all 0.3s ease;
+  @include transition-standard;
 }
 
 .clickText {
@@ -387,14 +360,13 @@
   color: #3b82f6;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
+  @include flex-center;
   gap: 4px;
 
   &::after {
     content: '→';
-    font-size: 0.75rem;
-    transition: transform 0.2s ease;
+    @include text-small;
+    @include transition-fast;
   }
 
   .clickable:hover &::after {
@@ -420,13 +392,13 @@
 
 .insightCard {
   padding: 16px 20px;
-  border-radius: 12px;
+  @include border-radius-md;
   border-left: 4px solid;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  @include card-shadow;
   
   p {
     margin: 0;
-    font-size: 0.9375rem;
+    @include text-body;
     font-weight: 500;
   }
 
@@ -461,6 +433,159 @@
   }
 }
 
+// Habit Performance Cards
+.habitPerformanceSection {
+  h2 {
+    margin: 0 0 20px;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+}
+
+.habitPerformanceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.habitCard {
+  background: white;
+  @include border-radius-md;
+  padding: 24px;
+  @include card-shadow;
+  @include border-subtle;
+  @include transition-standard;
+
+  &:hover {
+    @include elevated-shadow;
+    @include hover-lift;
+  }
+}
+
+.habitHeader {
+  @include flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.habitEmoji {
+  font-size: 1.75rem;
+  width: 48px;
+  height: 48px;
+  @include flex-center;
+  @include border-radius-md;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border: 1px solid #e2e8f0;
+}
+
+.habitInfo {
+  flex: 1;
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  .habitGoal {
+    margin: 0;
+    @include text-small;
+    color: #6b7280;
+    font-weight: 500;
+  }
+}
+
+.habitStats {
+  margin-top: 16px;
+  
+  .statRow {
+    @include flex-between;
+    margin-bottom: 8px;
+    
+    .statLabel {
+      @include text-small;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    
+    .statValue {
+      @include text-small;
+      font-weight: 700;
+      color: #1f2937;
+    }
+  }
+}
+
+.habitProgress {
+  margin-top: 16px;
+
+  .progressLabel {
+    @include flex-between;
+    margin-bottom: 8px;
+
+    span:first-child {
+      @include text-small;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    span:last-child {
+      @include text-small;
+      font-weight: 700;
+      color: #1f2937;
+    }
+  }
+
+  .progressBarContainer {
+    height: 8px;
+    background: #e5e7eb;
+    @include border-radius-sm;
+    overflow: hidden;
+    margin-bottom: 12px;
+
+    .progressBarFill {
+      height: 100%;
+      @include border-radius-sm;
+      @include transition-standard;
+      
+      &.good {
+        background: linear-gradient(90deg, #10b981, #059669);
+      }
+      
+      &.average {
+        background: linear-gradient(90deg, #f59e0b, #d97706);
+      }
+      
+      &.poor {
+        background: linear-gradient(90deg, #ef4444, #dc2626);
+      }
+    }
+  }
+
+  .roomForImprovement {
+    @include flex-start;
+    gap: 8px;
+    padding: 12px;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    @include border-radius-sm;
+    
+    .improvementIcon {
+      font-size: 1rem;
+      color: #d97706;
+    }
+    
+    .improvementText {
+      @include text-small;
+      color: #92400e;
+      font-weight: 500;
+      margin: 0;
+    }
+  }
+}
+
 // Quick Stats
 .quickStatsSection {
   h2 {
@@ -480,605 +605,40 @@
 
 .quickStat {
   background: white;
-  border-radius: 16px;
+  @include border-radius-md;
   padding: 24px;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f3f4f6;
-  transition: all 0.2s ease;
+  @include card-shadow;
+  @include border-subtle;
+  @include transition-fast;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+    @include elevated-shadow;
+    @include hover-lift;
   }
 
   .statValue {
     font-size: 2.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    @include gradient-primary;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 8px;
+    margin: 0 0 8px;
+    line-height: 1.1;
   }
 
   .statLabel {
-    font-size: 1rem;
+    @include text-body;
     color: #6b7280;
-    font-weight: 500;
-  }
-}
-
-// Habit Details Section
-.habitDetailsSection {
-  h2 {
-    margin: 0 0 24px;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #1f2937;
-  }
-}
-
-.habitDetailsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 24px;
-}
-
-.habitDetailCard {
-  background: white;
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f3f4f6;
-  transition: all 0.3s ease;
-
-  &:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    transform: translateY(-4px);
-  }
-}
-
-.habitHeader {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-
-  .habitEmoji {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-  }
-
-  .habitInfo {
-    flex: 1;
-
-    h3 {
-      margin: 0 0 4px;
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #1f2937;
-    }
-
-    p {
-      margin: 0;
-      color: #6b7280;
-      font-size: 0.875rem;
-    }
-  }
-
-  .habitStatus {
-    .activeStreak {
-      background: #fef3c7;
-      color: #92400e;
-      padding: 4px 8px;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 600;
-    }
-
-    .noStreak {
-      font-size: 1.5rem;
-      opacity: 0.5;
-    }
-  }
-}
-
-// Weekly Goal Progress
-.weeklyGoalSection {
-  margin-bottom: 20px;
-  padding: 16px;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 1px solid #f3f4f6;
-}
-
-.goalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #4b5563;
-}
-
-.goalPercentage {
-  color: #3b82f6;
-  font-weight: 700;
-}
-
-.goalProgressBar {
-  height: 8px;
-  background: #e5e7eb;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.goalProgressFill {
-  height: 100%;
-  background: #3b82f6;
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-// Metrics Grid
-.metricsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.metric {
-  text-align: center;
-  padding: 12px 8px;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #f3f4f6;
-
-  .metricValue {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 2px;
-  }
-
-  .metricLabel {
-    font-size: 0.75rem;
-    color: #6b7280;
-    font-weight: 500;
-  }
-}
-
-// Habit Insights
-.habitInsights {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.habitInsight {
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  border-left: 3px solid;
-
-  &.achievement {
-    background: #fef3c7;
-    border-color: #f59e0b;
-    color: #92400e;
-  }
-
-  &.success {
-    background: #d1fae5;
-    border-color: #10b981;
-    color: #065f46;
-  }
-
-  &.warning {
-    background: #fee2e2;
-    border-color: #ef4444;
-    color: #dc2626;
-  }
-
-  &.milestone {
-    background: #f3e8ff;
-    border-color: #8b5cf6;
-    color: #6b21a8;
-  }
-}
-
-// Heatmap Section
-.heatmapSection {
-  h2 {
-    margin: 0 0 24px;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #1f2937;
-  }
-}
-
-.habitHeatmap {
-  background: white;
-  border-radius: 20px;
-  padding: 32px;
-  margin-bottom: 24px;
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.08),
-    0 4px 16px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.1),
-      0 8px 32px rgba(0, 0, 0, 0.06);
-    transform: translateY(-2px);
-  }
-}
-
-.heatmapHeader {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 28px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-
-  .habitEmoji {
-    width: 44px;
-    height: 44px;
-    font-size: 1.5rem;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-    box-shadow: 
-      0 1px 3px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-  }
-
-  h3 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #0f172a;
-    flex: 1;
-    letter-spacing: -0.025em;
-  }
-
-  .yearLabel {
-    font-size: 0.9rem;
-    color: #475569;
     font-weight: 600;
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-    padding: 8px 14px;
-    border-radius: 10px;
-    box-shadow: 
-      0 1px 3px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 }
 
-// GitHub-style heatmap container
-.heatmapContainer {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding: 20px;
-  background: linear-gradient(135deg, #fafbfc, #f8fafc);
-  border-radius: 16px;
-  width: 100%;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 1px 3px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-.dayLabels {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-right: 8px;
-  padding-top: 3px;
-}
-
-.dayLabel {
-  aspect-ratio: 1;
-  max-width: 18px;
-  min-width: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  color: #64748b;
-  font-weight: 600;
-  margin-bottom: 3px;
-  width: 100%;
-  letter-spacing: -0.01em;
-}
-
-.heatmapGrid {
-  display: flex;
-  flex-direction: row;
-  gap: 3px;
-  flex: 1;
-  min-width: 0;
-  width: 100%;
-  justify-content: space-between;
-}
-
-.heatmapWeekColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex: 1;
-  min-width: 14px;
-}
-
-.heatmapDayWrapper {
-  position: relative;
-}
-
-.heatmapDay {
-  width: 100%;
-  aspect-ratio: 1;
-  max-width: 18px;
-  min-width: 10px;
-  border-radius: 4px;
-  background: #f1f5f9;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  position: relative;
-  box-shadow: 
-    0 1px 2px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-
-  &:hover {
-    transform: scale(1.3);
-    z-index: 10;
-    border-color: #475569;
-    box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.15),
-      0 2px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  &.completed {
-    background: linear-gradient(135deg, var(--habit-color, #10b981), color-mix(in srgb, var(--habit-color, #10b981) 80%, white));
-    border-color: color-mix(in srgb, var(--habit-color, #10b981) 70%, black);
-    box-shadow: 
-      0 1px 3px rgba(0, 0, 0, 0.08),
-      0 1px 2px color-mix(in srgb, var(--habit-color, #10b981) 30%, transparent),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    
-    &:hover {
-      background: var(--habit-color, #10b981);
-      border-color: color-mix(in srgb, var(--habit-color, #10b981) 60%, black);
-      box-shadow: 
-        0 6px 16px rgba(0, 0, 0, 0.2),
-        0 3px 8px color-mix(in srgb, var(--habit-color, #10b981) 40%, transparent);
-    }
-  }
-
-  &.future {
-    background: #f8fafc;
-    border-color: rgba(0, 0, 0, 0.04);
-    cursor: default;
-    opacity: 0.5;
-    
-    &:hover {
-      transform: scale(1.15);
-      border-color: rgba(0, 0, 0, 0.08);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-    }
-  }
-}
-
-.heatmapDayEmpty {
-  width: 100%;
-  aspect-ratio: 1;
-  max-width: 18px;
-  min-width: 10px;
-  border-radius: 4px;
-  background: transparent;
-}
-
-.heatmapTooltip {
-  position: fixed;
-  bottom: auto;
-  top: auto;
-  left: auto;
-  right: auto;
-  z-index: 10000;
-  background: rgba(15, 23, 42, 0.96);
-  color: white;
-  padding: 16px 20px;
-  border-radius: 12px;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  min-width: 240px;
-  max-width: 320px;
-  box-shadow: 
-    0 12px 48px rgba(0, 0, 0, 0.4),
-    0 6px 24px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(16px);
-  pointer-events: auto;
-  animation: tooltipFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.tooltipArrow {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 8px solid rgba(15, 23, 42, 0.96);
-}
-
-/* Dark mode support for tooltips */
-[data-theme='dark'] .heatmapTooltip {
-  background: rgba(15, 23, 42, 0.96);
-  color: #f8fafc;
-  box-shadow: 
-    0 12px 48px rgba(0, 0, 0, 0.6),
-    0 6px 24px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-[data-theme='dark'] .tooltipArrow {
-  border-top-color: rgba(15, 23, 42, 0.96);
-}
-
-@keyframes tooltipFadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(4px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
-}
-
-// Animations
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-// Responsive design
-@media (max-width: 768px) {
-  .statsView {
-    padding: 12px;
-    gap: 24px;
-  }
-
-  .header {
-    h1 {
-      font-size: 2rem;
-    }
-
-    p {
-      font-size: 1rem;
-    }
-  }
-
-  .achievementsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .insightsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .quickStatsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .habitDetailsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .habitDetailCard {
-    padding: 16px;
-  }
-
-  .metricsGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .metric {
-    padding: 10px 6px;
-
-    .metricValue {
-      font-size: 1rem;
-    }
-
-    .metricLabel {
-      font-size: 0.6875rem;
-    }
-  }
-
-  .heatmapContainer {
-    padding: 12px;
-    gap: 8px;
-    border-radius: 12px;
-  }
-
-  .heatmapDay, .heatmapDayEmpty {
-    max-width: 12px;
-    min-width: 8px;
-    border-radius: 3px;
-  }
-
-  .dayLabel {
-    font-size: 0.55rem;
-    max-width: 12px;
-    min-width: 10px;
-    margin-bottom: 2px;
-  }
-
-  .heatmapGrid {
-    gap: 2px;
-  }
-
-  .heatmapWeekColumn {
-    gap: 2px;
-    min-width: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .quickStatsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .achievementBadge {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
-  }
-
-  .habitHeader {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
-  }
-
-  .heatmapContainer {
-    gap: 4px;
-    padding: 2px;
-  }
-
-  .heatmapGrid {
-    gap: 1px;
-  }
-
-  .heatmapWeekColumn {
-    gap: 1px;
-  }
-}
-
-// Dark mode styles
+// Dark mode support
 :global(html.dark-mode) {
   .statsView {
     background: #111827;
@@ -1086,10 +646,7 @@
 
   .header {
     h1 {
-      background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      // Gradient already handled by mixin
     }
 
     p {
@@ -1110,137 +667,21 @@
   }
 
   .emptyTips {
-    background: #1f2937;
-    border-color: #374151;
+    @include gradient-dark;
+    @include border-subtle;
 
     h3 {
       color: #f9fafb;
     }
 
-    li {
+    ul li {
       color: #d1d5db;
     }
   }
 
   .spinner {
     border-color: #374151;
-    border-top-color: #3b82f6;
-  }
-
-  .achievementBadge {
-    &.earned {
-      background: linear-gradient(135deg, #d97706, #92400e);
-      border-color: #d97706;
-    }
-
-    &.inProgress {
-      background: linear-gradient(135deg, rgba(55, 65, 81, 0.6), rgba(75, 85, 99, 0.8));
-      border-color: rgba(107, 114, 128, 0.4);
-
-      &:hover {
-        border-color: rgba(107, 114, 128, 0.6);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-      }
-
-      .badgeEmoji {
-        background: linear-gradient(135deg, #374151, #4b5563);
-      }
-
-      .badgeInfo h4 {
-        color: #f3f4f6;
-      }
-
-      .badgeInfo p {
-        color: #d1d5db;
-      }
-    }
-  }
-
-  .progressBar {
-    background: rgba(55, 65, 81, 0.5);
-  }
-
-  .progressText {
-    color: #9ca3af;
-  }
-
-  .clickText {
-    color: #60a5fa;
-  }
-
-  .achievementBadge.clickable {
-    &::before {
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(96, 165, 250, 0.15),
-        transparent
-      );
-    }
-
-    &:hover {
-      border-color: rgba(96, 165, 250, 0.6);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-
-      .badgeEmoji {
-        box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
-      }
-    }
-  }
-
-  .insightCard {
-    &.achievement {
-      background: #451a03;
-      border-color: #d97706;
-      color: #fbbf24;
-    }
-
-    &.success {
-      background: #064e3b;
-      border-color: #059669;
-      color: #34d399;
-    }
-
-    &.warning {
-      background: #450a0a;
-      border-color: #dc2626;
-      color: #f87171;
-    }
-
-    &.tip {
-      background: #1e3a8a;
-      border-color: #2563eb;
-      color: #60a5fa;
-    }
-
-    &.milestone {
-      background: #581c87;
-      border-color: #7c3aed;
-      color: #a78bfa;
-    }
-  }
-
-  .quickStat {
-    background: #1f2937;
-    border-color: #374151;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-
-    &:hover {
-      background: #374151;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    }
-
-    .statLabel {
-      color: #9ca3af;
-    }
-  }
-
-  .habitDetailsSection h2,
-  .achievementsSection h2,
-  .insightsSection h2,
-  .quickStatsSection h2,
-  .heatmapSection h2 {
-    color: #f9fafb;
+    border-top-color: #60a5fa;
   }
 
   .headerText {
@@ -1249,229 +690,203 @@
     }
 
     p {
-      color: #d1d5db;
-    }
-  }
-
-  .habitDetailCard {
-    background: #1f2937;
-    border-color: #374151;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-
-    &:hover {
-      background: #374151;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    }
-
-    .habitInfo {
-      h3 {
-        color: #f9fafb;
-      }
-
-      p {
-        color: #9ca3af;
-      }
-    }
-
-    .habitStatus {
-      .activeStreak {
-        background: #451a03;
-        color: #fbbf24;
-      }
-    }
-  }
-
-  .weeklyGoalSection {
-    background: #374151;
-    border-color: #4b5563;
-  }
-
-  .goalHeader {
-    color: #d1d5db;
-  }
-
-  .goalPercentage {
-    color: #60a5fa;
-  }
-
-  .goalProgressBar {
-    background: #4b5563;
-  }
-
-  .metric {
-    background: #374151;
-    border-color: #4b5563;
-
-    .metricValue {
-      color: #f9fafb;
-    }
-
-    .metricLabel {
       color: #9ca3af;
     }
   }
 
-  .habitInsight {
-    &.achievement {
-      background: #451a03;
-      border-color: #d97706;
-      color: #fbbf24;
-    }
+  .achievementBadge {
+    &.inProgress {
+      @include gradient-dark;
+      border-color: rgba(156, 163, 175, 0.3);
 
-    &.success {
-      background: #064e3b;
-      border-color: #059669;
-      color: #34d399;
-    }
+      .badgeEmoji {
+        @include gradient-dark;
+      }
 
-    &.warning {
-      background: #450a0a;
-      border-color: #dc2626;
-      color: #f87171;
-    }
+      .badgeInfo h4 {
+        color: #f9fafb;
+      }
 
-    &.milestone {
-      background: #581c87;
-      border-color: #7c3aed;
-      color: #a78bfa;
+      .badgeInfo p {
+        color: #d1d5db;
+      }
     }
   }
 
-  .habitHeatmap {
-    background: #1e293b;
-    border-color: #334155;
-    box-shadow: 
-      0 2px 8px rgba(0, 0, 0, 0.4),
-      0 4px 16px rgba(0, 0, 0, 0.2);
+  .progressText {
+    color: #9ca3af;
+  }
 
-    &:hover {
-      background: #334155;
-      box-shadow: 
-        0 8px 24px rgba(0, 0, 0, 0.5),
-        0 4px 16px rgba(0, 0, 0, 0.3);
+  .insightsSection h2 {
+    color: #f9fafb;
+  }
+
+  .quickStatsSection h2 {
+    color: #f9fafb;
+  }
+
+  .quickStat {
+    @include gradient-dark;
+    @include border-subtle;
+
+    .statLabel {
+      color: #9ca3af;
+    }
+  }
+
+  // Habit Performance dark mode
+  .habitPerformanceSection h2 {
+    color: #f9fafb;
+  }
+
+  .habitCard {
+    @include gradient-dark;
+    @include border-subtle;
+  }
+
+  .habitEmoji {
+    background: linear-gradient(135deg, #374151, #4b5563);
+    border-color: #4b5563;
+  }
+
+  .habitInfo {
+    h3 {
+      color: #f9fafb;
     }
 
-    .heatmapHeader {
-      border-bottom-color: rgba(255, 255, 255, 0.1);
+    .habitGoal {
+      color: #9ca3af;
+    }
+  }
 
-      .habitEmoji {
-        background: linear-gradient(135deg, #334155, #475569);
-        box-shadow: 
-          0 1px 3px rgba(0, 0, 0, 0.3),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.1);
+  .habitStats {
+    .statLabel {
+      color: #9ca3af;
+    }
+    
+    .statValue {
+      color: #f9fafb;
+    }
+  }
+
+  .habitProgress {
+    .progressLabel {
+      span:first-child {
+        color: #d1d5db;
       }
 
-      h3 {
-        color: #f8fafc;
-      }
-
-      .yearLabel {
-        background: linear-gradient(135deg, #334155, #475569);
-        color: #cbd5e1;
-        box-shadow: 
-          0 1px 3px rgba(0, 0, 0, 0.3),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.1);
+      span:last-child {
+        color: #f9fafb;
       }
     }
 
-    .heatmapContainer {
-      background: linear-gradient(135deg, #1e293b, #334155);
-      border-color: rgba(255, 255, 255, 0.1);
-      box-shadow: 
-        inset 0 1px 0 rgba(255, 255, 255, 0.1),
-        0 1px 3px rgba(0, 0, 0, 0.2);
-    }
-
-    .dayLabel {
-      color: #94a3b8;
-    }
-
-    .heatmapDay {
+    .progressBarContainer {
       background: #374151;
-      border-color: rgba(255, 255, 255, 0.1);
-      box-shadow: 
-        0 1px 2px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
 
-      &:hover {
-        border-color: #64748b;
-        box-shadow: 
-          0 4px 12px rgba(0, 0, 0, 0.3),
-          0 2px 6px rgba(0, 0, 0, 0.2);
+    .roomForImprovement {
+      background: rgba(251, 191, 36, 0.1);
+      border-color: rgba(251, 191, 36, 0.3);
+      
+      .improvementIcon {
+        color: #fbbf24;
       }
-
-      &.future {
-        background: #2d3748;
-        border-color: rgba(255, 255, 255, 0.05);
-        
-        &:hover {
-          border-color: rgba(255, 255, 255, 0.1);
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        }
+      
+      .improvementText {
+        color: #fcd34d;
       }
     }
   }
 }
 
-// Habit tooltip content styles
-.habitTooltipContent {
-  text-align: left;
-  min-width: 200px;
-}
-
-.tooltipHeader {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.tooltipEmoji {
-  font-size: 1.25rem;
-}
-
-.tooltipHabitName {
-  font-weight: 600;
-  font-size: 0.9375rem;
-}
-
-.tooltipDate {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 4px;
-}
-
-.tooltipTime {
-  font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-style: italic;
-}
-
-.tooltipStatus {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
-  font-style: italic;
-}
-
-// Dark mode tooltip content
-:global(html.dark-mode) {
-  .tooltipHeader {
-    border-bottom-color: rgba(255, 255, 255, 0.2);
+// Responsive design
+@include mobile {
+  .statsView {
+    padding: 16px;
+    gap: 24px;
   }
 
-  .tooltipDate {
-    color: rgba(255, 255, 255, 0.9);
+  .header {
+    h1 {
+      font-size: 2rem;
+    }
+
+    p {
+      @include text-body;
+    }
   }
 
-  .tooltipTime {
-    color: rgba(255, 255, 255, 0.8);
+  .achievementsGrid {
+    gap: 12px;
   }
 
-  .tooltipStatus {
-    color: rgba(255, 255, 255, 0.7);
+  .achievementBadge {
+    padding: 16px;
+    gap: 12px;
+
+    .badgeEmoji {
+      font-size: 2rem;
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  .quickStatsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
+  .quickStat {
+    padding: 20px;
+
+    .statValue {
+      font-size: 2rem;
+    }
+  }
+
+  .insightsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .insightCard {
+    padding: 14px 16px;
+  }
+
+  // Habit Performance mobile styles
+  .habitPerformanceGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .habitCard {
+    padding: 20px;
+  }
+
+  .habitHeader {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .habitEmoji {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+  }
+
+  .habitInfo h3 {
+    font-size: 1rem;
+  }
+
+  .habitStats {
+    margin-top: 14px;
+  }
+
+  .habitProgress {
+    margin-top: 14px;
+
+    .roomForImprovement {
+      padding: 10px;
+    }
   }
 }

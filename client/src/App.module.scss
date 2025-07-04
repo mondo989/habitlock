@@ -1,3 +1,5 @@
+@import 'styles/mixins.scss';
+
 .app {
   min-height: 100vh;
   background: #f8fafc;
@@ -7,15 +9,9 @@
 
 // Loading, error, and auth screens
 .loadingScreen, .errorScreen, .authScreen {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  @include fullscreen-layout;
+  @include gradient-primary;
   color: white;
-  text-align: center;
-  padding: 20px;
 
   .logo {
     margin-bottom: 32px;
@@ -23,7 +19,7 @@
 
   p {
     margin: 16px 0;
-    font-size: 1.125rem;
+    @include text-large;
     opacity: 0.9;
   }
 }
@@ -37,8 +33,7 @@
 }
 
 .logo {
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 12px;
   
   h1 {
@@ -51,23 +46,21 @@
 
 .logoEmoji {
   font-size: 2.5rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  @include icon-with-shadow;
 }
 
 .logoIcon {
-  width: 48px;
-  height: 48px;
+  @include icon-xl;
   object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  @include icon-with-shadow;
 }
 
 .spinner {
-  width: 48px;
-  height: 48px;
+  @include icon-xl;
   border: 4px solid rgba(255, 255, 255, 0.3);
   border-top: 4px solid white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  @include border-radius-full;
+  @include spin-animation;
   margin-bottom: 16px;
 }
 
@@ -85,63 +78,35 @@
 }
 
 .retryButton {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
+  @include button-primary;
   font-size: 1rem;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
-  }
 }
 
 // Navigation
 .nav {
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  @include nav-base;
+  // border-bottom: 1px solid #e5e7eb;
 }
 
 .navContent {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
+  @include nav-content;
 }
 
 .nav .logo {
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: 8px;
+  @include border-radius-sm;
   padding: 4px;
+  @include hover-lift;
   
   &:hover {
     background: #f3f4f6;
-    transform: translateY(-1px);
-  }
-  
-  &:active {
-    transform: translateY(0);
   }
 
   h1 {
     font-size: 1.5rem;
     color: #1f2937;
     margin: 0;
-    transition: color 0.2s ease;
+    @include transition-standard;
   }
   
   &:hover h1 {
@@ -154,31 +119,16 @@
 }
 
 .nav .logoIcon {
-  width: 32px;
-  height: 32px;
+  @include icon-lg;
   object-fit: contain;
 }
 
 .navTabs {
-  display: flex;
-  gap: 8px;
+  @include nav-tabs-container;
 }
 
 .navTab {
-  background: none;
-  border: none;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-weight: 500;
-  color: #6b7280;
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
-  text-decoration: none;
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: 8px;
+  @include button-nav-tab;
 
   // Apply gray fill only to inactive tabs
   &:not(.active) .navIcon path {
@@ -186,78 +136,32 @@
   }
 
   &:hover {
-    color: #374151;
-    background: rgba(99, 102, 241, 0.05);
-    
     &:not(.active) .navIcon path {
       fill: #374151;
     }
   }
 
   &.active {
-    color: #1f2937;
-    font-weight: 600;
-    background: var(--nav-bg-gradient-light);
-    
     &:hover {
       color: #1f2937;
-      background: var(--nav-bg-gradient-light-hover);
     }
   }
 }
 
 .navIcon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  
-  // Ensure SVG is visible
-  svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
+  @include icon-sm;
 }
 
 // Mobile Navigation Tabs (hidden on desktop, shown on mobile)
 .mobileNavTabs {
   display: none;
-  background: white;
-  border-top: 1px solid #e5e7eb;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 90;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  @include mobile-nav-base;
+  // border-top: 1px solid #e5e7eb;
   border-radius: 0;
-  padding: 0 4px;
-  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .mobileNavTab {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 12px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  flex: 1;
-  color: #6b7280;
-  transition: all 0.2s ease;
-  position: relative;
-  min-height: 60px;
-  border-radius: 8px;
-  margin: 4px;
-
-  &:hover {
-    color: #374151;
-    background: rgba(99, 102, 241, 0.05);
-  }
+  @include mobile-nav-tab;
 
   // Apply gray fill only to inactive tabs
   &:not(.active) {
@@ -271,10 +175,6 @@
   }
 
   &.active {
-    color: #1f2937;
-    font-weight: 600;
-    background: var(--nav-bg-gradient-light);
-    
     // Apply gradient purple color to active mobile icons
     .mobileNavIcon path {
       fill: #6965F1 !important; // Nice purple from the gradient
@@ -282,7 +182,6 @@
     
     &:hover {
       color: #1f2937;
-      background: var(--nav-bg-gradient-light-hover);
     }
   }
 }
@@ -296,46 +195,35 @@
 }
 
 .mobileNavIcon {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  
-  // Ensure SVG is visible
-  svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
+  @include icon-md;
 }
 
 .mobileTabText {
-  font-size: 0.75rem;
+  @include text-small;
   font-weight: 500;
   line-height: 1;
+  color: white;
 }
 
 .navActions {
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 16px;
 }
 
 .navMeta {
-  font-size: 0.75rem;
+  @include text-small;
   color: #9ca3af;
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 12px;
 }
 
 .userProfile {
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 8px;
   cursor: pointer;
   padding: 8px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  @include border-radius-sm;
+  @include transition-standard;
   position: relative;
   
   &:hover {
@@ -344,11 +232,7 @@
 }
 
 .profileImage {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #e5e7eb;
+  @include profile-image(32px);
 }
 
 .userDetails {
@@ -359,13 +243,11 @@
 }
 
 .userName {
-  font-size: 0.75rem;
+  @include text-small;
   font-weight: 500;
   color: #374151;
   max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  @include text-truncate;
 }
 
 .dropdownArrow {
@@ -380,35 +262,16 @@
 }
 
 .profileDropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  @include dropdown-base;
   min-width: 240px;
-  z-index: 1000;
-  margin-top: 8px;
-  overflow: hidden;
 }
 
 .dropdownHeader {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-bottom: 1px solid #e2e8f0;
+  @include dropdown-header;
 }
 
 .dropdownProfileImage {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  @include profile-image-elevated(48px);
 }
 
 .dropdownUserInfo {
@@ -423,17 +286,13 @@
   font-size: 0.9rem;
   font-weight: 600;
   color: #1f2937;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  @include text-truncate;
 }
 
 .dropdownUserEmail {
-  font-size: 0.75rem;
+  @include text-small;
   color: #6b7280;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  @include text-truncate;
 }
 
 .dropdownDivider {
@@ -443,24 +302,7 @@
 }
 
 .dropdownItem {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: #fef2f2;
-    color: #dc2626;
-  }
-  
-  &:active {
-    background: #fee2e2;
-  }
+  @include dropdown-item;
 }
 
 .dropdownIcon {
@@ -469,8 +311,7 @@
 }
 
 .userStatus {
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 6px;
   font-size: 0.7rem;
   color: #059669;
@@ -481,8 +322,8 @@
   width: 6px;
   height: 6px;
   background: #10b981;
-  border-radius: 50%;
-  animation: pulse 2s infinite;
+  @include border-radius-full;
+  @include pulse-animation;
 }
 
 .userInfo {
@@ -504,28 +345,27 @@
 .main {
   flex: 1;
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
+  @include container-max-width;
   padding-bottom: 0; // Default no bottom padding
 }
 
 // Footer
 .footer {
   background: white;
+  @include border-subtle;
   border-top: 1px solid #e5e7eb;
   padding: 16px 20px;
   margin-top: auto;
 }
 
 .footerContent {
-  max-width: 1400px;
-  margin: 0 auto;
+  @include container-max-width;
   text-align: center;
 
   p {
     margin: 0;
     color: #6b7280;
-    font-size: 0.875rem;
+    @include text-body;
   }
 }
 
@@ -549,7 +389,7 @@
 }
 
 // Responsive design
-@media (max-width: 768px) {
+@include mobile {
   .navContent {
     padding: 0 12px;
     height: 56px;
@@ -596,8 +436,7 @@
   }
 
   .profileImage {
-    width: 28px;
-    height: 28px;
+    @include profile-image(28px);
   }
 
   .userName {
@@ -622,8 +461,7 @@
   }
 
   .dropdownProfileImage {
-    width: 40px;
-    height: 40px;
+    @include profile-image-elevated(40px);
   }
 
   .dropdownUserName {
@@ -645,7 +483,7 @@
   }
 
   .footerContent p {
-    font-size: 0.75rem;
+    @include text-small;
   }
 
   .loadingScreen, .errorScreen, .authScreen {
@@ -670,7 +508,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@include mobile-small {
   .navContent {
     padding: 8px 12px;
     height: 48px;
@@ -686,8 +524,7 @@
   }
 
   .nav .logoIcon {
-    width: 24px;
-    height: 24px;
+    @include icon-md;
   }
 
   .mobileNavTab {
@@ -730,8 +567,7 @@
   }
 
   .profileImage {
-    width: 24px;
-    height: 24px;
+    @include profile-image(24px);
   }
 
   .userName {
@@ -753,7 +589,7 @@
 }
 
 // Extra small screens (< 360px)
-@media (max-width: 360px) {
+@include mobile-xs {
   .navContent {
     padding: 6px 8px;
     height: 44px;
@@ -785,8 +621,7 @@
   }
 
   .mobileNavIcon {
-    width: 20px;
-    height: 20px;
+    @include icon-sm;
   }
 
   // Adjust padding for extra small screens
@@ -799,8 +634,7 @@
   }
 
   .profileImage {
-    width: 20px;
-    height: 20px;
+    @include profile-image(20px);
   }
 
   .userProfile {
@@ -812,13 +646,9 @@
   }
 }
 
-// CSS Variables for consistent gradients
+// CSS Variables for consistent gradients (now handled by mixins)
 :root {
   --icon-gradient: linear-gradient(135deg, #DE4BAD 0%, #6965F1 100%);
-  --nav-bg-gradient-light: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-  --nav-bg-gradient-light-hover: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-  --nav-bg-gradient-dark: linear-gradient(135deg, rgba(96, 165, 250, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%);
-  --nav-bg-gradient-dark-hover: linear-gradient(135deg, rgba(96, 165, 250, 0.18) 0%, rgba(139, 92, 246, 0.18) 100%);
 }
 
 // Global styles for consistent spacing
@@ -871,7 +701,6 @@
 
   .nav {
     background: #1f2937;
-    border-bottom-color: #374151;
 
     .logo {
       &:hover {
@@ -888,48 +717,9 @@
     }
   }
 
-  // Mobile navigation dark mode
-  .mobileNavTabs {
-    background: #1f2937;
-    border-top-color: #374151;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-  }
 
-  .mobileNavTab {
-    color: #d1d5db;
 
-    &:hover {
-      background: rgba(96, 165, 250, 0.05);
-      color: #f9fafb;
-    }
-
-    // Apply gray fill only to inactive tabs in dark mode
-    &:not(.active) {
-      .mobileNavIcon path {
-        fill: #d1d5db;
-      }
-      
-      &:hover .mobileNavIcon path {
-        fill: #f9fafb;
-      }
-    }
-
-    &.active {
-      color: #f9fafb;
-      background: var(--nav-bg-gradient-dark);
-      
-      // Apply gradient purple color to active mobile icons in dark mode
-      .mobileNavIcon path {
-        fill: #6965F1 !important; // Same purple from the gradient
-      }
-      
-      &:hover {
-        background: var(--nav-bg-gradient-dark-hover);
-      }
-    }
-  }
-
-  // Calendar subtle today button dark mode
+  // Calendar subtle today button dark mode  
   :global(.calendarView) {
     .subtleTodayButton {
       background: rgba(96, 165, 250, 0.12);
@@ -945,39 +735,7 @@
     }
   }
 
-  .navTab {
-    color: #d1d5db;
 
-    // Apply gray fill only to inactive tabs in dark mode
-    &:not(.active) .navIcon path {
-      fill: #d1d5db;
-    }
-
-    &:hover {
-      background: #374151;
-      color: #f9fafb;
-      
-      &:not(.active) .navIcon path {
-        fill: #f9fafb;
-      }
-    }
-
-    &.active {
-      color: white;
-    }
-  }
-
-  .navMeta {
-    color: #9ca3af;
-  }
-
-  .profileImage {
-    border-color: #374151;
-  }
-
-  .userName {
-    color: #d1d5db;
-  }
 
   .userProfile {
     &:hover {
@@ -988,11 +746,12 @@
   .profileDropdown {
     background: #1f2937;
     border-color: #374151;
+    @include elevated-shadow;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
   }
 
   .dropdownHeader {
-    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    @include gradient-dark;
     border-bottom-color: #4b5563;
   }
 
@@ -1048,7 +807,7 @@
   }
 
   .loadingScreen, .errorScreen, .authScreen {
-    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    @include gradient-dark;
   }
 
   .retryButton {
@@ -1059,6 +818,106 @@
     &:hover {
       background: rgba(255, 255, 255, 0.2);
       border-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+// Navigation tabs dark mode
+.navTab {
+  :global(html.dark-mode) & {
+    color: #d1d5db;
+
+    // Apply gray fill only to inactive tabs in dark mode
+    &:not(.active) .navIcon path {
+      fill: #d1d5db;
+    }
+
+    &:hover {
+      background: #374151;
+      color: #f9fafb;
+      
+      &:not(.active) .navIcon path {
+        fill: #f9fafb;
+      }
+    }
+
+    &.active {
+      color: white;
+    }
+  }
+}
+
+.navMeta {
+  :global(html.dark-mode) & {
+    color: #9ca3af;
+  }
+}
+
+.profileImage {
+  :global(html.dark-mode) & {
+    border-color: #374151;
+  }
+}
+
+.userName {
+  :global(html.dark-mode) & {
+    color: #d1d5db;
+  }
+}
+
+.dropdownUserEmail {
+  :global(html.dark-mode) & {
+    color: #9ca3af;
+  }
+}
+
+// Mobile navigation dark mode - Higher specificity to override mixins
+:global(html.dark-mode) {
+  .mobileNavTabs {
+    background: #1f2937;
+    border: 0;
+
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  .nav {
+    border: 0;
+  }
+
+  .mobileNavTab {
+    background: rgba(96, 165, 250, 0.05);
+    opacity: 0.7;
+
+    &:hover {
+      background: rgba(96, 165, 250, 0.05);
+      color: #f9fafb;
+    }
+
+    // Apply gray fill only to inactive tabs in dark mode
+    &:not(.active) {
+      .mobileNavIcon path {
+        fill: #d1d5db;
+        opacity: 0.3;
+      }
+      
+      &:hover .mobileNavIcon path {
+        fill: #f9fafb;
+      }
+    }
+
+    &.active {
+      color: #f9fafb;
+      background: linear-gradient(135deg, rgba(96, 165, 250, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%);
+      opacity: 1;
+      
+      // Apply gradient purple color to active mobile icons in dark mode
+      .mobileNavIcon path {
+        fill: #6965F1; // Same purple from the gradient
+      }
+      
+      &:hover {
+        background: linear-gradient(135deg, rgba(96, 165, 250, 0.18) 0%, rgba(139, 92, 246, 0.18) 100%);
+      }
     }
   }
 }

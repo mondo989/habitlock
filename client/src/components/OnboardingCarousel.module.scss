@@ -1,27 +1,19 @@
 // OnboardingCarousel.module.scss
+@import '../styles/mixins.scss';
+
 .onboardingOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  @include modal-overlay;
   background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 10000;
-  padding: 20px;
   animation: fadeIn 0.3s ease-out;
 }
 
 .onboardingModal {
-  background: white;
+  @include modal-content;
   border-radius: 24px;
   width: 100%;
   max-width: 900px;
   max-height: 90vh;
-  overflow: hidden;
   box-shadow: 
     0 20px 60px rgba(0, 0, 0, 0.3),
     0 8px 24px rgba(0, 0, 0, 0.2);
@@ -29,9 +21,9 @@
 }
 
 .modalHeader {
-  display: flex;
+  @include modal-header;
+  @include flex-between;
   align-items: center;
-  justify-content: space-between;
   padding: 24px 32px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }

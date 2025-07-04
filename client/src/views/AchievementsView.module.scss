@@ -1,6 +1,8 @@
+@import '../styles/mixins.scss';
+
 .achievementsView {
   padding: 32px;
-  max-width: 1200px;
+  @include container-max-width;
   margin: 0 auto;
   min-height: calc(100vh - 200px);
 }
@@ -13,14 +15,14 @@
     font-size: 2.5rem;
     font-weight: 800;
     margin: 0 0 12px;
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #92400e 100%);
+    @include gradient-nav-light;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   
   p {
-    font-size: 1.125rem;
+    @include text-large;
     color: #6b7280;
     margin: 0;
     line-height: 1.6;
@@ -34,6 +36,7 @@
     background: transparent !important;
     backdrop-filter: none !important;
     padding: 0 !important;
+    @include border-radius-full;
     border-radius: 0 !important;
     box-shadow: none !important;
     max-width: none !important;
@@ -49,32 +52,23 @@
 }
 
 .loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  @include flex-column-center;
   min-height: 400px;
   gap: 16px;
   
   .spinner {
-    width: 32px;
-    height: 32px;
+    @include icon-lg;
     border: 3px solid #f3f4f6;
     border-top: 3px solid #3b82f6;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+    @include border-radius-full;
+    @include spin-animation;
   }
   
   p {
     color: #6b7280;
-    font-size: 1rem;
+    @include text-body;
     margin: 0;
   }
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 
 // Dark mode support
@@ -100,7 +94,7 @@
 }
 
 // Responsive design
-@media (max-width: 768px) {
+@include mobile {
   .achievementsView {
     padding: 20px;
   }
@@ -113,7 +107,7 @@
     }
     
     p {
-      font-size: 1rem;
+      @include text-body;
     }
   }
 } 

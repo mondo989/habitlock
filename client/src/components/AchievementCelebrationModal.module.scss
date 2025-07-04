@@ -1,19 +1,13 @@
+@import '../styles/mixins.scss';
+
 // Achievement Celebration Modal - Rich Animations & Visual Effects
 .modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  @include modal-overlay;
   background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 10000;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  @include transition-standard;
   overflow: hidden;
   
   &.open {
@@ -41,7 +35,7 @@
   background: var(--color);
   left: var(--x);
   top: -10px;
-  border-radius: 2px;
+  @include border-radius-sm;
   animation: confettiFall var(--duration) var(--delay) ease-out forwards;
   opacity: 0.8;
   
@@ -51,7 +45,7 @@
     width: 4px;
     height: 4px;
     background: var(--color);
-    border-radius: 50%;
+    @include border-radius-full;
     top: -6px;
     left: 1px;
   }
@@ -70,17 +64,14 @@
 
 // Main Modal Container
 .modal {
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  border-radius: 24px;
+  @include gradient-light;
+  @include border-radius-md;
+  @include elevated-shadow;
+  @include container-max-width;
   padding: 40px;
-  max-width: 480px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.25),
-    0 0 100px rgba(59, 130, 246, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
   transform: scale(0.8) translateY(20px);
@@ -95,19 +86,17 @@
 
 // Celebration Header
 .celebrationHeader {
-  text-align: center;
+  @include flex-center;
   margin-bottom: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
   z-index: 100;
 }
 
 .congratulations {
+  @include text-large;
   font-size: 2.5rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+  @include gradient-primary;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -145,17 +134,14 @@
 
 // Badge Showcase
 .badgeShowcase {
-  display: flex;
-  justify-content: center;
+  @include flex-center;
   margin-bottom: 32px;
   position: relative;
 }
 
 .badgeContainer {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   width: 120px;
   height: 120px;
 }
@@ -165,7 +151,7 @@
   width: 100%;
   height: 100%;
   background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
-  border-radius: 50%;
+  @include border-radius-full;
   animation: badgeGlow 2s ease-in-out infinite;
 }
 
@@ -181,6 +167,7 @@
 }
 
 .badgeEmoji {
+  @include icon-xl;
   font-size: 4rem;
   z-index: 2;
   position: relative;
@@ -208,19 +195,8 @@
   width: 100%;
   height: 100%;
   border: 3px solid rgba(59, 130, 246, 0.5);
-  border-radius: 50%;
-  animation: badgePulse 2s ease-in-out infinite;
-}
-
-@keyframes badgePulse {
-  0% {
-    transform: scale(0.8);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.4);
-    opacity: 0;
-  }
+  @include border-radius-full;
+  @include pulse-animation;
 }
 
 // Achievement Details
@@ -230,7 +206,7 @@
 }
 
 .achievementTitle {
-  font-size: 1.5rem;
+  @include text-large;
   font-weight: 700;
   color: #1f2937;
   margin: 0 0 8px;
@@ -238,7 +214,7 @@
 }
 
 .achievementDescription {
-  font-size: 1rem;
+  @include text-body;
   color: #6b7280;
   margin: 0 0 16px;
   line-height: 1.5;
@@ -258,21 +234,20 @@
 
 // Rarity Badge
 .rarityBadge {
-  display: inline-flex;
-  align-items: center;
+  @include flex-center;
   gap: 6px;
   padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  @include border-radius-md;
+  @include text-small;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   animation: slideInUp 0.6s ease-out 1.2s both;
   
   &.common {
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    @include gradient-light;
     color: #374151;
-    border: 1px solid #d1d5db;
+    @include border-subtle;
   }
   
   &.uncommon {
@@ -311,22 +286,22 @@
 }
 
 .rarityStars {
-  font-size: 0.875rem;
+  @include text-body;
 }
 
 // Motivational Quote Section
 .motivationSection {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 16px;
+  @include gradient-light;
+  @include border-radius-md;
   padding: 24px;
   margin-bottom: 32px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  @include border-subtle;
   position: relative;
   animation: slideInUp 0.6s ease-out 1.4s both;
 }
 
 .quoteIcon {
-  font-size: 1.5rem;
+  @include text-large;
   text-align: center;
   margin-bottom: 12px;
   animation: float 3s ease-in-out infinite;
@@ -338,7 +313,7 @@
 }
 
 .motivationalQuote {
-  font-size: 1rem;
+  @include text-body;
   font-style: italic;
   font-weight: 500;
   color: #374151;
@@ -353,8 +328,8 @@
     position: absolute;
     width: 20px;
     height: 2px;
-    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-    border-radius: 1px;
+    @include gradient-primary;
+    @include border-radius-sm;
   }
   
   &::before {
@@ -372,28 +347,20 @@
 
 // Action Buttons
 .actionButtons {
-  display: flex;
+  @include flex-center;
   gap: 12px;
   animation: slideInUp 0.6s ease-out 1.6s both;
 }
 
 .shareButton,
 .continueButton {
+  @include button-base;
   flex: 1;
-  padding: 14px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   gap: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  border: none;
   
   &:hover {
-    transform: translateY(-2px);
+    @include hover-lift;
   }
   
   &:active {
@@ -402,44 +369,27 @@
 }
 
 .shareButton {
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-  color: #374151;
-  border: 1px solid #d1d5db;
-  
-  &:hover {
-    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
+  @include button-ghost;
 }
 
 .continueButton {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
-  
-  &:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-  }
+  @include button-primary;
 }
 
 // Close Button
 .closeButton {
+  @include reset-button;
   position: absolute;
   top: 16px;
   right: 16px;
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  @include border-radius-sm;
   background: rgba(0, 0, 0, 0.05);
-  border: none;
   color: #6b7280;
-  font-size: 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  @include icon-md;
+  @include flex-center;
+  @include transition-fast;
   
   &:hover {
     background: rgba(0, 0, 0, 0.1);
@@ -449,11 +399,11 @@
 }
 
 // Responsive Design
-@media (max-width: 640px) {
+@include mobile {
   .modal {
     padding: 28px;
     margin: 20px;
-    border-radius: 20px;
+    @include border-radius-md;
   }
   
   .congratulations {
@@ -474,7 +424,7 @@
   }
   
   .motivationalQuote {
-    font-size: 0.9rem;
+    @include text-small;
   }
   
   .actionButtons {
@@ -485,11 +435,8 @@
 // Dark Mode Support
 :global(html.dark-mode) {
   .modal {
-    background: linear-gradient(145deg, #1f2937 0%, #111827 100%);
-    box-shadow: 
-      0 25px 50px rgba(0, 0, 0, 0.5),
-      0 0 100px rgba(59, 130, 246, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    @include gradient-dark;
+    @include elevated-shadow;
     border-color: rgba(255, 255, 255, 0.1);
   }
   
@@ -502,7 +449,7 @@
   }
   
   .motivationSection {
-    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    @include gradient-dark;
     border-color: rgba(255, 255, 255, 0.1);
   }
   
@@ -511,7 +458,7 @@
   }
   
   .shareButton {
-    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    @include gradient-dark;
     color: #d1d5db;
     border-color: rgba(255, 255, 255, 0.2);
     
@@ -532,7 +479,7 @@
   
   .rarityBadge {
     &.common {
-      background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+      @include gradient-dark;
       color: #d1d5db;
       border-color: rgba(255, 255, 255, 0.2);
     }

@@ -1,52 +1,25 @@
+@import '../styles/mixins.scss';
+
 .modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  @include modal-overlay;
   background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  backdrop-filter: blur(4px);
 }
 
 .modalContent {
-  background: white;
-  border-radius: 16px;
-  width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  @include modal-content;
   animation: modalSlideIn 0.3s ease-out;
-  display: flex;
-  flex-direction: column;
 }
 
 .modalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  @include modal-header;
   padding: 24px 24px 0;
-  border-bottom: 1px solid #f3f4f6;
-
-  h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1f2937;
-  }
 }
 
 .dayLabel {
   margin: 4px 0 0;
   color: #6b7280;
-  font-size: 0.875rem;
-  display: flex;
-  align-items: center;
+  @include text-body;
+  @include flex-start;
   gap: 8px;
 }
 
@@ -54,20 +27,19 @@
   background: #3b82f6;
   color: white;
   padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  @include border-radius-full;
+  @include text-small;
   font-weight: 500;
 }
 
 .closeButton {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
+  @include reset-button;
+  @include icon-md;
+  @include flex-center;
   color: #6b7280;
   padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  @include border-radius-sm;
+  @include transition-fast;
   line-height: 1;
 
   &:hover {
@@ -83,35 +55,34 @@
 
   h3 {
     margin: 0 0 16px;
-    font-size: 1.125rem;
+    @include text-large;
     font-weight: 600;
     color: #374151;
   }
 }
 
 .habitsList {
-  display: flex;
-  flex-direction: column;
+  @include flex-column-center;
+  align-items: stretch;
   gap: 12px;
 }
 
 .habitItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  @include flex-between;
   padding: 20px;
   background: #f9fafb;
+  @include border-subtle;
   border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  @include border-radius-md;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include transition-fast;
   min-height: 80px;
 
   &:hover {
     background: #f3f4f6;
     border-color: #d1d5db;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    @include hover-lift;
+    @include card-shadow;
   }
 
   &.selected {
@@ -145,8 +116,7 @@
 }
 
 .habitInfo {
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 16px;
   flex: 1;
 }
@@ -154,16 +124,14 @@
 .habitEmoji {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.375rem;
+  @include border-radius-md;
+  @include flex-center;
+  @include icon-xl;
   flex-shrink: 0;
   border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  @include card-shadow;
 }
 
 .habitDetails {
@@ -178,21 +146,21 @@
 }
 
 .habitDescription {
-  font-size: 0.875rem;
+  @include text-body;
   color: #6b7280;
   margin-bottom: 8px;
   line-height: 1.4;
 }
 
 .habitStats {
-  display: flex;
-  flex-direction: column;
+  @include flex-column-center;
+  align-items: flex-start;
   gap: 6px;
 }
 
 .weeklyProgress {
-  display: flex;
-  flex-direction: column;
+  @include flex-column-center;
+  align-items: flex-start;
   gap: 4px;
 }
 
@@ -205,7 +173,7 @@
 .progressBar {
   height: 6px;
   background: #f1f5f9;
-  border-radius: 3px;
+  @include border-radius-sm;
   overflow: hidden;
   width: 100%;
   min-width: 120px;
@@ -213,39 +181,35 @@
 
 .progressFill {
   height: 100%;
-  border-radius: 3px;
-  transition: width 0.3s ease;
+  @include border-radius-sm;
+  @include transition-standard;
 }
 
 .goalMetBadge {
-  font-size: 0.75rem;
+  @include text-small;
   color: #f59e0b;
   font-weight: 600;
   background: rgba(251, 191, 36, 0.1);
   padding: 2px 6px;
-  border-radius: 4px;
+  @include border-radius-sm;
   align-self: flex-start;
 }
 
 .habitActions {
-  display: flex;
-  align-items: center;
+  @include flex-center;
   gap: 12px;
   flex-shrink: 0;
   margin-bottom: auto;
 }
 
 .editButton {
+  @include reset-button;
   background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0;
-  cursor: pointer;
+  @include border-subtle;
+  @include border-radius-sm;
   color: #6b7280;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include transition-fast;
+  @include flex-center;
   width: 24px;
   height: 24px;
 
@@ -270,12 +234,10 @@
   width: 24px;
   height: 24px;
   border: 2px solid #d1d5db;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  font-size: 14px;
+  @include border-radius-sm;
+  @include flex-center;
+  @include transition-fast;
+  @include text-body;
   font-weight: 600;
   color: white;
 
@@ -292,7 +254,7 @@
 
   p {
     margin: 0;
-    font-size: 1rem;
+    @include text-body;
   }
 }
 
@@ -300,71 +262,56 @@
   padding: 16px 24px;
   border-top: 1px solid #f3f4f6;
   background: #f9fafb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  @include flex-between;
   gap: 16px;
 }
 
 .summary {
-  font-size: 0.875rem;
+  @include text-body;
   color: #6b7280;
   font-weight: 500;
-  display: flex;
-  flex-direction: column;
+  @include flex-column-center;
+  align-items: flex-start;
   gap: 8px;
 }
 
 .keyboardHints {
-  display: flex;
+  @include flex-center;
   gap: 12px;
   opacity: 0.7;
 }
 
 .keyHint {
-  display: flex;
-  align-items: center;
+  @include flex-center;
   gap: 4px;
-  font-size: 0.75rem;
+  @include text-small;
   color: #9ca3af;
 }
 
 .key {
   background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
+  @include border-subtle;
+  @include border-radius-sm;
   padding: 2px 6px;
   font-size: 0.6875rem;
   font-family: monospace;
   font-weight: 600;
   color: #6b7280;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  @include card-shadow;
 }
 
 .actions {
-  display: flex;
+  @include flex-center;
   gap: 8px;
 }
 
 .cancelButton, .saveButton {
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-  border: none;
+  @include button-base;
+  @include transition-fast;
 }
 
 .cancelButton {
-  background: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
-
-  &:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
-  }
+  @include button-ghost;
 }
 
 .saveButton {
@@ -372,12 +319,7 @@
   color: #9ca3af;
 
   &.hasChanges {
-    background: #3b82f6;
-    color: white;
-
-    &:hover {
-      background: #2563eb;
-    }
+    @include button-primary;
   }
 
   &:disabled {
@@ -398,7 +340,7 @@
 }
 
 // Responsive design
-@media (max-width: 640px) {
+@include mobile {
   .modalOverlay {
     padding: 12px;
   }
@@ -450,7 +392,7 @@
   .habitEmoji {
     width: 40px;
     height: 40px;
-    font-size: 1.25rem;
+    @include icon-lg;
   }
 
   .habitActions {
@@ -480,36 +422,45 @@
     min-width: 100px;
   }
 }
-
-// Dark mode styles
-:global(html.dark-mode) {
-  .modalOverlay {
+// Dark mode styles - using nested selectors for proper CSS modules scope
+.modalOverlay {
+  :global(html.dark-mode) & {
     background: rgba(0, 0, 0, 0.7);
   }
+}
 
-  .modalContent {
+.modalContent {
+  :global(html.dark-mode) & {
     background: #1f2937;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
   }
+}
 
-  .modalHeader {
+.modalHeader {
+  :global(html.dark-mode) & {
     border-bottom-color: #4b5563;
 
     h2 {
       color: #f9fafb;
     }
   }
+}
 
-  .dayLabel {
+.dayLabel {
+  :global(html.dark-mode) & {
     color: #9ca3af;
   }
+}
 
-  .todayBadge {
+.todayBadge {
+  :global(html.dark-mode) & {
     background: #3b82f6;
     color: white;
   }
+}
 
-  .closeButton {
+.closeButton {
+  :global(html.dark-mode) & {
     color: #9ca3af;
 
     &:hover {
@@ -517,14 +468,18 @@
       color: #d1d5db;
     }
   }
+}
 
-  .modalBody {
-    h3 {
+.modalBody {
+  h3 {
+    :global(html.dark-mode) & {
       color: #d1d5db;
     }
   }
+}
 
-  .habitItem {
+.habitItem {
+  :global(html.dark-mode) & {
     background: #374151;
     border-color: #4b5563;
 
@@ -561,35 +516,49 @@
       }
     }
   }
+}
 
-  .habitEmoji {
+.habitEmoji {
+  :global(html.dark-mode) & {
     border-color: rgba(255, 255, 255, 0.4);
     color: white;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   }
+}
 
-  .habitName {
+.habitName {
+  :global(html.dark-mode) & {
     color: #f9fafb;
   }
+}
 
-  .habitDescription {
+.habitDescription {
+  :global(html.dark-mode) & {
     color: #9ca3af;
   }
+}
 
-  .progressText {
+.progressText {
+  :global(html.dark-mode) & {
     color: #9ca3af;
   }
+}
 
-  .progressBar {
+.progressBar {
+  :global(html.dark-mode) & {
     background: #4b5563;
   }
+}
 
-  .goalMetBadge {
+.goalMetBadge {
+  :global(html.dark-mode) & {
     color: #fbbf24;
     background: rgba(251, 191, 36, 0.2);
   }
+}
 
-  .editButton {
+.editButton {
+  :global(html.dark-mode) & {
     background: #4b5563;
     border-color: #6b7280;
     color: #9ca3af;
@@ -605,8 +574,10 @@
       height: 12px;
     }
   }
+}
 
-  .checkmark {
+.checkmark {
+  :global(html.dark-mode) & {
     border-color: #6b7280;
     color: white;
 
@@ -615,36 +586,48 @@
       border-color: #3b82f6;
     }
   }
+}
 
-  .emptyState {
+.emptyState {
+  :global(html.dark-mode) & {
     color: #9ca3af;
 
     p {
       color: #9ca3af;
     }
   }
+}
 
-  .modalFooter {
+.modalFooter {
+  :global(html.dark-mode) & {
     border-top-color: #4b5563;
     background: #374151;
   }
+}
 
-  .summary {
+.summary {
+  :global(html.dark-mode) & {
     color: #9ca3af;
   }
+}
 
-  .keyHint {
+.keyHint {
+  :global(html.dark-mode) & {
     color: #6b7280;
   }
+}
 
-  .key {
+.key {
+  :global(html.dark-mode) & {
     background: #4b5563;
     border-color: #6b7280;
     color: #9ca3af;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
+}
 
-  .cancelButton {
+.cancelButton {
+  :global(html.dark-mode) & {
     background: #4b5563;
     color: #d1d5db;
     border-color: #6b7280;
@@ -655,18 +638,15 @@
       border-color: #9ca3af;
     }
   }
+}
 
-  .saveButton {
+.saveButton {
+  :global(html.dark-mode) & {
     background: #4b5563;
     color: #6b7280;
 
     &.hasChanges {
-      background: #3b82f6;
-      color: white;
-
-      &:hover {
-        background: #2563eb;
-      }
+      @include button-primary;
     }
   }
 } 

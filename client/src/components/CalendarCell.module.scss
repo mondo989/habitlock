@@ -1,3 +1,5 @@
+@import '../styles/mixins.scss';
+
 .calendarCell {
   position: relative;
   min-height: 120px;
@@ -44,7 +46,7 @@
         width: 28px;
         height: 28px;
         border: 1.5px solid #3b82f6;
-        border-radius: 50%;
+        @include border-radius-full;
         opacity: 0.8;
         pointer-events: none;
       }
@@ -58,7 +60,7 @@
         width: 28px;
         height: 28px;
         background: rgba(59, 130, 246, 0.08);
-        border-radius: 50%;
+        @include border-radius-full;
         z-index: -1;
         pointer-events: none;
         left: 5px;
@@ -180,7 +182,7 @@
 // Tooltip content styles
 .tooltipDate {
   font-weight: 600;
-  font-size: 0.875rem;
+  @include text-body;
   margin-bottom: 6px;
   padding-bottom: 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -188,8 +190,7 @@
 }
 
 .tooltipHabit {
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 8px;
   margin: 4px 0;
 }
@@ -199,12 +200,12 @@
 }
 
 .tooltipName {
-  font-size: 0.875rem;
+  @include text-body;
   font-weight: 500;
 }
 
 .goalMet {
-  font-size: 0.75rem;
+  @include text-small;
   margin-left: auto;
   font-weight: 600;
 }
@@ -401,7 +402,7 @@
 
 
 // Responsive adjustments
-@media (max-width: 768px) {
+@include mobile {
   .calendarCell {
     min-height: 100px;
     padding: 12px 10px;
@@ -419,12 +420,12 @@
     }
     
     .habitEmojis:has(.habitEmoji:nth-child(4)) & {
-      font-size: 0.875rem;
+      @include text-body;
     }
   }
 
   .dayNumber {
-    font-size: 0.875rem;
+    @include text-body;
   }
 
   // Faster animations on mobile for better performance
@@ -443,7 +444,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@include mobile-small {
   .calendarCell {
     min-height: 85px;
     padding: 10px 8px;
@@ -457,11 +458,11 @@
     }
     
     .habitEmojis:has(.habitEmoji:nth-child(3)) & {
-      font-size: 0.875rem;
+      @include text-body;
     }
     
     .habitEmojis:has(.habitEmoji:nth-child(4)) & {
-      font-size: 0.75rem;
+      @include text-small;
     }
   }
 
@@ -514,9 +515,9 @@
   }
 }
 
-// Dark mode styles
-:global(html.dark-mode) {
-  .calendarCell {
+// Dark mode styles - using nested selectors for proper CSS modules scope
+.calendarCell {
+  :global(html.dark-mode) & {
     background: rgba(31, 41, 55, 0.4);
 
     &.otherMonth {
@@ -539,6 +540,15 @@
         
         &::after {
           background: rgba(96, 165, 250, 0.1);
+        }
+      }
+
+      &.hasCompletions {
+        &::before {
+          border-color: rgba(96, 165, 250, 0.8);
+          box-shadow: 
+            0 0 0 1px rgba(59, 130, 246, 0.4),
+            0 4px 12px rgba(59, 130, 246, 0.3);
         }
       }
     }
@@ -592,12 +602,16 @@
       }
     }
   }
+}
 
-  .dayNumber {
+.dayNumber {
+  :global(html.dark-mode) & {
     color: #e5e7eb;
   }
+}
 
-  .habitEmoji {
+.habitEmoji {
+  :global(html.dark-mode) & {
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 
     &:hover {
@@ -608,23 +622,27 @@
       filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
     }
   }
+}
 
-  // Tooltip styles in dark mode
-  .tooltipDate {
+// Tooltip styles in dark mode
+.tooltipDate {
+  :global(html.dark-mode) & {
     border-bottom-color: rgba(255, 255, 255, 0.3);
   }
+}
 
-  // Today cell with completions in dark mode
-  .calendarCell.today.hasCompletions {
-    &::before {
-      border-color: rgba(96, 165, 250, 0.8);
-      box-shadow: 
-        0 0 0 1px rgba(59, 130, 246, 0.4),
-        0 4px 12px rgba(59, 130, 246, 0.3);
+.loadingCell {
+  :global(html.dark-mode) & {
+    &.hasCompletions {
+      animation: 
+        cellFadeIn 0.4s ease-out var(--loading-delay, 0s) both,
+        backgroundGlow 0.6s ease-out var(--background-delay, 0.1s) both;
     }
   }
+}
 
-  // Dark mode loading animation adjustments
+// Dark mode loading animation adjustments - keeping as global since it's a keyframe
+:global(html.dark-mode) {
   @keyframes backgroundGlowDark {
     from {
       background-color: transparent;
@@ -632,14 +650,6 @@
     }
     to {
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
-    }
-  }
-  
-  .loadingCell {
-    &.hasCompletions {
-      animation: 
-        cellFadeIn 0.4s ease-out var(--loading-delay, 0s) both,
-        backgroundGlow 0.6s ease-out var(--background-delay, 0.1s) both;
     }
   }
 } 

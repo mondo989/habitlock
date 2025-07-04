@@ -1,83 +1,80 @@
+@import '../styles/mixins.scss';
+
 .animatedCalendar {
   position: relative;
-  max-width: 400px;
+  @include container-max-width;
   margin: 0 auto;
 }
 
 .calendarHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  @include flex-between;
   margin-bottom: 20px;
   padding: 0 4px;
 
   h3 {
     margin: 0;
-    font-size: 1.25rem;
+    @include text-large;
     font-weight: 600;
     color: #1f2937;
   }
 }
 
 .streakIndicator {
-  display: flex;
-  align-items: center;
+  @include flex-center;
   gap: 6px;
   padding: 6px 12px;
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  border-radius: 20px;
+  @include gradient-nav-light;
+  @include border-radius-full;
   color: white;
-  font-size: 0.75rem;
+  @include text-small;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-  animation: streakPulse 2s ease-in-out infinite;
+  @include card-shadow;
+  @include pulse-animation;
 }
 
 .streakIcon {
-  width: 14px;
-  height: 14px;
+  @include icon-xs;
   fill: currentColor;
-  animation: sparkle 1.5s ease-in-out infinite;
+  @include sparkle-animation;
 }
 
 .habitTitle {
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 12px;
   margin-bottom: 16px;
   padding: 12px 16px;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   border: 1px solid #bae6fd;
-  border-radius: 12px;
+  @include border-radius-md;
   color: #0369a1;
 }
 
 .habitTitleEmoji {
-  font-size: 20px;
+  @include icon-md;
   flex-shrink: 0;
 }
 
 .habitTitleInfo {
   flex: 1;
-  display: flex;
-  flex-direction: column;
+  @include flex-column-center;
+  align-items: flex-start;
   gap: 6px;
 }
 
 .habitTitleText {
-  font-size: 0.875rem;
+  @include text-body;
   font-weight: 600;
   margin: 0;
 }
 
 .weeklyProgress {
-  display: flex;
-  flex-direction: column;
+  @include flex-column-center;
+  align-items: flex-start;
   gap: 4px;
 }
 
 .weeklyCount {
-  font-size: 0.75rem;
+  @include text-small;
   font-weight: 500;
   color: #0369a1;
   opacity: 0.8;
@@ -87,15 +84,15 @@
   width: 100%;
   height: 4px;
   background: rgba(3, 105, 161, 0.2);
-  border-radius: 2px;
+  @include border-radius-sm;
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
   background: linear-gradient(90deg, #0369a1 0%, #0284c7 100%);
-  border-radius: 2px;
-  transition: width 0.8s ease-out;
+  @include border-radius-sm;
+  @include transition-slow;
   animation: fillProgress 1s ease-out;
 }
 
@@ -109,7 +106,7 @@
   aspect-ratio: 1;
   position: relative;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  @include transition-fast;
 
   &:hover {
     transform: scale(1.05);
@@ -126,7 +123,7 @@
   fill: #f9fafb;
   stroke: #e5e7eb;
   stroke-width: 1;
-  transition: all 0.3s ease;
+  @include transition-standard;
 }
 
 .day.completed .dayBackground {
@@ -168,7 +165,7 @@
 }
 
 .habitEmoji {
-  font-size: 14px;
+  @include text-body;
   text-anchor: middle;
   dominant-baseline: middle;
   opacity: 0;
@@ -188,12 +185,12 @@
 }
 
 .dayNumber {
-  font-size: 12px;
+  @include text-small;
   font-weight: 600;
   text-anchor: middle;
   dominant-baseline: middle;
   fill: #6b7280;
-  transition: fill 0.3s ease;
+  @include transition-standard;
 }
 
 .day.completed .dayNumber,
@@ -220,17 +217,15 @@
   top: -80px;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  @include flex-column-center;
   gap: 4px;
   padding: 16px 24px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  border-radius: 16px;
-  font-size: 0.875rem;
+  @include border-radius-md;
+  @include text-body;
   font-weight: 600;
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  @include card-shadow;
   animation: notificationSlide 2s ease-out forwards;
   z-index: 10;
   text-align: center;
@@ -238,12 +233,12 @@
 }
 
 .notificationEmoji {
-  font-size: 24px;
+  @include icon-md;
   animation: notificationEmojiBounce 0.6s ease-out;
 }
 
 .notificationProgress {
-  font-size: 0.75rem;
+  @include text-small;
   opacity: 0.9;
   font-weight: 500;
 }
@@ -357,73 +352,101 @@
   }
 }
 
-// Dark mode support
-:global(html.dark-mode) {
-  .calendarHeader h3 {
-    color: #f9fafb;
+// Dark mode support - using nested selectors for proper CSS modules scope
+.calendarHeader {
+  h3 {
+    :global(html.dark-mode) & {
+      color: #f9fafb;
+    }
   }
+}
 
-  .habitTitle {
+.habitTitle {
+  :global(html.dark-mode) & {
     background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     border-color: #475569;
     color: #38bdf8;
   }
+}
 
-  .weeklyCount {
+.weeklyCount {
+  :global(html.dark-mode) & {
     color: #38bdf8;
   }
+}
 
-  .progressBar {
+.progressBar {
+  :global(html.dark-mode) & {
     background: rgba(56, 189, 248, 0.2);
   }
+}
 
-  .progressFill {
+.progressFill {
+  :global(html.dark-mode) & {
     background: linear-gradient(90deg, #38bdf8 0%, #0ea5e9 100%);
   }
+}
 
-  .dayBackground {
+.dayBackground {
+  :global(html.dark-mode) & {
     fill: #374151;
     stroke: #4b5563;
   }
+}
 
-  .dayNumber {
+.dayNumber {
+  :global(html.dark-mode) & {
     fill: #d1d5db;
   }
+}
 
-  .day.completed .dayBackground,
-  .day.animating .dayBackground {
-    fill: #10b981;
-    stroke: #059669;
+.day {
+  &.completed .dayBackground,
+  &.animating .dayBackground {
+    :global(html.dark-mode) & {
+      fill: #10b981;
+      stroke: #059669;
+    }
   }
 
-  .day.today .dayBackground {
-    fill: #6366f1;
-    stroke: #4f46e5;
+  &.today .dayBackground {
+    :global(html.dark-mode) & {
+      fill: #6366f1;
+      stroke: #4f46e5;
+    }
   }
 
-  .day.animating.today .dayBackground {
-    fill: #6366f1;
-    stroke: #4f46e5;
+  &.animating.today .dayBackground {
+    :global(html.dark-mode) & {
+      fill: #6366f1;
+      stroke: #4f46e5;
+    }
   }
 
-  .day.today .progressBorder {
-    stroke: #8b5cf6;
-    filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.5));
+  &.today .progressBorder {
+    :global(html.dark-mode) & {
+      stroke: #8b5cf6;
+      filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.5));
+    }
   }
 
-  .day.today .ripple {
-    stroke: #8b5cf6;
+  &.today .ripple {
+    :global(html.dark-mode) & {
+      stroke: #8b5cf6;
+    }
   }
 
-  .day.completed .dayNumber,
-  .day.today .dayNumber,
-  .day.animating .dayNumber {
-    fill: white;
+  &.completed .dayNumber,
+  &.today .dayNumber,
+  &.animating .dayNumber {
+    :global(html.dark-mode) & {
+      fill: white;
+    }
   }
 }
 
 // Responsive adjustments
-@media (max-width: 768px) {
+@include mobile {
   .animatedCalendar {
     max-width: 320px;
   }
@@ -442,8 +465,7 @@
   }
 
   .streakIcon {
-    width: 12px;
-    height: 12px;
+    @include icon-xs;
   }
 
   .habitTitle {
@@ -453,11 +475,11 @@
   }
 
   .habitTitleEmoji {
-    font-size: 18px;
+    @include icon-sm;
   }
 
   .habitTitleText {
-    font-size: 0.8rem;
+    @include text-small;
   }
 
   .weeklyCount {
@@ -471,7 +493,7 @@
   }
 
   .notificationEmoji {
-    font-size: 20px;
+    @include icon-md;
   }
 
   .calendarGrid {
@@ -489,15 +511,15 @@
   .notification {
     top: -50px;
     padding: 10px 16px;
-    font-size: 0.8rem;
+    @include text-small;
   }
 
   .notificationEmoji {
-    font-size: 16px;
+    @include icon-sm;
   }
 }
 
-@media (max-width: 480px) {
+@include mobile-small {
   .animatedCalendar {
     max-width: 280px;
   }
@@ -508,11 +530,11 @@
   }
 
   .habitTitleEmoji {
-    font-size: 16px;
+    @include icon-sm;
   }
 
   .habitTitleText {
-    font-size: 0.75rem;
+    @include text-small;
   }
 
   .weeklyCount {
@@ -526,7 +548,7 @@
   }
 
   .notificationEmoji {
-    font-size: 18px;
+    @include icon-sm;
   }
 
   .calendarGrid {

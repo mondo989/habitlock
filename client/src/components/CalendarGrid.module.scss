@@ -1,12 +1,15 @@
+@import '../styles/mixins.scss';
+
 .calendarGrid {
   display: flex;
   flex-direction: column;
   gap: 0;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1);
+  @include card-shadow-hover;
   background: white;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.04);
 }
 
 .dayHeaders {
@@ -67,10 +70,10 @@
 }
 
 // Responsive design
-@media (max-width: 768px) {
+@include mobile {
   .dayHeader {
     padding: 16px 8px;
-    font-size: 0.75rem;
+    @include text-small;
     letter-spacing: 0.6px;
   }
 
@@ -87,33 +90,39 @@
 .calendarWeek {
   min-height: 120px;
 
-  @media (max-width: 768px) {
+  @include mobile {
     min-height: 100px;
   }
   
-  @media (max-width: 480px) {
+  @include mobile-small {
     min-height: 85px;
   }
 }
 
 // Dark mode styles
-:global(html.dark-mode) {
-  .calendarGrid {
+.calendarGrid {
+  :global(html.dark-mode) & {
     background: #1a1d23;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
     border-color: rgba(255, 255, 255, 0.08);
   }
+}
 
-  .dayHeaders {
+.dayHeaders {
+  :global(html.dark-mode) & {
     background: #1e2328;
     border-bottom-color: rgba(255, 255, 255, 0.08);
   }
+}
 
-  .dayHeader {
+.dayHeader {
+  :global(html.dark-mode) & {
     color: #9ca3af;
   }
+}
 
-  .calendarWeek {
+.calendarWeek {
+  :global(html.dark-mode) & {
     border-bottom-color: rgba(255, 255, 255, 0.06);
 
     :global(.calendarCell) {

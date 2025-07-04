@@ -1,0 +1,581 @@
+// ========================================
+// MIXINS FOR HABITLOCK STYLING
+// ========================================
+
+// ----------------------------------------
+// LAYOUT MIXINS
+// ----------------------------------------
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-column-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@mixin fullscreen-layout {
+  min-height: 100vh;
+  @include flex-column-center;
+  text-align: center;
+  padding: 20px;
+}
+
+@mixin container-max-width {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// ----------------------------------------
+// VISUAL MIXINS
+// ----------------------------------------
+
+@mixin card-shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@mixin card-shadow-hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@mixin elevated-shadow {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+@mixin border-subtle {
+  border: 1px solid #e5e7eb;
+}
+
+@mixin border-radius-sm {
+  border-radius: 8px;
+}
+
+@mixin border-radius-md {
+  border-radius: 12px;
+}
+
+@mixin border-radius-full {
+  border-radius: 50%;
+}
+
+// ----------------------------------------
+// GRADIENT MIXINS
+// ----------------------------------------
+
+@mixin gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+@mixin gradient-dark {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+}
+
+@mixin gradient-light {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+@mixin gradient-nav-light {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+}
+
+@mixin gradient-nav-light-hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+}
+
+@mixin gradient-nav-dark {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%);
+}
+
+@mixin gradient-nav-dark-hover {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.18) 0%, rgba(139, 92, 246, 0.18) 100%);
+}
+
+// ----------------------------------------
+// BUTTON MIXINS
+// ----------------------------------------
+
+@mixin button-base {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  @include border-radius-sm;
+  
+  &:focus {
+    outline: none;
+  }
+}
+
+@mixin button-primary {
+  @include button-base;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+@mixin button-ghost {
+  @include button-base;
+  background: none;
+  color: #6b7280;
+  padding: 8px 16px;
+  
+  &:hover {
+    color: #374151;
+    background: rgba(99, 102, 241, 0.05);
+  }
+}
+
+@mixin button-nav-tab {
+  @include button-ghost;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  
+  &.active {
+    color: #1f2937;
+    font-weight: 600;
+    @include gradient-nav-light;
+    
+    &:hover {
+      @include gradient-nav-light-hover;
+    }
+  }
+}
+
+// ----------------------------------------
+// ICON MIXINS
+// ----------------------------------------
+
+@mixin icon-size($size) {
+  width: $size;
+  height: $size;
+  flex-shrink: 0;
+  
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+}
+
+@mixin icon-xs {
+  @include icon-size(16px);
+}
+
+@mixin icon-sm {
+  @include icon-size(20px);
+}
+
+@mixin icon-md {
+  @include icon-size(24px);
+}
+
+@mixin icon-lg {
+  @include icon-size(32px);
+}
+
+@mixin icon-xl {
+  @include icon-size(48px);
+}
+
+@mixin icon-with-shadow {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+// ----------------------------------------
+// NAVIGATION MIXINS
+// ----------------------------------------
+
+@mixin nav-base {
+  background: white;
+  @include border-subtle;
+  @include card-shadow;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+@mixin nav-content {
+  @include container-max-width;
+  @include flex-between;
+  padding: 0 20px;
+  height: 64px;
+}
+
+@mixin nav-tabs-container {
+  display: flex;
+  gap: 8px;
+}
+
+@mixin mobile-nav-base {
+  @include nav-base;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: auto;
+  z-index: 90;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 0 4px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+@mixin mobile-nav-tab {
+  @include button-base;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  color: #6b7280;
+  min-height: 60px;
+  margin: 4px;
+  
+  &:hover {
+    color: #374151;
+    background: rgba(99, 102, 241, 0.05);
+  }
+  
+  &.active {
+    color: #1f2937;
+    font-weight: 600;
+    @include gradient-nav-light;
+    
+    &:hover {
+      @include gradient-nav-light-hover;
+    }
+  }
+}
+
+// ----------------------------------------
+// DROPDOWN MIXINS
+// ----------------------------------------
+
+@mixin dropdown-base {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  @include border-subtle;
+  @include border-radius-md;
+  @include elevated-shadow;
+  z-index: 1000;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+@mixin dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  @include gradient-light;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+@mixin dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+  
+  &:active {
+    background: #fee2e2;
+  }
+}
+
+// ----------------------------------------
+// PROFILE MIXINS
+// ----------------------------------------
+
+@mixin profile-image($size) {
+  width: $size;
+  height: $size;
+  @include border-radius-full;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+@mixin profile-image-elevated($size) {
+  @include profile-image($size);
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+// ----------------------------------------
+// RESPONSIVE MIXINS
+// ----------------------------------------
+
+@mixin mobile {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
+@mixin mobile-small {
+  @media (max-width: 480px) {
+    @content;
+  }
+}
+
+@mixin mobile-xs {
+  @media (max-width: 360px) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: 769px) and (max-width: 1024px) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: 1025px) {
+    @content;
+  }
+}
+
+// ----------------------------------------
+// ANIMATION MIXINS
+// ----------------------------------------
+
+@mixin transition-fast {
+  transition: all 0.2s ease;
+}
+
+@mixin transition-standard {
+  transition: all 0.3s ease;
+}
+
+@mixin transition-slow {
+  transition: all 0.6s ease;
+}
+
+@mixin hover-lift {
+  transform: translateY(-2px);
+}
+
+@mixin pulse-animation {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@mixin sparkle-animation {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+@mixin spin-animation {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-10deg) scale(1.1); }
+  75% { transform: rotate(10deg) scale(1.1); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// ----------------------------------------
+// TYPOGRAPHY MIXINS
+// ----------------------------------------
+
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-small {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+@mixin text-body {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+@mixin text-large {
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+// ----------------------------------------
+// THEME MIXINS  
+// ----------------------------------------
+// Note: Use :global(html.dark-mode) directly instead of mixins for better compatibility
+
+// ----------------------------------------
+// MODAL MIXINS
+// ----------------------------------------
+
+@mixin modal-overlay {
+  @include flex-center;
+  @include backdrop-blur;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+}
+
+@mixin modal-content {
+  background: white;
+  @include border-radius-md;
+  @include elevated-shadow;
+  width: 100%;
+  @include container-max-width;
+  max-height: 90vh;
+  overflow: hidden;
+  @include flex-column-center;
+  align-items: stretch;
+}
+
+@mixin modal-header {
+  @include flex-between;
+  align-items: flex-start;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #f3f4f6;
+
+  h2, h3 {
+    margin: 0;
+    @include text-large;
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+@mixin modal-body {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+@mixin modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f3f4f6;
+  background: #f9fafb;
+  @include flex-between;
+  gap: 16px;
+}
+
+@mixin modal-close-button {
+  @include reset-button;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  @include icon-md;
+  @include flex-center;
+  color: #6b7280;
+  @include border-radius-sm;
+  @include transition-fast;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #374151;
+  }
+}
+
+// ----------------------------------------
+// UTILITY MIXINS
+// ----------------------------------------
+
+@mixin backdrop-blur {
+  backdrop-filter: blur(10px);
+}
+
+@mixin clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@mixin reset-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@mixin reset-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+} 

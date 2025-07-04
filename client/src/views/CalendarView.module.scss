@@ -1,3 +1,5 @@
+@import '../styles/mixins.scss';
+
 .calendarView {
   min-height: 100vh;
   background: #f8fafc;
@@ -10,35 +12,30 @@
 
 // Loading and error states
 .loading, .error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  @include flex-column-center;
   min-height: 60vh;
   color: #6b7280;
 
   p {
     margin: 20px 0 0;
-    font-size: 1.125rem;
+    @include text-large;
     font-weight: 500;
   }
 
   button {
+    @include button-base;
     margin-top: 20px;
     padding: 12px 24px;
     background: #3b82f6;
     color: white;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
+    @include border-radius-md;
     font-weight: 600;
     font-size: 0.9375rem;
-    transition: all 0.25s ease;
     box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
 
     &:hover {
       background: #2563eb;
-      transform: translateY(-1px);
+      @include hover-lift;
       box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
     }
   }
@@ -49,40 +46,38 @@
   height: 44px;
   border: 3px solid #e5e7eb;
   border-top: 3px solid #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  @include border-radius-full;
+  @include spin-animation;
 }
 
 // Header
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  @include flex-between;
   background: white;
   padding: 28px 32px;
   border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  @include card-shadow-hover;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.04);
 }
 
 .monthControls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  @include flex-column-center;
   gap: 12px;
 }
 
 .subtleTodayButton {
   background: rgba(59, 130, 246, 0.08);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  @include border-subtle;
+  border-color: rgba(59, 130, 246, 0.2);
   color: #3b82f6;
   padding: 6px 16px;
   border-radius: 16px;
-  cursor: pointer;
+  @include reset-button;
   font-weight: 500;
   font-size: 0.8125rem;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  backdrop-filter: blur(8px);
+  @include transition-slow;
+  @include backdrop-blur;
   letter-spacing: -0.01em;
   box-shadow: 0 1px 3px rgba(59, 130, 246, 0.1);
 
@@ -90,7 +85,7 @@
     background: rgba(59, 130, 246, 0.12);
     border-color: rgba(59, 130, 246, 0.3);
     color: #2563eb;
-    transform: translateY(-1px);
+    @include hover-lift;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
   }
 
@@ -101,30 +96,28 @@
 }
 
 .monthNavigation {
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 20px;
 }
 
 .navButton {
   background: #f8fafc;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 12px;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.06);
+  @include border-radius-md;
   width: 44px;
   height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  @include flex-center;
+  @include reset-button;
   font-size: 1.25rem;
   color: #4b5563;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  @include transition-slow;
   font-weight: 600;
 
   &:hover {
     background: #f1f5f9;
     color: #1f2937;
-    transform: translateY(-1px);
+    @include hover-lift;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border-color: rgba(0, 0, 0, 0.1);
   }
@@ -142,44 +135,44 @@
 }
 
 .headerActions {
-  display: flex;
+  @include flex-start;
   gap: 16px;
 }
 
 .todayButton {
+  @include button-ghost;
   background: #f8fafc;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.08);
   color: #4b5563;
   padding: 12px 20px;
-  border-radius: 12px;
-  cursor: pointer;
+  @include border-radius-md;
   font-weight: 600;
   font-size: 0.9375rem;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  @include transition-slow;
 
   &:hover {
     background: #f1f5f9;
     border-color: rgba(0, 0, 0, 0.12);
-    transform: translateY(-1px);
+    @include hover-lift;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 }
 
 .addHabitButton {
+  @include button-base;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
-  border: none;
   padding: 12px 20px;
-  border-radius: 12px;
-  cursor: pointer;
+  @include border-radius-md;
   font-weight: 600;
   font-size: 0.9375rem;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  @include transition-slow;
   box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
 
   &:hover {
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    transform: translateY(-1px);
+    @include hover-lift;
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
   }
 }
@@ -210,16 +203,16 @@
   background: white;
   border-radius: 20px;
   padding: 32px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  @include card-shadow-hover;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.04);
 }
 
 .habitsHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  @include flex-between;
   margin-bottom: 28px;
   padding-bottom: 20px;
+  @include border-subtle;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
   h3 {
@@ -237,7 +230,8 @@
   background: #f8fafc;
   padding: 10px 16px;
   border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.06);
   font-weight: 500;
 }
 
@@ -252,25 +246,24 @@
   border: 2px solid rgba(0, 0, 0, 0.06);
   border-radius: 16px;
   padding: 24px;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  @include transition-slow;
 
   &:hover {
     background: #f8fafc;
     border-color: rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08), 0 3px 10px rgba(0, 0, 0, 0.05);
+    @include elevated-shadow;
   }
 }
 
 .habitMainInfo {
-  display: flex;
-  justify-content: space-between;
+  @include flex-between;
   align-items: flex-start;
   margin-bottom: 20px;
 }
 
 .habitBasics {
-  display: flex;
+  @include flex-start;
   align-items: flex-start;
   gap: 16px;
   flex: 1;
@@ -280,13 +273,11 @@
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   font-size: 1.75rem;
   flex-shrink: 0;
   border: 2px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  @include card-shadow;
 }
 
 .habitDetails {
@@ -315,30 +306,29 @@
 }
 
 .habitActions {
-  display: flex;
+  @include flex-start;
   gap: 8px;
   flex-shrink: 0;
 }
 
 .editButton, .deleteButton {
+  @include button-base;
   background: white;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.08);
   padding: 10px;
   border-radius: 10px;
-  cursor: pointer;
   font-size: 0.9375rem;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  @include transition-slow;
   width: 40px;
   height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  @include flex-center;
+  @include card-shadow;
 
   &:hover {
     background: #f8fafc;
     border-color: rgba(0, 0, 0, 0.12);
-    transform: translateY(-1px);
+    @include hover-lift;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 }
@@ -348,14 +338,13 @@
   background: white;
   border-radius: 14px;
   padding: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.06);
+  @include card-shadow;
 }
 
 .progressHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  @include flex-between;
   margin-bottom: 16px;
 }
 
@@ -367,8 +356,7 @@
 }
 
 .progressStats {
-  display: flex;
-  align-items: center;
+  @include flex-start;
   gap: 12px;
 }
 
@@ -384,8 +372,9 @@
   font-weight: 700;
   background: #d1fae5;
   padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid #a7f3d0;
+  @include border-radius-sm;
+  @include border-subtle;
+  border-color: #a7f3d0;
   letter-spacing: -0.025em;
 }
 
@@ -439,7 +428,7 @@
 }
 
 // Responsive design
-@media (max-width: 1023px) {
+@include tablet {
   .calendarView {
     padding: 20px;
     gap: 24px;
@@ -472,7 +461,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include mobile-small {
   .calendarView {
     padding: 16px;
     gap: 20px;
@@ -497,8 +486,8 @@
 
   .subtleTodayButton {
     padding: 4px 12px;
-    font-size: 0.75rem;
-    border-radius: 12px;
+    @include text-small;
+    @include border-radius-md;
     font-weight: 600;
   }
 
@@ -562,12 +551,14 @@
 }
 
 // Dark mode styles
-:global(html.dark-mode) {
-  .calendarView {
-    background: #1a1f2e;
-  }
+.calendarView {
+  :global(html.dark-mode) & {
+  background: #1a1f2e;
+}
+}
 
-  .loading, .error {
+.loading, .error {
+  :global(html.dark-mode) & {
     color: #9ca3af;
 
     button {
@@ -579,23 +570,31 @@
       }
     }
   }
+}
 
-  .spinner {
+.spinner {
+  :global(html.dark-mode) & {
     border-color: #374151;
     border-top-color: #3b82f6;
   }
+}
 
-  .header {
+.header {
+  :global(html.dark-mode) & {
     background: #1a1d23;
     border-color: rgba(255, 255, 255, 0.08);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
+}
 
-  .monthTitle {
+.monthTitle {
+  :global(html.dark-mode) & {
     color: #f9fafb;
   }
+}
 
-  .navButton, .todayButton {
+.navButton, .todayButton {
+  :global(html.dark-mode) & {
     background: #232830;
     border-color: rgba(255, 255, 255, 0.1);
     color: #d1d5db;
@@ -606,36 +605,46 @@
       border-color: rgba(255, 255, 255, 0.15);
     }
   }
+}
 
-  .addHabitButton {
+.addHabitButton {
+  :global(html.dark-mode) & {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 
     &:hover {
       background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     }
   }
+}
 
-  .habitsContainer, .emptyState {
+.habitsContainer, .emptyState {
+  :global(html.dark-mode) & {
     background: #1a1d23;
     border-color: rgba(255, 255, 255, 0.08);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
+}
 
-  .habitsHeader {
+.habitsHeader {
+  :global(html.dark-mode) & {
     border-bottom-color: rgba(255, 255, 255, 0.08);
 
     h3 {
       color: #f9fafb;
     }
   }
+}
 
-  .weeklyStats {
+.weeklyStats {
+  :global(html.dark-mode) & {
     background: #232830;
     border-color: rgba(255, 255, 255, 0.1);
     color: #9ca3af;
   }
+}
 
-  .habitCard {
+.habitCard {
+  :global(html.dark-mode) & {
     background: #1e2328;
     border-color: rgba(255, 255, 255, 0.08);
 
@@ -644,16 +653,22 @@
       border-color: rgba(255, 255, 255, 0.12);
     }
   }
+}
 
-  .habitName {
+.habitName {
+  :global(html.dark-mode) & {
     color: #f9fafb;
   }
+}
 
-  .habitDescription, .habitStats, .progressText {
+.habitDescription, .habitStats, .progressText {
+  :global(html.dark-mode) & {
     color: #9ca3af;
   }
+}
 
-  .editButton, .deleteButton {
+.editButton, .deleteButton {
+  :global(html.dark-mode) & {
     background: #232830;
     border-color: rgba(255, 255, 255, 0.1);
     color: #d1d5db;
@@ -663,26 +678,36 @@
       border-color: rgba(255, 255, 255, 0.15);
     }
   }
+}
 
-  .weeklyProgressSection {
+.weeklyProgressSection {
+  :global(html.dark-mode) & {
     background: #232830;
     border-color: rgba(255, 255, 255, 0.1);
   }
+}
 
-  .progressLabel {
+.progressLabel {
+  :global(html.dark-mode) & {
     color: #e5e7eb;
   }
+}
 
-  .progressBar {
+.progressBar {
+  :global(html.dark-mode) & {
     background: #374151;
   }
+}
 
-  .emptyStateContent {
-    h2 {
+.emptyStateContent {
+  h2 {
+    :global(html.dark-mode) & {
       color: #f9fafb;
     }
+  }
 
-    p {
+  p {
+    :global(html.dark-mode) & {
       color: #9ca3af;
     }
   }
@@ -690,17 +715,15 @@
 
 // Empty state
 .emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  @include flex-column-center;
   min-height: 400px;
   text-align: center;
   background: white;
   border-radius: 20px;
   padding: 60px 40px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  @include card-shadow-hover;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.04);
 }
 
 .emptyStateContent {
@@ -723,20 +746,19 @@
 }
 
 .primaryButton {
+  @include button-base;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
-  border: none;
   padding: 14px 24px;
-  border-radius: 12px;
-  cursor: pointer;
+  @include border-radius-md;
   font-weight: 600;
   font-size: 1rem;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  @include transition-slow;
   box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
 
   &:hover {
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    transform: translateY(-1px);
+    @include hover-lift;
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
   }
 }
