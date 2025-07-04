@@ -42,36 +42,8 @@ class AnalyticsService {
     this.posthogAvailable = !!posthogInstance;
     this.initialized = true;
     
-    // Test if PostHog is actually accessible
-    if (posthogInstance) {
-      await this.testPostHogConnection();
-    }
-  }
-
-  // Test if PostHog is blocked
-  async testPostHogConnection() {
-    if (!this.posthog) return false;
-    
-    try {
-      // Make a simple test request to see if PostHog is accessible
-      const testUrl = `${import.meta.env.VITE_PUBLIC_POSTHOG_HOST}/batch/`;
-      const response = await fetch(testUrl, { 
-        method: 'HEAD',
-        mode: 'no-cors' // This will succeed even if CORS blocked, but will fail if network blocked
-      });
-      return true;
-    } catch (error) {
-      // PostHog is blocked - disable it completely
-      if (import.meta.env.MODE === 'development') {
-        console.warn('Analytics: PostHog is blocked, disabling all tracking');
-      }
-      this.posthogAvailable = false;
-      
-      // Disable PostHog entirely to prevent internal retry loops
-      if (this.posthog && typeof this.posthog.opt_out_capturing === 'function') {
-        this.posthog.opt_out_capturing();
-      }
-      return false;
+    if (import.meta.env.MODE === 'development') {
+      console.log('Analytics: PostHog initialized successfully');
     }
   }
 
