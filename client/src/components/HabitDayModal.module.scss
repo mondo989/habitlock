@@ -16,7 +16,7 @@
 }
 
 .dayLabel {
-  margin: 4px 0 0;
+  margin: 4px 0 10px;
   color: #6b7280;
   @include text-body;
   @include flex-start;
@@ -68,7 +68,8 @@
 }
 
 .habitItem {
-  @include flex-between;
+  display: flex;
+  flex-direction: column;
   padding: 20px;
   background: #f9fafb;
   @include border-subtle;
@@ -77,6 +78,7 @@
   cursor: pointer;
   @include transition-fast;
   min-height: 80px;
+  position: relative;
 
   &:hover {
     background: #f3f4f6;
@@ -119,6 +121,8 @@
   @include flex-start;
   gap: 16px;
   flex: 1;
+  margin-bottom: 16px;
+  padding-right: 80px; // Space for actions in top-right
 }
 
 .habitEmoji {
@@ -156,12 +160,14 @@
   @include flex-column-center;
   align-items: flex-start;
   gap: 6px;
+  width: 100%;
 }
 
 .weeklyProgress {
   @include flex-column-center;
   align-items: flex-start;
   gap: 4px;
+  width: 100%;
 }
 
 .progressText {
@@ -176,7 +182,6 @@
   @include border-radius-sm;
   overflow: hidden;
   width: 100%;
-  min-width: 120px;
 }
 
 .progressFill {
@@ -196,10 +201,13 @@
 }
 
 .habitActions {
+  position: absolute;
+  top: 16px;
+  right: 16px;
   @include flex-center;
   gap: 12px;
   flex-shrink: 0;
-  margin-bottom: auto;
+  z-index: 2;
 }
 
 .editButton {
@@ -308,22 +316,47 @@
 .cancelButton, .saveButton {
   @include button-base;
   @include transition-fast;
+  padding: 12px 24px;
+  min-width: 120px;
+  height: 44px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  @include flex-center;
+  @include border-radius-md;
 }
 
 .cancelButton {
   @include button-ghost;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #6b7280;
+
+  &:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #374151;
+  }
 }
 
 .saveButton {
   background: #e5e7eb;
   color: #9ca3af;
+  border: 1px solid #d1d5db;
 
   &.hasChanges {
-    @include button-primary;
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+
+    &:hover {
+      background: #2563eb;
+      border-color: #2563eb;
+    }
   }
 
   &:disabled {
     cursor: not-allowed;
+    opacity: 0.6;
   }
 }
 
@@ -373,20 +406,22 @@
 
       .cancelButton, .saveButton {
         flex: 1;
+        min-width: 0; // Allow flex to override min-width
+        height: 48px; // Slightly larger on mobile for better touch targets
       }
     }
   }
 
   .habitItem {
     padding: 16px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
+    padding-top: 13px; // Extra space for actions on mobile
     min-height: auto;
   }
 
   .habitInfo {
     gap: 12px;
+    padding-right: 70px; // Adjust for smaller mobile actions
+    margin-bottom: 12px;
   }
 
   .habitEmoji {
@@ -396,9 +431,9 @@
   }
 
   .habitActions {
-    justify-content: space-between;
-    width: 100%;
-    align-items: flex-end;
+    top: 12px;
+    right: 12px;
+    gap: 8px;
   }
 
   .habitName {
@@ -410,16 +445,11 @@
   }
 
   .weeklyProgress {
-    align-items: flex-end;
+    align-items: flex-start;
   }
 
   .progressText {
-    text-align: right;
-  }
-
-  .progressBar {
-    width: 100%;
-    min-width: 100px;
+    text-align: left;
   }
 }
 // Dark mode styles - using nested selectors for proper CSS modules scope
@@ -628,14 +658,14 @@
 
 .cancelButton {
   :global(html.dark-mode) & {
-    background: #4b5563;
+    background: #374151;
     color: #d1d5db;
-    border-color: #6b7280;
+    border-color: #4b5563;
 
     &:hover {
-      background: #6b7280;
+      background: #4b5563;
       color: #f9fafb;
-      border-color: #9ca3af;
+      border-color: #6b7280;
     }
   }
 }
@@ -644,9 +674,17 @@
   :global(html.dark-mode) & {
     background: #4b5563;
     color: #6b7280;
+    border-color: #6b7280;
 
     &.hasChanges {
-      @include button-primary;
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+
+      &:hover {
+        background: #2563eb;
+        border-color: #2563eb;
+      }
     }
   }
 } 

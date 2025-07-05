@@ -51,6 +51,7 @@
 
 .headerContent {
   h2 {
+    color: #ffffff;
     margin: 0 0 4px 0;
     font-size: 2rem;
     font-weight: 700;
@@ -144,7 +145,7 @@
   background: rgba(255, 255, 255, 0.2);
   @include border-subtle;
   border-color: rgba(255, 255, 255, 0.3);
-  @include border-radius-md;
+  border-radius: 12px;
   color: white;
   width: 40px;
   height: 40px;
@@ -297,7 +298,7 @@
   width: 80px;
   height: 80px;
   @include flex-center;
-  @include border-radius-full;
+  border-radius: 50%;
   @include gradient-light;
   @include transition-slow;
   position: relative;
@@ -316,7 +317,7 @@
   transform: translate(-50%, -50%);
   width: 100px;
   height: 100px;
-  @include border-radius-full;
+  border-radius: 50%;
   background: radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%);
   @include pulse-animation;
   z-index: 1;
@@ -327,7 +328,7 @@
   top: -4px;
   right: -4px;
   @include icon-md;
-  @include border-radius-full;
+  border-radius: 50%;
   border: 2px solid white;
   z-index: 3;
 
@@ -397,7 +398,7 @@
 .checkmark {
   width: 28px;
   height: 28px;
-  @include border-radius-full;
+  border-radius: 50%;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   @include flex-center;
@@ -553,82 +554,65 @@
 }
 
 // Dark mode styles
-.modalContent {
-  :global(html.dark-mode) & {
+:global(html.dark-mode) {
+  .modalContent {
     background: #1f2937;
     color: #f9fafb;
     box-shadow: 
       0 25px 50px -12px rgba(0, 0, 0, 0.4),
       0 0 0 1px rgba(255, 255, 255, 0.05);
   }
-}
 
-.modalHeader {
-  :global(html.dark-mode) & {
+  .modalHeader {
     @include gradient-dark;
     border-bottom-color: #374151;
   }
-}
 
-.progressTrack {
-  :global(html.dark-mode) & {
+  .progressTrack {
     stroke: rgba(255, 255, 255, 0.15);
   }
-}
 
-.progressBar {
-  :global(html.dark-mode) & {
+  .progressBar {
     stroke: rgba(96, 165, 250, 0.9);
     filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.4));
   }
-}
 
-.categoryTitle {
-  :global(html.dark-mode) & {
+  .categoryTitle {
     color: #f9fafb;
 
     &::before {
       background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
     }
   }
-}
 
-.badgeCard {
-  :global(html.dark-mode) & {
-    background: #374151;
-    border-color: transparent;
+  .badgeCard {
+    background: #374151 !important;
+    border-color: #4b5563 !important;
     
     &.earned {
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.12) 100%);
-      border-color: rgba(34, 197, 94, 0.3);
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.12) 100%) !important;
+      border-color: rgba(34, 197, 94, 0.3) !important;
     }
 
     &.locked {
-      background: linear-gradient(135deg, rgba(75, 85, 99, 0.4) 0%, rgba(75, 85, 99, 0.6) 100%);
+      background: linear-gradient(135deg, rgba(75, 85, 99, 0.4) 0%, rgba(75, 85, 99, 0.6) 100%) !important;
+      border-color: rgba(75, 85, 99, 0.5) !important;
     }
   }
-}
 
-.badgeTitle {
-  :global(html.dark-mode) & {
+  .badgeTitle {
     color: #f9fafb;
   }
-}
 
-.badgeDescription {
-  :global(html.dark-mode) & {
+  .badgeDescription {
     color: #d1d5db;
   }
-}
 
-.badgeIcon {
-  :global(html.dark-mode) & {
+  .badgeIcon {
     background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
   }
-}
 
-.hoverTooltip {
-  :global(html.dark-mode) & {
+  .hoverTooltip {
     background: rgba(31, 41, 55, 0.95);
     border-color: rgba(255, 255, 255, 0.1);
   }

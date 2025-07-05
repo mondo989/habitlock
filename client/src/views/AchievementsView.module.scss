@@ -10,22 +10,29 @@
 .header {
   text-align: center;
   margin-bottom: 40px;
-  
+  padding: 40px 20px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-radius: 12px;
+  @include border-subtle;
+  border-color: rgba(99, 102, 241, 0.2);
+
   h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
     margin: 0 0 12px;
-    @include gradient-nav-light;
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    letter-spacing: -0.02em;
   }
-  
+
   p {
-    @include text-large;
-    color: #6b7280;
     margin: 0;
-    line-height: 1.6;
+    font-size: 1.25rem;
+    color: #64748b;
+    font-weight: 500;
+    opacity: 0.8;
   }
 }
 
@@ -60,7 +67,7 @@
     @include icon-lg;
     border: 3px solid #f3f4f6;
     border-top: 3px solid #3b82f6;
-    @include border-radius-full;
+    border-radius: 50%;
     @include spin-animation;
   }
   
@@ -75,6 +82,9 @@
 :global(html.dark-mode) {
   .achievementsView {
     .header {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+      border-color: rgba(99, 102, 241, 0.3);
+
       p {
         color: #9ca3af;
       }
@@ -94,20 +104,44 @@
 }
 
 // Responsive design
+@include tablet {
+  .achievementsView {
+    padding: 16px;
+  }
+
+  .header {
+    padding: 32px 16px;
+
+    h1 {
+      font-size: 2.5rem;
+    }
+
+    p {
+      font-size: 1.125rem;
+    }
+  }
+}
+
 @include mobile {
   .achievementsView {
-    padding: 20px;
+    padding: 12px;
   }
   
   .header {
-    margin-bottom: 24px;
+    padding: 24px 12px;
     
     h1 {
       font-size: 2rem;
     }
     
     p {
-      @include text-body;
+      font-size: 1rem;
     }
+  }
+}
+
+@include mobile-small {
+  .header h1 {
+    font-size: 1.75rem;
   }
 } 

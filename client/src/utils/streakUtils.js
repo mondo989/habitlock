@@ -187,4 +187,66 @@ export const generateHeatmapData = (habitId, year, calendarEntries) => {
   }
   
   return data;
+};
+
+// Generate aggregated heatmap data for all habits (GitHub commit-style)
+export const generateAggregatedHeatmapData = (habits, calendarEntries) => {
+  const now = dayjs();
+  const currentYear = now.year();
+  
+  // Always use current year, show entire year
+  const startDate = dayjs().year(currentYear).startOf('year');
+  const endDate = dayjs().year(currentYear).endOf('year');
+  const data = [];
+  
+  let current = startDate;
+  while (current.isBefore(endDate) || current.isSame(endDate, 'day')) {
+    const dateStr = current.format('YYYY-MM-DD');
+    const entry = calendarEntries[dateStr];
+    const isFuture = current.isAfter(now, 'day');
+    
+    // Calculate completion rate for this day
+    let completedCount = 0;
+    const totalHabits = habits.length;
+    
+    if (entry && entry.completedHabits && totalHabits > 0) {
+      // Count how many habits were completed on this day
+      completedCount = entry.completedHabits.filter(habitId => 
+        habits.some(habit => habit.id === habitId)
+      ).length;
+    }
+    
+    // Calculate intensity level (0-4, like GitHub)
+    let intensity = 0;
+    if (totalHabits > 0 && completedCount > 0 && !isFuture) {
+      const completionRate = completedCount / totalHabits;
+      if (completionRate >= 1.0) {
+        intensity = 4; // 100% completion - max intensity
+      } else if (completionRate >= 0.75) {
+        intensity = 3; // 75%+ completion - high intensity
+      } else if (completionRate >= 0.5) {
+        intensity = 2; // 50%+ completion - medium intensity
+      } else {
+        intensity = 1; // Some completion - low intensity
+      }
+    }
+    
+    data.push({
+      date: dateStr,
+      intensity,
+      completedCount,
+      totalHabits,
+      completionRate: totalHabits > 0 ? completedCount / totalHabits : 0,
+      isFuture,
+      dayOfYear: current.dayOfYear(),
+      week: current.week(),
+      dayOfWeek: current.day(), // 0 = Sunday, 1 = Monday, etc.
+      formattedDate: current.format('MMM D, YYYY'),
+      weekday: current.format('dddd'),
+    });
+    
+    current = current.add(1, 'day');
+  }
+  
+  return data;
 }; 

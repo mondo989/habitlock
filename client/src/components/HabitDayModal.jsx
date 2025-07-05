@@ -156,27 +156,28 @@ const HabitDayModal = ({
                       {habit.description && (
                         <div className={styles.habitDescription}>{habit.description}</div>
                       )}
-                      
-                      <div className={styles.habitStats}>
-                        <div className={styles.weeklyProgress}>
-                          <span className={styles.progressText}>
-                            {weekStat.completions}/{weekStat.goal} this week
-                          </span>
-                          <div className={styles.progressBar}>
-                            <div 
-                              className={styles.progressFill}
-                              style={{ 
-                                width: `${Math.min(weekStat.percentage, 100)}%`,
-                                backgroundColor: habit.color 
-                              }}
-                            />
-                          </div>
-                        </div>
-                        {weekStat.hasMetGoal && (
-                          <div className={styles.goalMetBadge}>🎯 Goal achieved!</div>
-                        )}
+                    </div>
+                  </div>
+                  
+                  {/* Full-width progress section */}
+                  <div className={styles.habitStats}>
+                    <div className={styles.weeklyProgress}>
+                      <span className={styles.progressText}>
+                        {weekStat.completions}/{weekStat.goal} this week
+                      </span>
+                      <div className={styles.progressBar}>
+                        <div 
+                          className={styles.progressFill}
+                          style={{ 
+                            width: `${Math.min(weekStat.percentage, 100)}%`,
+                            backgroundColor: habit.color 
+                          }}
+                        />
                       </div>
                     </div>
+                    {weekStat.hasMetGoal && (
+                      <div className={styles.goalMetBadge}>🎯 Goal achieved!</div>
+                    )}
                   </div>
                   
                   <div className={styles.habitActions}>

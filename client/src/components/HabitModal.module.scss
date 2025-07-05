@@ -28,6 +28,10 @@
   @include modal-header;
   padding: 24px 24px 0;
   margin-bottom: 24px;
+  
+  h2 {
+    margin-bottom: 16px;
+  }
 }
 
 .closeButton {
@@ -461,6 +465,10 @@
 .modalHeader {
   :global(html.dark-mode) & {
     border-bottom-color: #4b5563;
+    
+    h2 {
+      color: #f9fafb;
+    }
   }
 }
 

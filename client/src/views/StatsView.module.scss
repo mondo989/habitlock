@@ -1,674 +1,1312 @@
 @import '../styles/mixins.scss';
 
+// ========================================
+// STATS VIEW - REDESIGNED ANALYTICS DASHBOARD
+// ========================================
+
 .statsView {
-  min-height: 100vh;
-  background: #f8fafc;
   padding: 20px;
-  @include flex-column-center;
-  align-items: stretch;
-  gap: 32px;
+  @include container-max-width;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
-// Header
+// ----------------------------------------
+// HEADER SECTION
+// ----------------------------------------
+
 .header {
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 40px;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-radius: 12px;
+  @include border-subtle;
+  border-color: rgba(99, 102, 241, 0.2);
 
   h1 {
     margin: 0 0 12px;
-    font-size: 2.5rem;
+    font-size: 3rem;
     font-weight: 800;
-    @include gradient-primary;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    letter-spacing: -0.02em;
   }
 
   p {
     margin: 0;
-    color: #6b7280;
-    @include text-large;
+    font-size: 1.25rem;
+    color: #64748b;
     font-weight: 500;
+    opacity: 0.8;
   }
 }
 
-// Loading and empty states
+// ----------------------------------------
+// LOADING & EMPTY STATES
+// ----------------------------------------
+
 .loading, .emptyState {
   @include flex-column-center;
   min-height: 60vh;
-  color: #6b7280;
+  text-align: center;
+  color: #64748b;
+
+  .spinner {
+    @include icon-xl;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #6366f1;
+    border-radius: 50%;
+    @include spin-animation;
+    margin-bottom: 24px;
+  }
+
+  .emptyIcon {
+    font-size: 4rem;
+    margin-bottom: 24px;
+    opacity: 0.6;
+  }
 
   h2 {
-    margin: 16px 0 8px;
-    @include text-large;
-    font-weight: 600;
-    color: #1f2937;
+    margin: 0 0 16px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
   }
 
   p {
-    margin: 0 0 24px;
-    @include text-large;
-    text-align: center;
+    margin: 0 0 32px;
+    font-size: 1.125rem;
+    max-width: 500px;
+    line-height: 1.6;
   }
-}
-
-.emptyIcon {
-  @include icon-xl;
-  font-size: 4rem;
-  margin-bottom: 16px;
-  opacity: 0.7;
 }
 
 .emptyTips {
   background: white;
-  @include border-radius-md;
-  padding: 24px;
+  padding: 32px;
+  border-radius: 12px;
   @include card-shadow;
   @include border-subtle;
-  @include container-max-width;
+  max-width: 600px;
+  margin: 0 auto;
 
   h3 {
-    margin: 0 0 16px;
-    @include text-large;
-    font-weight: 600;
-    color: #1f2937;
+    margin: 0 0 20px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
   }
 
   ul {
+    list-style: none;
+    padding: 0;
     margin: 0;
-    padding-left: 20px;
-    
+
     li {
-      margin-bottom: 8px;
-      color: #4b5563;
-      @include text-body;
-    }
-  }
-}
+      padding: 12px 0;
+      font-size: 1rem;
+      color: #475569;
+      @include flex-start;
+      gap: 12px;
+      border-radius: 8px;
+      @include transition-fast;
 
-.spinner {
-  @include icon-xl;
-  border: 3px solid #e5e7eb;
-  border-top: 3px solid #3b82f6;
-  @include border-radius-full;
-  @include spin-animation;
-}
-
-// Achievement Badges
-.achievementsSection {
-  // Remove the h2 styles from here as they'll be in achievementsHeader
-}
-
-.achievementsHeader {
-  @include flex-between;
-  margin-bottom: 20px;
-}
-
-.headerText {
-  h2 {
-    margin: 0 0 4px 0;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #1f2937;
-  }
-
-  p {
-    margin: 0;
-    @include text-body;
-    color: #6b7280;
-    font-weight: 500;
-  }
-}
-
-.viewAllBadgesButton {
-  @include gradient-nav-light;
-  color: white;
-  @include button-base;
-  @include border-radius-md;
-  @include flex-center;
-  gap: 8px;
-  @include card-shadow;
-
-  &:hover {
-    @include hover-lift;
-    @include elevated-shadow;
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
-.achievementsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-
-  // Desktop: Show up to 8 badges (4 columns on large screens)
-  @include desktop {
-    grid-template-columns: repeat(4, 1fr);
-    
-    .achievementBadge:nth-child(n+9) {
-      display: none;
-    }
-  }
-
-  // Medium screens: Show up to 8 badges (2 columns)
-  @include tablet {
-    grid-template-columns: repeat(2, 1fr);
-    
-    .achievementBadge:nth-child(n+9) {
-      display: none;
-    }
-  }
-
-  // Mobile: Show all 9 badges (1 column)
-  @include mobile {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}
-
-.achievementBadge {
-  @include border-radius-md;
-  padding: 20px;
-  @include flex-start;
-  gap: 16px;
-  @include transition-standard;
-  position: relative;
-  border: 2px solid transparent;
-
-  &.earned {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    @include card-shadow;
-    border-color: #fbbf24;
-
-    &:hover {
-      @include hover-lift;
-      @include elevated-shadow;
-    }
-
-    .badgeEmoji {
-      background: white;
-      @include card-shadow;
-    }
-
-    .badgeInfo h4 {
-      color: white;
-    }
-
-    .badgeInfo p {
-      color: rgba(255, 255, 255, 0.9);
-    }
-  }
-
-  &.inProgress {
-    @include gradient-light;
-    border-color: rgba(107, 114, 128, 0.3);
-    @include card-shadow;
-
-    &:hover {
-      @include hover-lift;
-      @include elevated-shadow;
-      border-color: rgba(107, 114, 128, 0.4);
-    }
-
-    .badgeEmoji {
-      @include gradient-light;
-      @include card-shadow;
-    }
-
-    .badgeInfo h4 {
-      color: #374151;
-    }
-
-    .badgeInfo p {
-      color: #6b7280;
-    }
-  }
-
-  &.clickable {
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(59, 130, 246, 0.1),
-        transparent
-      );
-      @include transition-slow;
-    }
-
-    &:hover {
-      transform: translateY(-3px);
-      @include elevated-shadow;
-      border-color: rgba(59, 130, 246, 0.5);
-
-      &::before {
-        left: 100%;
-      }
-
-      .clickHint {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .badgeEmoji {
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      &:hover {
+        background: #f8fafc;
+        padding-left: 12px;
+        margin-left: -12px;
+        margin-right: -12px;
       }
     }
-
-    &:active {
-      transform: translateY(-1px);
-    }
   }
 }
 
-.badgeEmoji {
-  font-size: 2.5rem;
-  @include border-radius-full;
-  @include icon-xl;
-  @include flex-center;
-  flex-shrink: 0;
-}
+// ----------------------------------------
+// INSIGHTS SECTION
+// ----------------------------------------
 
-.badgeInfo {
-  flex: 1;
-
-  h4 {
-    margin: 0 0 4px;
-    @include text-large;
-    font-weight: 700;
-  }
-
-  p {
-    margin: 0 0 8px;
-    @include text-body;
-    font-weight: 500;
-  }
-}
-
-.completionDate {
-  @include text-small;
-  font-weight: 500;
-  font-style: italic;
-  opacity: 0.75;
-  margin-top: 4px;
-  padding: 2px 0;
-  line-height: 1.3;
-  
-  .earned & {
-    color: rgba(255, 255, 255, 0.9);
-  }
-  
-  .inProgress & {
-    color: #6b7280;
-  }
-}
-
-// Progress indicators for in-progress badges
-.progressInfo {
-  @include flex-center;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.progressBar {
-  flex: 1;
-  height: 6px;
-  background: rgba(107, 114, 128, 0.2);
-  @include border-radius-sm;
-  overflow: hidden;
-}
-
-.progressFill {
-  height: 100%;
-  @include gradient-primary;
-  @include border-radius-sm;
-  @include transition-standard;
-}
-
-.progressText {
-  @include text-small;
-  font-weight: 600;
-  color: #6b7280;
-  min-width: 35px;
-  text-align: right;
-}
-
-// Click hint for incomplete badges
-.clickHint {
-  margin-top: 8px;
-  opacity: 0;
-  transform: translateY(4px);
-  @include transition-standard;
-}
-
-.clickText {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: #3b82f6;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  @include flex-center;
-  gap: 4px;
-
-  &::after {
-    content: '→';
-    @include text-small;
-    @include transition-fast;
-  }
-
-  .clickable:hover &::after {
-    transform: translateX(2px);
-  }
-}
-
-// Insights Section
 .insightsSection {
+  margin-bottom: 48px;
+
   h2 {
-    margin: 0 0 20px;
-    font-size: 1.75rem;
+    margin: 0 0 24px;
+    font-size: 1.875rem;
     font-weight: 700;
-    color: #1f2937;
+    color: #1e293b;
+    @include flex-start;
+    gap: 12px;
   }
 }
 
 .insightsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 16px;
-}
-
-.insightCard {
-  padding: 16px 20px;
-  @include border-radius-md;
-  border-left: 4px solid;
-  @include card-shadow;
-  
-  p {
-    margin: 0;
-    @include text-body;
-    font-weight: 500;
-  }
-
-  &.achievement {
-    background: #fef3c7;
-    border-color: #f59e0b;
-    color: #92400e;
-  }
-
-  &.success {
-    background: #d1fae5;
-    border-color: #10b981;
-    color: #065f46;
-  }
-
-  &.warning {
-    background: #fee2e2;
-    border-color: #ef4444;
-    color: #dc2626;
-  }
-
-  &.tip {
-    background: #dbeafe;
-    border-color: #3b82f6;
-    color: #1e40af;
-  }
-
-  &.milestone {
-    background: #f3e8ff;
-    border-color: #8b5cf6;
-    color: #6b21a8;
-  }
-}
-
-// Habit Performance Cards
-.habitPerformanceSection {
-  h2 {
-    margin: 0 0 20px;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #1f2937;
-  }
-}
-
-.habitPerformanceGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 20px;
 }
 
-.habitCard {
-  background: white;
-  @include border-radius-md;
-  padding: 24px;
+.insightCard {
+  padding: 20px 24px;
+  border-radius: 12px;
   @include card-shadow;
-  @include border-subtle;
   @include transition-standard;
+  border-left: 4px solid;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60px;
+    height: 60px;
+    opacity: 0.1;
+    border-radius: 50%;
+    @include transition-standard;
+  }
 
   &:hover {
-    @include elevated-shadow;
     @include hover-lift;
-  }
-}
+    @include elevated-shadow;
 
-.habitHeader {
-  @include flex-start;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.habitEmoji {
-  font-size: 1.75rem;
-  width: 48px;
-  height: 48px;
-  @include flex-center;
-  @include border-radius-md;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border: 1px solid #e2e8f0;
-}
-
-.habitInfo {
-  flex: 1;
-
-  h3 {
-    margin: 0 0 4px;
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #1f2937;
+    &::before {
+      transform: scale(1.2);
+      opacity: 0.15;
+    }
   }
 
-  .habitGoal {
+  p {
     margin: 0;
-    @include text-small;
-    color: #6b7280;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
   }
-}
 
-.habitStats {
-  margin-top: 16px;
-  
-  .statRow {
-    @include flex-between;
-    margin-bottom: 8px;
-    
-    .statLabel {
-      @include text-small;
-      color: #6b7280;
-      font-weight: 500;
-    }
-    
-    .statValue {
-      @include text-small;
-      font-weight: 700;
-      color: #1f2937;
-    }
-  }
-}
+  &.achievement {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-color: #f59e0b;
+    color: #92400e;
 
-.habitProgress {
-  margin-top: 16px;
-
-  .progressLabel {
-    @include flex-between;
-    margin-bottom: 8px;
-
-    span:first-child {
-      @include text-small;
-      font-weight: 600;
-      color: #374151;
-    }
-
-    span:last-child {
-      @include text-small;
-      font-weight: 700;
-      color: #1f2937;
+    &::before {
+      background: #f59e0b;
     }
   }
 
-  .progressBarContainer {
-    height: 8px;
-    background: #e5e7eb;
-    @include border-radius-sm;
-    overflow: hidden;
-    margin-bottom: 12px;
+  &.success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-color: #10b981;
+    color: #065f46;
 
-    .progressBarFill {
-      height: 100%;
-      @include border-radius-sm;
-      @include transition-standard;
-      
-      &.good {
-        background: linear-gradient(90deg, #10b981, #059669);
-      }
-      
-      &.average {
-        background: linear-gradient(90deg, #f59e0b, #d97706);
-      }
-      
-      &.poor {
-        background: linear-gradient(90deg, #ef4444, #dc2626);
-      }
+    &::before {
+      background: #10b981;
     }
   }
 
-  .roomForImprovement {
-    @include flex-start;
-    gap: 8px;
-    padding: 12px;
-    background: #fef3c7;
-    border: 1px solid #fcd34d;
-    @include border-radius-sm;
-    
-    .improvementIcon {
-      font-size: 1rem;
-      color: #d97706;
+  &.warning {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    color: #dc2626;
+
+    &::before {
+      background: #ef4444;
     }
-    
-    .improvementText {
-      @include text-small;
-      color: #92400e;
-      font-weight: 500;
-      margin: 0;
+  }
+
+  &.tip {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #3b82f6;
+    color: #1e40af;
+
+    &::before {
+      background: #3b82f6;
+    }
+  }
+
+  &.milestone {
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    border-color: #8b5cf6;
+    color: #6b21a8;
+
+    &::before {
+      background: #8b5cf6;
     }
   }
 }
 
-// Quick Stats
+// ----------------------------------------
+// QUICK STATS SECTION
+// ----------------------------------------
+
 .quickStatsSection {
+  margin-bottom: 48px;
+
   h2 {
-    margin: 0 0 20px;
-    font-size: 1.75rem;
+    margin: 0 0 32px;
+    font-size: 1.875rem;
     font-weight: 700;
-    color: #1f2937;
+    color: #1e293b;
     text-align: center;
   }
 }
 
 .quickStatsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
 }
 
 .quickStat {
   background: white;
-  @include border-radius-md;
-  padding: 24px;
-  text-align: center;
+  padding: 32px 24px;
+  border-radius: 12px;
   @include card-shadow;
+  @include border-subtle;
+  text-align: center;
+  @include transition-standard;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4, #10b981);
+    @include transition-standard;
+  }
+
+  &:hover {
+    @include hover-lift;
+    @include elevated-shadow;
+
+    &::before {
+      height: 6px;
+    }
+
+    .statValue {
+      transform: scale(1.1);
+    }
+  }
+
+  .statValue {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+    @include transition-standard;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .statLabel {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+// ----------------------------------------
+// HABIT PERFORMANCE SECTION
+// ----------------------------------------
+
+.habitDetailsSection {
+  margin-bottom: 48px;
+
+  h2 {
+    margin: 0 0 32px;
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1e293b;
+    @include flex-start;
+    gap: 12px;
+  }
+}
+
+.habitDetailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 24px;
+}
+
+.habitDetailCard {
+  background: white;
+  border-radius: 12px;
+  padding: 28px;
+  @include card-shadow;
+  @include border-subtle;
+  @include transition-standard;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--habit-color, #6366f1), var(--habit-color, #8b5cf6));
+    @include transition-standard;
+  }
+
+  &:hover {
+    @include hover-lift;
+    @include elevated-shadow;
+
+    &::before {
+      height: 6px;
+    }
+  }
+}
+
+.habitHeader {
+  @include flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.habitEmoji {
+  font-size: 2.5rem;
+  width: 64px;
+  height: 64px;
+  @include flex-center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  @include border-subtle;
+  flex-shrink: 0;
+  @include transition-standard;
+  @include card-shadow;
+
+  &:hover {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+.habitInfo {
+  flex: 1;
+
+  h3 {
+    margin: 0 0 6px;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.2;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+}
+
+.habitStatus {
+  .activeStreak {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    @include border-subtle;
+    border-color: #f59e0b;
+  }
+
+  .noStreak {
+    padding: 8px 16px;
+    background: none;
+    color: #64748b;
+    // @include border-radius-full;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    // @include border-subtle;
+  }
+}
+
+// Weekly Goal Progress
+.weeklyGoalSection {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 8px;
+  @include border-subtle;
+}
+
+.goalHeader {
+  @include flex-between;
+  margin-bottom: 12px;
+
+  span:first-child {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .goalPercentage {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    // background: white;
+    padding: 4px 12px;
+    // @include border-radius-full;
+    // @include border-subtle;
+  }
+}
+
+.goalProgressBar {
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 6px;
+  // @include border-radius-full;
+  overflow: hidden;
+  position: relative;
+  @include card-shadow;
+
+  .goalProgressFill {
+    height: 100%;
+    border-radius: inherit;
+    @include transition-standard;
+    position: relative;
+    background: linear-gradient(90deg, var(--habit-color, #6366f1), var(--habit-color, #8b5cf6));
+  }
+}
+
+// Metrics Grid
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric {
+  text-align: center;
+  padding: 16px 12px;
+  border-radius: 8px;
+  // background: #1f2937;
   @include border-subtle;
   @include transition-fast;
 
   &:hover {
-    @include elevated-shadow;
-    @include hover-lift;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    transform: translateY(-2px);
   }
 
-  .statValue {
-    font-size: 2.5rem;
+  .metricValue {
+    font-size: 1.75rem;
     font-weight: 800;
-    @include gradient-primary;
+    color: #1e293b;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin: 0 0 8px;
-    line-height: 1.1;
   }
 
-  .statLabel {
-    @include text-body;
-    color: #6b7280;
+  .metricLabel {
+    font-size: 0.6875rem;
     font-weight: 600;
-    margin: 0;
+    color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
   }
 }
 
-// Dark mode support
-:global(html.dark-mode) {
+// Habit Insights
+.habitInsights {
+  @include flex-column-center;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.habitInsight {
+  padding: 12px 16px;
+  border-radius: 8px;
+  @include border-subtle;
+  font-size: 0.875rem;
+  font-weight: 500;
+  @include transition-fast;
+
+  &:hover {
+    @include hover-lift;
+  }
+
+  &.achievement {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-color: #f59e0b;
+    color: #92400e;
+  }
+
+  &.success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-color: #10b981;
+    color: #065f46;
+  }
+
+  &.warning {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    color: #dc2626;
+  }
+
+  &.tip {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #3b82f6;
+    color: #1e40af;
+  }
+
+  &.milestone {
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    border-color: #8b5cf6;
+    color: #6b21a8;
+  }
+}
+
+// ----------------------------------------
+// HEATMAP SECTION
+// ----------------------------------------
+
+.heatmapSection {
+  margin-bottom: 48px;
+
+  h2 {
+    margin: 0 0 32px;
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1e293b;
+    @include flex-start;
+    gap: 12px;
+  }
+}
+
+.habitHeatmap {
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+  @include card-shadow;
+  @include border-subtle;
+  margin-bottom: 24px;
+  @include transition-standard;
+
+  &:hover {
+    @include elevated-shadow;
+  }
+}
+
+.heatmapHeader {
+  @include flex-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  @include border-subtle;
+  border-bottom: 1px solid #e2e8f0;
+
+  .habitEmoji {
+    font-size: 2rem;
+  }
+
+  h3 {
+    flex: 1;
+    margin: 0 0 0 16px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .yearLabel {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    background: #f8fafc;
+    padding: 6px 16px;
+    border-radius: 50px;
+    @include border-subtle;
+  }
+}
+
+.heatmapContainer {
+  @include flex-column-center;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.monthLabels {
+  position: relative;
+  width: 100%;
+  margin-bottom: 8px;
+  height: 20px;
+  
+  .monthLabel {
+    position: absolute;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-align: left;
+    padding: 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    
+    // Only show first few characters on small screens
+    @media (max-width: 768px) {
+      font-size: 0.6875rem;
+      padding: 0 2px;
+    }
+  }
+}
+
+
+
+.heatmapGrid {
+  display: flex;
+  gap: 3px;
+  overflow-x: auto;
+  padding: 4px;
+  width: 100%;
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 0.5);
+  
+  // Better scrollbar styling
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(226, 232, 240, 0.3);
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 3px;
+    
+    &:hover {
+      background: rgba(148, 163, 184, 0.6);
+    }
+  }
+}
+
+.heatmapWeekColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 14px;
+}
+
+.heatmapDay, .heatmapDayEmpty {
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 20px;
+  min-width: 12px;
+  border-radius: 3px;
+  @include transition-standard;
+  cursor: pointer;
+  position: relative;
+}
+
+.heatmapDayEmpty {
+  background: transparent;
+  cursor: default;
+}
+
+// GitHub-style intensity levels for aggregated heatmap
+.heatmapDay {
+  border: 1px solid;
+  
+  &:hover {
+    transform: scale(1.2);
+    z-index: 10;
+    position: relative;
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.15),
+      0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+
+  // Intensity levels (GitHub-style) with improved colors
+  &.intensity0 {
+    background: #ebedf0;
+    border-color: #d1d9e0;
+  }
+
+  &.intensity1 {
+    background: #9be9a8;
+    border-color: #7dd87f;
+  }
+
+  &.intensity2 {
+    background: #40c463;
+    border-color: #2ea043;
+  }
+
+  &.intensity3 {
+    background: #30a14e;
+    border-color: #238636;
+  }
+
+  &.intensity4 {
+    background: #216e39;
+    border-color: #1a5f2e;
+  }
+
+  &.future {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(.future) {
+    filter: brightness(1.05) saturate(1.1);
+  }
+}
+
+// Legend styling
+.heatmapLegend {
+  @include flex-center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: rgba(248, 250, 252, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  justify-self: center;
+  align-self: center;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.legendText {
+  font-size: 0.8125rem;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.legendSquares {
+  @include flex-center;
+  gap: 4px;
+}
+
+.legendSquare {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid;
+  @include transition-fast;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &.intensity0 {
+    background: #ebedf0;
+    border-color: #d1d9e0;
+  }
+
+  &.intensity1 {
+    background: #9be9a8;
+    border-color: #7dd87f;
+  }
+
+  &.intensity2 {
+    background: #40c463;
+    border-color: #2ea043;
+  }
+
+  &.intensity3 {
+    background: #30a14e;
+    border-color: #238636;
+  }
+
+  &.intensity4 {
+    background: #216e39;
+    border-color: #1a5f2e;
+  }
+}
+
+.heatmapDayWrapper {
+  position: relative;
+}
+
+// Heatmap Tooltip
+.heatmapTooltip {
+  background: #1e293b;
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  @include elevated-shadow;
+  min-width: 200px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 10000;
+}
+
+.habitTooltipContent {
+  .tooltipHeader {
+    @include flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    .tooltipEmoji {
+      font-size: 1.25rem;
+    }
+
+    .tooltipHabitName {
+      font-weight: 600;
+      font-size: 0.9375rem;
+    }
+  }
+
+  .tooltipDate {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #94a3b8;
+  }
+
+  .tooltipTime, .tooltipStatus {
+    font-size: 0.8125rem;
+    color: #cbd5e1;
+  }
+}
+
+.tooltipArrow {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #1e293b;
+}
+
+// New tooltip styles for aggregated heatmap
+.tooltipStats {
+  margin-top: 8px;
+}
+
+.completionStat {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 4px;
+}
+
+.completionRate {
+  font-size: 0.8125rem;
+  color: #94a3b8;
+}
+
+// ----------------------------------------
+// ACHIEVEMENTS SECTION
+// ----------------------------------------
+
+.achievementsSection {
+  margin-bottom: 48px;
+
+  .achievementsHeader {
+    @include flex-between;
+    align-items: flex-end;
+    margin-bottom: 32px;
+
+    .headerText {
+      h2 {
+        margin: 0 0 8px;
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #1e293b;
+        @include flex-start;
+        gap: 12px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 1rem;
+        color: #64748b;
+        font-weight: 500;
+      }
+    }
+
+    .viewAllBadgesButton {
+      @include button-base;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      @include transition-standard;
+      @include border-subtle;
+      border-color: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        @include hover-lift;
+        @include elevated-shadow;
+        background: linear-gradient(135deg, #5048e5 0%, #7c3aed 100%);
+      }
+    }
+  }
+}
+
+.achievementsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.achievementBadge {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  @include card-shadow;
+  @include border-subtle;
+  @include transition-standard;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    @include transition-standard;
+  }
+
+  &.earned {
+    &::before {
+      background: linear-gradient(90deg, #10b981, #059669);
+    }
+
+    &:hover {
+      @include hover-lift;
+      @include elevated-shadow;
+    }
+  }
+
+  &.inProgress {
+    opacity: 0.8;
+
+    &::before {
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    }
+
+    &.clickable {
+      cursor: pointer;
+
+      &:hover {
+        @include hover-lift;
+        @include elevated-shadow;
+        opacity: 1;
+      }
+    }
+  }
+
+  .badgeEmoji {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 16px;
+    @include transition-standard;
+
+    &:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+  }
+
+  .badgeInfo {
+    text-align: center;
+
+    h4 {
+      margin: 0 0 8px;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    p {
+      margin: 0 0 16px;
+      font-size: 0.9375rem;
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    .completionDate {
+      font-size: 0.8125rem;
+      color: #10b981;
+      font-weight: 600;
+      // background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      padding: 6px 12px;
+      border-radius: 50px;
+      @include border-subtle;
+      border-color: #10b981;
+    }
+
+    .progressInfo {
+      .progressBar {
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 50px;
+        overflow: hidden;
+        margin-bottom: 8px;
+
+        .progressFill {
+          height: 100%;
+          background: linear-gradient(90deg, #6366f1, #8b5cf6);
+          @include transition-standard;
+        }
+      }
+
+      .progressText {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #6366f1;
+      }
+    }
+
+    .clickHint {
+      margin-top: 12px;
+
+      .clickText {
+        font-size: 0.8125rem;
+        color: #6366f1;
+        font-weight: 600;
+        @include transition-fast;
+      }
+    }
+  }
+}
+
+// ----------------------------------------
+// ANIMATIONS
+// ----------------------------------------
+
+// ----------------------------------------
+// RESPONSIVE DESIGN
+// ----------------------------------------
+
+@include tablet {
   .statsView {
-    background: #111827;
+    padding: 16px;
   }
 
   .header {
+    padding: 32px 16px;
+
     h1 {
-      // Gradient already handled by mixin
+      font-size: 2.5rem;
     }
+
+    p {
+      font-size: 1.125rem;
+    }
+  }
+
+  .quickStatsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .habitDetailsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@include mobile {
+  .statsView {
+    padding: 12px;
+  }
+
+  .header {
+    padding: 24px 12px;
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+  }
+
+  .quickStatsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .quickStat {
+    padding: 24px 16px;
+
+    .statValue {
+      font-size: 2.5rem;
+    }
+  }
+
+  .habitDetailCard {
+    padding: 20px;
+  }
+
+  .habitHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .habitEmoji {
+    font-size: 2rem;
+    width: 56px;
+    height: 56px;
+  }
+
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .metric {
+    padding: 14px 10px;
+
+    .metricValue {
+      font-size: 1.5rem;
+    }
+
+    .metricLabel {
+      font-size: 0.625rem;
+      line-height: 1.1;
+    }
+  }
+
+  .achievementsHeader {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+
+    .viewAllBadgesButton {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  .achievementsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .habitHeatmap {
+    padding: 20px 16px;
+  }
+
+  .heatmapGrid {
+    gap: 2px;
+    padding: 3px;
+    
+    .heatmapDay, .heatmapDayEmpty {
+      max-width: 16px;
+      min-width: 10px;
+    }
+  }
+
+  .heatmapWeekColumn {
+    gap: 2px;
+    min-width: 10px;
+  }
+
+  .monthLabels {
+    width: 100%;
+    margin-bottom: 6px;
+    height: 16px;
+    
+    .monthLabel {
+      font-size: 0.625rem;
+      padding: 0 2px;
+    }
+  }
+
+  .heatmapLegend {
+    margin-top: 16px;
+    padding: 12px 16px;
+    gap: 10px;
+    
+    .legendSquare {
+      width: 10px;
+      height: 10px;
+    }
+    
+    .legendText {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+@include mobile-small {
+  .header h1 {
+    font-size: 1.75rem;
+  }
+
+  .insightsGrid, .achievementsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .habitHeatmap {
+    padding: 20px 16px;
+  }
+
+  .heatmapContainer {
+    overflow-x: auto;
+  }
+}
+
+// ----------------------------------------
+// DARK MODE SUPPORT
+// ----------------------------------------
+
+:global(html.dark-mode) {
+  .statsView {
+    background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+  }
+
+  .header {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+    border-color: rgba(99, 102, 241, 0.3);
 
     p {
       color: #9ca3af;
     }
   }
 
-  .loading, .emptyState {
+  .emptyState, .loading {
     color: #9ca3af;
 
     h2 {
       color: #f9fafb;
     }
-
-    p {
-      color: #9ca3af;
-    }
   }
 
   .emptyTips {
-    @include gradient-dark;
-    @include border-subtle;
+    background: #1f2937;
+    border-color: #374151;
 
     h3 {
       color: #f9fafb;
@@ -676,217 +1314,189 @@
 
     ul li {
       color: #d1d5db;
+
+      &:hover {
+        background: #374151;
+      }
     }
   }
 
-  .spinner {
+  .quickStat, .habitDetailCard, .achievementBadge, .habitHeatmap, .emptyTips {
+    background: #1f2937;
     border-color: #374151;
-    border-top-color: #60a5fa;
   }
 
-  .headerText {
-    h2 {
-      color: #f9fafb;
-    }
-
-    p {
-      color: #9ca3af;
-    }
-  }
-
-  .achievementBadge {
-    &.inProgress {
-      @include gradient-dark;
-      border-color: rgba(156, 163, 175, 0.3);
-
-      .badgeEmoji {
-        @include gradient-dark;
-      }
-
-      .badgeInfo h4 {
-        color: #f9fafb;
-      }
-
-      .badgeInfo p {
-        color: #d1d5db;
-      }
-    }
-  }
-
-  .progressText {
+  .quickStat .statLabel,
+  .habitInfo p,
+  .achievementsHeader .headerText p {
     color: #9ca3af;
   }
 
-  .insightsSection h2 {
+  .habitInfo h3,
+  .achievementsHeader .headerText h2,
+  .insightsSection h2,
+  .quickStatsSection h2,
+  .habitDetailsSection h2,
+  .heatmapSection h2 {
     color: #f9fafb;
   }
 
-  .quickStatsSection h2 {
-    color: #f9fafb;
+  .habitStatus .noStreak {
+    // background: #374151;
+    color: #9ca3af;
+    // border-color: #4b5563;
   }
 
-  .quickStat {
-    @include gradient-dark;
-    @include border-subtle;
+  .weeklyGoalSection {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    border-color: #4b5563;
+  }
 
-    .statLabel {
+  .goalHeader span:first-child {
+    color: #d1d5db;
+  }
+
+  .goalPercentage {
+    // background: #1f2937;
+    color: #f9fafb;
+    // border-color: #4b5563;
+  }
+
+  .goalProgressBar {
+    background: #4b5563;
+  }
+
+  .metric {
+    // background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    border-color: #4b5563;
+
+    &:hover {
+      background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+    }
+
+    .metricLabel {
       color: #9ca3af;
     }
   }
 
-  // Habit Performance dark mode
-  .habitPerformanceSection h2 {
-    color: #f9fafb;
-  }
+  .heatmapHeader {
+    border-color: #374151;
 
-  .habitCard {
-    @include gradient-dark;
-    @include border-subtle;
-  }
-
-  .habitEmoji {
-    background: linear-gradient(135deg, #374151, #4b5563);
-    border-color: #4b5563;
-  }
-
-  .habitInfo {
     h3 {
       color: #f9fafb;
     }
 
-    .habitGoal {
+    .yearLabel {
+      background: #374151;
       color: #9ca3af;
+      border-color: #4b5563;
     }
   }
 
-  .habitStats {
-    .statLabel {
-      color: #9ca3af;
+  .heatmapGrid {
+    background: rgba(55, 65, 81, 0.3);
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(75, 85, 99, 0.3);
     }
     
-    .statValue {
-      color: #f9fafb;
+    &::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.4);
+      
+      &:hover {
+        background: rgba(156, 163, 175, 0.6);
+      }
     }
   }
 
-  .habitProgress {
-    .progressLabel {
-      span:first-child {
-        color: #d1d5db;
-      }
-
-      span:last-child {
-        color: #f9fafb;
-      }
-    }
-
-    .progressBarContainer {
+  .heatmapDay {
+    // Dark mode intensity levels with better contrast
+    &.intensity0 {
       background: #374151;
+      border-color: #4b5563;
     }
 
-    .roomForImprovement {
-      background: rgba(251, 191, 36, 0.1);
-      border-color: rgba(251, 191, 36, 0.3);
-      
-      .improvementIcon {
-        color: #fbbf24;
-      }
-      
-      .improvementText {
-        color: #fcd34d;
-      }
-    }
-  }
-}
-
-// Responsive design
-@include mobile {
-  .statsView {
-    padding: 16px;
-    gap: 24px;
-  }
-
-  .header {
-    h1 {
-      font-size: 2rem;
+    &.intensity1 {
+      background: #065f46;
+      border-color: #047857;
     }
 
-    p {
-      @include text-body;
+    &.intensity2 {
+      background: #047857;
+      border-color: #059669;
+    }
+
+    &.intensity3 {
+      background: #059669;
+      border-color: #10b981;
+    }
+
+    &.intensity4 {
+      background: #10b981;
+      border-color: #34d399;
+    }
+
+    &.future {
+      background: #1f2937 !important;
+      border-color: #374151 !important;
     }
   }
 
-  .achievementsGrid {
-    gap: 12px;
+  .heatmapLegend {
+    background: rgba(55, 65, 81, 0.4);
+    border-color: rgba(75, 85, 99, 0.5);
+  }
+
+  .legendText {
+    color: #9ca3af;
+  }
+
+  .legendSquare {
+    &.intensity0 {
+      background: #374151;
+      border-color: #4b5563;
+    }
+
+    &.intensity1 {
+      background: #065f46;
+      border-color: #047857;
+    }
+
+    &.intensity2 {
+      background: #047857;
+      border-color: #059669;
+    }
+
+    &.intensity3 {
+      background: #059669;
+      border-color: #10b981;
+    }
+
+    &.intensity4 {
+      background: #10b981;
+      border-color: #34d399;
+    }
+  }
+
+  .monthLabels .monthLabel {
+    color: #9ca3af;
   }
 
   .achievementBadge {
-    padding: 16px;
-    gap: 12px;
+    .badgeInfo {
+      h4 {
+        color: #f9fafb;
+      }
 
-    .badgeEmoji {
-      font-size: 2rem;
-      width: 48px;
-      height: 48px;
+      p {
+        color: #9ca3af;
+      }
     }
   }
 
-  .quickStatsGrid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 16px;
-  }
-
-  .quickStat {
-    padding: 20px;
-
-    .statValue {
-      font-size: 2rem;
-    }
-  }
-
-  .insightsGrid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .insightCard {
-    padding: 14px 16px;
-  }
-
-  // Habit Performance mobile styles
-  .habitPerformanceGrid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .habitCard {
-    padding: 20px;
-  }
-
-  .habitHeader {
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-
-  .habitEmoji {
-    font-size: 1.5rem;
-    width: 40px;
-    height: 40px;
-  }
-
-  .habitInfo h3 {
-    font-size: 1rem;
-  }
-
-  .habitStats {
-    margin-top: 14px;
-  }
-
-  .habitProgress {
-    margin-top: 14px;
-
-    .roomForImprovement {
-      padding: 10px;
+  .viewAllBadgesButton {
+    &:hover {
+      background: linear-gradient(135deg, #4c1d95 0%, #6b21a8 100%);
     }
   }
 }

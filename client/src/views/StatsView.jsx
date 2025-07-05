@@ -4,7 +4,8 @@ import { useCalendar } from '../hooks/useCalendar';
 import { 
   getBestStreak, 
   getHabitStatsForRange, 
-  generateHeatmapData 
+  generateHeatmapData,
+  generateAggregatedHeatmapData 
 } from '../utils/streakUtils';
 import { getWeekBoundaries } from '../utils/dateUtils';
 import BadgesModal from '../components/BadgesModal';
@@ -118,6 +119,13 @@ const StatsView = () => {
       };
     });
   }, [habits, calendarEntries, streaks]);
+
+  // Generate aggregated heatmap data (GitHub-style)
+  const aggregatedHeatmapData = useMemo(() => {
+    if (!habits.length || !Object.keys(calendarEntries).length) return null;
+    
+    return generateAggregatedHeatmapData(habits, calendarEntries);
+  }, [habits, calendarEntries]);
 
   // Calculate overall insights
   const overallInsights = useMemo(() => {
@@ -475,9 +483,9 @@ const StatsView = () => {
         <div className={styles.quickStatsGrid}>
           <div className={styles.quickStat}>
             <div className={styles.statValue}>
-              {statsData.reduce((sum, { currentStreak }) => sum + currentStreak, 0)}
+              {statsData.reduce((sum, { thirtyDayStats }) => sum + thirtyDayStats.completedDays, 0)}
             </div>
-            <div className={styles.statLabel}>Total Active Streaks</div>
+            <div className={styles.statLabel}>Total Days Completed</div>
           </div>
           <div className={styles.quickStat}>
             <div className={styles.statValue}>
@@ -508,7 +516,11 @@ const StatsView = () => {
         <h2>🎯 Habit Performance</h2>
         <div className={styles.habitDetailsGrid}>
           {statsData.map(({ habit, currentStreak, bestStreak, thirtyDayStats, currentWeekStats, weeklyGoalPercentage, currentWeekProgress, insights }) => (
-            <div key={habit.id} className={styles.habitDetailCard}>
+            <div 
+              key={habit.id} 
+              className={styles.habitDetailCard}
+              style={{ '--habit-color': habit.color }}
+            >
               <div className={styles.habitHeader}>
                 <span 
                   className={styles.habitEmoji}
@@ -549,19 +561,19 @@ const StatsView = () => {
               <div className={styles.metricsGrid}>
                 <div className={styles.metric}>
                   <div className={styles.metricValue}>{currentStreak}</div>
-                  <div className={styles.metricLabel}>Current</div>
+                  <div className={styles.metricLabel}>Current Streak</div>
                 </div>
                 <div className={styles.metric}>
                   <div className={styles.metricValue}>{bestStreak}</div>
-                  <div className={styles.metricLabel}>Best</div>
+                  <div className={styles.metricLabel}>Best Streak</div>
+                </div>
+                <div className={styles.metric}>
+                  <div className={styles.metricValue}>{thirtyDayStats.completedDays}</div>
+                  <div className={styles.metricLabel}>Total Days</div>
                 </div>
                 <div className={styles.metric}>
                   <div className={styles.metricValue}>{Math.round(thirtyDayStats.completionRate)}%</div>
-                  <div className={styles.metricLabel}>30-Day</div>
-                </div>
-                <div className={styles.metric}>
-                  <div className={styles.metricValue}>{currentWeekStats.completedDays}</div>
-                  <div className={styles.metricLabel}>This Week</div>
+                  <div className={styles.metricLabel}>Success Rate</div>
                 </div>
               </div>
 
@@ -580,55 +592,121 @@ const StatsView = () => {
         </div>
       </div>
 
-      {/* Yearly Heatmap */}
-      <div className={styles.heatmapSection}>
-        <h2>📅 Activity Overview</h2>
-        {statsData.map(({ habit, heatmapData }) => {
-          // Create 2D grid for GitHub-style layout (weeks x days of week)
-          const weeks = [];
-          const daysByWeek = {};
-          
-          // Group days by week number and day of week
-          heatmapData.forEach(day => {
-            if (!daysByWeek[day.week]) {
-              daysByWeek[day.week] = {};
-            }
-            daysByWeek[day.week][day.dayOfWeek] = day;
-          });
-          
-          // Convert to array format for rendering
-          const sortedWeeks = Object.keys(daysByWeek).sort((a, b) => Number(a) - Number(b));
-          sortedWeeks.forEach(weekNum => {
-            const week = [];
-            for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-              week[dayOfWeek] = daysByWeek[weekNum][dayOfWeek] || null;
-            }
-            weeks.push(week);
-          });
-
-          return (
-            <div key={habit.id} className={styles.habitHeatmap}>
-              <div className={styles.heatmapHeader}>
-                <span className={styles.habitEmoji}>{habit.emoji}</span>
-                <h3>{habit.name}</h3>
-                <span className={styles.yearLabel}>{new Date().getFullYear()}</span>
-              </div>
-              
-              {/* Day labels and heatmap grid */}
-              <div className={styles.heatmapContainer}>
-                <div className={styles.dayLabels}>
-                  <div className={styles.dayLabel}>Sun</div>
-                  <div className={styles.dayLabel}>Mon</div>
-                  <div className={styles.dayLabel}>Tue</div>
-                  <div className={styles.dayLabel}>Wed</div>
-                  <div className={styles.dayLabel}>Thu</div>
-                  <div className={styles.dayLabel}>Fri</div>
-                  <div className={styles.dayLabel}>Sat</div>
-                </div>
+      {/* Yearly Aggregated Heatmap */}
+      {aggregatedHeatmapData && (
+        <div className={styles.heatmapSection}>
+          <h2>📅 Activity Overview</h2>
+          <div className={styles.habitHeatmap}>
+            <div className={styles.heatmapHeader}>
+              <span className={styles.habitEmoji}>📊</span>
+              <h3>All Habits Combined</h3>
+              <span className={styles.yearLabel}>{new Date().getFullYear()}</span>
+            </div>
+            
+            {/* Month labels, day labels and heatmap grid */}
+            <div className={styles.heatmapContainer}>
+              {/* Month labels */}
+              <div className={styles.monthLabels}>
+                {(() => {
+                  const monthLabels = [];
+                  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                  
+                  // Group days by week
+                  const daysByWeek = {};
+                  aggregatedHeatmapData.forEach(day => {
+                    if (!daysByWeek[day.week]) {
+                      daysByWeek[day.week] = {};
+                    }
+                    daysByWeek[day.week][day.dayOfWeek] = day;
+                  });
+                  
+                  const sortedWeeks = Object.keys(daysByWeek).sort((a, b) => Number(a) - Number(b));
+                  const totalWeeks = sortedWeeks.length;
+                  
+                  // Find the first Sunday of each month for label positioning
+                  const monthPositions = [];
+                  let lastMonth = null;
+                  
+                  sortedWeeks.forEach((weekNum, weekIndex) => {
+                    const week = daysByWeek[weekNum];
                     
-                <div className={styles.heatmapGrid}>
-                  {/* Create columns for each week */}
-                  {weeks.map((week, weekIndex) => (
+                    // Check the first day (Sunday) of this week
+                    const sunday = week[0];
+                    if (sunday) {
+                      const date = new Date(sunday.date);
+                      const month = date.getMonth();
+                      
+                      // If this is a new month, record its position
+                      if (month !== lastMonth) {
+                        monthPositions.push({
+                          month: month,
+                          weekIndex: weekIndex,
+                          date: date
+                        });
+                        lastMonth = month;
+                      }
+                    }
+                  });
+                  
+                  // Create month labels
+                  monthPositions.forEach((monthPos, index) => {
+                    // Calculate the width for this month
+                    const nextMonthPos = monthPositions[index + 1];
+                    const endWeek = nextMonthPos ? nextMonthPos.weekIndex : totalWeeks;
+                    const weekSpan = endWeek - monthPos.weekIndex;
+                    
+                    // Only show months that span at least 2 weeks
+                    if (weekSpan >= 2) {
+                      const leftPercent = (monthPos.weekIndex / totalWeeks) * 100;
+                      const widthPercent = (weekSpan / totalWeeks) * 100;
+                      
+                      monthLabels.push(
+                        <div 
+                          key={monthPos.month} 
+                          className={styles.monthLabel}
+                          style={{ 
+                            left: `${leftPercent}%`,
+                            width: `${widthPercent}%`
+                          }}
+                        >
+                          {months[monthPos.month]}
+                        </div>
+                      );
+                    }
+                  });
+                  
+                  return monthLabels;
+                })()}
+              </div>
+
+
+                  
+              <div className={styles.heatmapGrid}>
+                {(() => {
+                  // Create 2D grid for GitHub-style layout (weeks x days of week)
+                  const weeks = [];
+                  const daysByWeek = {};
+                  
+                  // Group days by week number and day of week
+                  aggregatedHeatmapData.forEach(day => {
+                    if (!daysByWeek[day.week]) {
+                      daysByWeek[day.week] = {};
+                    }
+                    daysByWeek[day.week][day.dayOfWeek] = day;
+                  });
+                  
+                  // Convert to array format for rendering
+                  const sortedWeeks = Object.keys(daysByWeek).sort((a, b) => Number(a) - Number(b));
+                  sortedWeeks.forEach(weekNum => {
+                    const week = [];
+                    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                      week[dayOfWeek] = daysByWeek[weekNum][dayOfWeek] || null;
+                    }
+                    weeks.push(week);
+                  });
+
+                  return weeks.map((week, weekIndex) => (
                     <div key={weekIndex} className={styles.heatmapWeekColumn}>
                       {/* Create rows for each day of the week (Sun-Sat) */}
                       {[0, 1, 2, 3, 4, 5, 6].map(dayOfWeek => {
@@ -637,7 +715,7 @@ const StatsView = () => {
                           return <div key={dayOfWeek} className={styles.heatmapDayEmpty}></div>;
                         }
                         
-                        const tooltipId = `${habit.id}-${day.date}`;
+                        const tooltipId = `aggregated-${day.date}`;
                         const isTooltipActive = activeTooltip?.id === tooltipId;
 
                         const handleDayClick = (e) => {
@@ -647,7 +725,7 @@ const StatsView = () => {
                           } else {
                             const rect = e.target.getBoundingClientRect();
                             const tooltipHeight = 140;
-                            const tooltipWidth = 260;
+                            const tooltipWidth = 280;
                             
                             // Calculate initial position centered above the square
                             let x = rect.left + rect.width / 2;
@@ -685,13 +763,10 @@ const StatsView = () => {
                         return (
                           <div key={day.date} className={styles.heatmapDayWrapper}>
                             <div
-                              className={`${styles.heatmapDay} ${day.completed ? styles.completed : ''} ${day.isFuture ? styles.future : ''}`}
-                              style={{
-                                '--habit-color': habit.color,
-                              }}
+                              className={`${styles.heatmapDay} ${styles[`intensity${day.intensity}`]} ${day.isFuture ? styles.future : ''}`}
                               onClick={handleDayClick}
-                              title={day.completed 
-                                ? `${habit.emoji} ${habit.name} - ${day.formattedDate}, ${day.weekday}`
+                              title={day.intensity > 0 
+                                ? `${day.formattedDate}, ${day.weekday} - ${day.completedCount}/${day.totalHabits} habits completed (${Math.round(day.completionRate * 100)}%)`
                                 : `${day.formattedDate}, ${day.weekday} - ${day.isFuture ? 'Future date' : 'No activity'}`
                               }
                             />
@@ -709,27 +784,24 @@ const StatsView = () => {
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <div className={styles.habitTooltipContent}>
-                                  {day.completed ? (
-                                    <>
-                                      <div className={styles.tooltipHeader}>
-                                        <span className={styles.tooltipEmoji}>{habit.emoji}</span>
-                                        <span className={styles.tooltipHabitName}>{habit.name}</span>
+                                  <div className={styles.tooltipHeader}>
+                                    <span className={styles.tooltipEmoji}>📊</span>
+                                    <span className={styles.tooltipHabitName}>Daily Progress</span>
+                                  </div>
+                                  <div className={styles.tooltipDate}>{day.formattedDate}, {day.weekday}</div>
+                                  {day.intensity > 0 ? (
+                                    <div className={styles.tooltipStats}>
+                                      <div className={styles.completionStat}>
+                                        {day.completedCount}/{day.totalHabits} habits completed
                                       </div>
-                                      <div className={styles.tooltipDate}>{day.formattedDate}, {day.weekday}</div>
-                                      <div className={styles.tooltipTime}>
-                                        {day.completionTime 
-                                          ? `Completed: ${new Date(day.completionTime).toLocaleString()}`
-                                          : 'Completed (time not recorded)'
-                                        }
+                                      <div className={styles.completionRate}>
+                                        {Math.round(day.completionRate * 100)}% completion rate
                                       </div>
-                                    </>
+                                    </div>
                                   ) : (
-                                    <>
-                                      <div className={styles.tooltipDate}>{day.formattedDate}, {day.weekday}</div>
-                                      <div className={styles.tooltipStatus}>
-                                        {day.isFuture ? 'Future date' : 'No activity'}
-                                      </div>
-                                    </>
+                                    <div className={styles.tooltipStatus}>
+                                      {day.isFuture ? 'Future date' : 'No habits completed'}
+                                    </div>
                                   )}
                                 </div>
                                 <div className={styles.tooltipArrow}></div>
@@ -739,13 +811,26 @@ const StatsView = () => {
                         );
                       })}
                     </div>
-                  ))}
-                </div>
+                  ));
+                })()}
               </div>
             </div>
-          );
-        })}
-      </div>
+
+            {/* Intensity Legend */}
+            <div className={styles.heatmapLegend}>
+              <span className={styles.legendText}>Less</span>
+              <div className={styles.legendSquares}>
+                <div className={`${styles.legendSquare} ${styles.intensity0}`}></div>
+                <div className={`${styles.legendSquare} ${styles.intensity1}`}></div>
+                <div className={`${styles.legendSquare} ${styles.intensity2}`}></div>
+                <div className={`${styles.legendSquare} ${styles.intensity3}`}></div>
+                <div className={`${styles.legendSquare} ${styles.intensity4}`}></div>
+              </div>
+              <span className={styles.legendText}>More</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Achievement Badges */}
       {badgeSystem.featured.length > 0 && (
