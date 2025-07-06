@@ -145,6 +145,68 @@ export const BADGE_DEFINITIONS = [
     rarity: 'rare',
     type: 'dynamic',
     requirement: (data) => data.some(d => d.thirtyDayStats.completionRate >= 90)
+  },
+  
+  // New Advanced Achievements
+  {
+    id: 'month_master',
+    emoji: '📅',
+    title: 'Month Master',
+    description: 'Complete a habit every day for 30 days',
+    category: 'Consistency',
+    rarity: 'uncommon',
+    type: 'permanent',
+    requirement: (data) => Math.max(...data.map(d => d.bestStreak)) >= 30
+  },
+  {
+    id: 'streak_titan',
+    emoji: '⚡',
+    title: 'Streak Titan',
+    description: 'Achieve a 50-day streak',
+    category: 'Streaks',
+    rarity: 'rare',
+    type: 'permanent',
+    requirement: (data) => Math.max(...data.map(d => d.bestStreak)) >= 50
+  },
+  {
+    id: 'habit_machine',
+    emoji: '🤖',
+    title: 'Habit Machine',
+    description: '500 total habit completions',
+    category: 'Milestones',
+    rarity: 'rare',
+    type: 'permanent',
+    requirement: (data) => data.reduce((sum, d) => sum + d.thirtyDayStats.completedDays, 0) >= 500
+  },
+  {
+    id: 'multi_streak_master',
+    emoji: '🌟',
+    title: 'Multi-Streak Master',
+    description: 'Maintain 3+ habits with 7-day streaks',
+    category: 'Streaks',
+    rarity: 'uncommon',
+    type: 'dynamic',
+    requirement: (data) => data.filter(d => d.currentStreak >= 7).length >= 3
+  },
+  {
+    id: 'perfect_month',
+    emoji: '💎',
+    title: 'Perfect Month',
+    description: '100% completion rate for 30 days',
+    category: 'Consistency',
+    rarity: 'rare',
+    type: 'dynamic',
+    requirement: (data) => data.some(d => d.thirtyDayStats.completionRate >= 100)
+  },
+  {
+    id: 'dedication_legend',
+    emoji: '🏆',
+    title: 'Dedication Legend',
+    description: '1000 total habit completions',
+    category: 'Milestones',
+    rarity: 'legendary',
+    type: 'permanent',
+    requirement: (data) => data.reduce((sum, d) => sum + d.thirtyDayStats.completedDays, 0) >= 1000
   }
 ];
 

@@ -352,8 +352,7 @@
 // Footer
 .footer {
   background: white;
-  @include border-subtle;
-  border-top: 1px solid #e5e7eb;
+  border: none;
   padding: 16px 20px;
   margin-top: auto;
 }
@@ -799,7 +798,7 @@
 
   .footer {
     background: #1f2937;
-    border-top-color: #374151;
+    // border-top-color: #374151;
 
     .footerContent p {
       color: #9ca3af;
@@ -936,6 +935,7 @@
 
   .footer {
     background: white;
-    border-top-color: #e5e7eb;
+    // border-top-color: #e5e7eb;
+    border: none;
   }
 } 
