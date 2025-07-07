@@ -29,6 +29,9 @@ const CalendarView = () => {
   const [celebrationAchievement, setCelebrationAchievement] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
 
+  // State for onboarding prompt
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
   const {
     habits,
     loading: habitsLoading,
@@ -54,6 +57,25 @@ const CalendarView = () => {
     getCompletedHabits,
     hasHabitMetWeeklyGoal,
   } = useCalendar(habits);
+
+  // Check if user should see onboarding prompt
+  useEffect(() => {
+    const hasSeenCalendarOnboarding = localStorage.getItem('hasSeenCalendarOnboarding');
+    const totalCompletions = Object.keys(calendarEntries).length;
+    
+    // Show onboarding if:
+    // 1. User has habits
+    // 2. Hasn't seen the onboarding before
+    // 3. Has fewer than 3 total completions (new user)
+    if (habits.length > 0 && !hasSeenCalendarOnboarding && totalCompletions < 3) {
+      setShowOnboarding(true);
+    }
+  }, [habits, calendarEntries]);
+
+  const dismissOnboarding = () => {
+    setShowOnboarding(false);
+    localStorage.setItem('hasSeenCalendarOnboarding', 'true');
+  };
 
   // Calculate week stats for the selected date's week
   const selectedWeekStats = selectedDate 
@@ -147,6 +169,11 @@ const CalendarView = () => {
     setSelectedDate(date);
     setSelectedDay(day);
     setIsDayModalOpen(true);
+    
+    // Dismiss onboarding when user interacts with calendar
+    if (showOnboarding) {
+      dismissOnboarding();
+    }
   };
 
   // Handle habit detail click to show stats
@@ -240,6 +267,26 @@ const CalendarView = () => {
 
       {/* Calendar Grid */}
       <div className={styles.calendarSection}>
+        {/* Onboarding Prompt */}
+        {showOnboarding && (
+          <div className={styles.onboardingPrompt}>
+            <div className={styles.onboardingContent}>
+              <div className={styles.onboardingIcon}>👆</div>
+              <div className={styles.onboardingText}>
+                <h3>Ready to track your habits?</h3>
+                <p><strong>Click on any calendar day</strong> to mark your habit completions!</p>
+              </div>
+              <button 
+                className={styles.onboardingDismiss}
+                onClick={dismissOnboarding}
+                title="Got it!"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
         {habits.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyStateContent}>
