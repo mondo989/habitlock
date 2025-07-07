@@ -71,7 +71,7 @@
 
 .slideContainer {
   padding: 0 32px;
-  min-height: 500px;
+  min-height: 400px; // Reduced from 500px to allow better mobile fit
   display: flex;
   align-items: center;
   touch-action: pan-y pinch-zoom; // Allow vertical scrolling but enable horizontal swipes
@@ -162,6 +162,44 @@
   grid-template-columns: 1fr 1fr;
   gap: 32px;
   align-items: start;
+}
+
+// Customization preview styles
+.customizationPreview {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.emojiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  
+  span {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+}
+
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  
+  div {
+    width: 32px;
+    height: 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
 }
 
 .mockupContainer {
@@ -255,10 +293,21 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
   .calendarHeader {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 16px;
     font-weight: 600;
     color: #0f172a;
+    
+    .weeklyProgress {
+      font-size: 0.75rem;
+      color: #059669;
+      background: #d1fae5;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
   }
 }
 
@@ -280,11 +329,30 @@
   color: #64748b;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
+  position: relative;
+  flex-direction: column;
+  gap: 1px;
 
   &.completed {
-    background: #10b981;
-    color: white;
-    border-color: #059669;
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #e2e8f0;
+    
+    .habitEmoji {
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+  }
+  
+  &.multiHabit {
+    .habitEmoji {
+      font-size: 0.6rem;
+    }
+  }
+  
+  &.goalGlow {
+    box-shadow: 0 0 0 2px #f59e0b, 0 0 8px rgba(245, 158, 11, 0.3);
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
   }
 
   &.today {
@@ -292,6 +360,11 @@
     color: white;
     border-color: #2563eb;
   }
+}
+
+.habitEmoji {
+  font-size: 0.75rem;
+  line-height: 1;
 }
 
 // Streak demo styles
@@ -304,76 +377,90 @@
   border-radius: 16px;
 }
 
-.streakCard {
+.habitCardPreview {
   background: white;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  min-width: 280px;
+  min-width: 300px;
+  border: 2px solid rgba(0, 0, 0, 0.06);
 
-  .streakHeader {
+  .habitCardHeader {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 16px;
+    margin-bottom: 20px;
 
     .streakEmoji {
-      width: 40px;
-      height: 40px;
-      font-size: 1.25rem;
-      background: #dbeafe;
-      border-radius: 10px;
+      width: 48px;
+      height: 48px;
+      font-size: 1.5rem;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    div:nth-child(2) {
+    .habitCardInfo {
       flex: 1;
 
       h4 {
         margin: 0 0 4px;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #0f172a;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #1f2937;
       }
 
       p {
         margin: 0;
-        font-size: 0.8125rem;
-        color: #64748b;
+        font-size: 0.9375rem;
+        color: #6b7280;
+        font-weight: 600;
       }
     }
 
-    .streakBadge {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 6px;
+    .goalBadge {
+      background: #d1fae5;
+      color: #059669;
+      padding: 6px 10px;
+      border-radius: 8px;
       font-size: 0.8125rem;
+      font-weight: 700;
+      border: 1px solid #a7f3d0;
+    }
+  }
+
+  .weeklySection {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+
+    .weeklyHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.9375rem;
       font-weight: 600;
+      color: #374151;
     }
-  }
 
-  .progressBar {
-    width: 100%;
-    height: 8px;
-    background: #e5e7eb;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 8px;
+    .progressBar {
+      width: 100%;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
 
-    .progressFill {
-      height: 100%;
-      background: #10b981;
-      transition: width 0.3s ease;
+      .progressFill {
+        height: 100%;
+        transition: width 0.3s ease;
+        border-radius: 4px;
+      }
     }
-  }
-
-  p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: #64748b;
   }
 }
 
@@ -385,6 +472,53 @@
   padding: 32px;
   background: linear-gradient(135deg, #f8fafc, #f1f5f9);
   border-radius: 16px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.statCard {
+  background: white;
+  padding: 16px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  .statNumber {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+  
+  .statLabel {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+}
+
+.achievementPreview {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.badge {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .heatmapPreview {
@@ -412,6 +546,10 @@
     height: 16px;
     background: #e5e7eb;
     border-radius: 3px;
+
+    &.light {
+      background: #a7f3d0;
+    }
 
     &.active {
       background: #10b981;
@@ -567,47 +705,65 @@
 // Responsive design
 @media (max-width: 768px) {
   .onboardingOverlay {
-    padding: 16px;
+    padding: 8px;
     align-items: flex-start;
-    padding-top: max(16px, env(safe-area-inset-top, 16px));
-    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    padding-top: max(8px, env(safe-area-inset-top, 8px));
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
 
   .onboardingModal {
-    width: calc(100vw - 32px);
+    width: calc(100vw - 16px);
     max-width: none;
-    max-height: calc(100vh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    // Allow modal to use full viewport height properly
+    height: calc(100vh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100vh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     border-radius: 20px;
     display: flex;
     flex-direction: column;
     margin: 0 auto;
     overflow: hidden;
+    position: relative;
   }
 
   .modalHeader, .slideContainer, .modalFooter {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .modalHeader {
     flex-shrink: 0;
-    padding-bottom: 16px;
+    padding-bottom: 12px;
+    padding-top: 16px;
   }
 
   .slideContainer {
     flex: 1;
     min-height: 0; // Allow flexbox to shrink
-    padding-top: 16px;
-    padding-bottom: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     
-    // Ensure scrollable content
+    // Remove min-height constraint on mobile
+    min-height: unset !important;
+    
+    // Better scroll behavior
     &::-webkit-scrollbar {
       display: none;
+    }
+    
+    // Ensure content doesn't get cut off
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    
+    // Add padding to bottom to ensure content visibility
+    &::after {
+      content: '';
+      display: block;
+      height: 20px;
     }
   }
 
@@ -631,32 +787,41 @@
   .modalFooter {
     flex-shrink: 0;
     padding-top: 16px;
-    padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
-    // Better mobile footer layout
-    background: linear-gradient(180deg, transparent 0%, #fafbfc 20%);
+    padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
+    // Better mobile footer layout with stronger background
+    background: linear-gradient(180deg, rgba(250, 251, 252, 0.95) 0%, #fafbfc 100%);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    
+    // Ensure footer is always visible
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
   }
 
   .mobileSwipeHint {
     display: block;
-    margin-bottom: 16px;
-    background: rgba(59, 130, 246, 0.05);
-    padding: 12px 16px;
-    border-radius: 12px;
-    border: 1px solid rgba(59, 130, 246, 0.1);
+    margin-bottom: 12px;
+    background: rgba(59, 130, 246, 0.08);
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(59, 130, 246, 0.15);
     color: #3b82f6;
     font-weight: 600;
+    font-size: 0.8125rem;
   }
 
   .desktopNavigation {
     flex-direction: row;
-    gap: 12px;
+    gap: 10px;
   }
 
   .prevButton, .nextButton {
     flex: 1;
-    padding: 14px 16px;
+    padding: 16px 14px;
     font-size: 1rem;
-    min-height: 48px; // Better touch target
+    min-height: 52px; // Better touch target
+    border-radius: 12px;
   }
 
   .slideCounter {
@@ -691,11 +856,13 @@
   }
 
   .modalFooter {
-    border-top-color: rgba(255, 255, 255, 0.1);
+    border-top-color: rgba(255, 255, 255, 0.15);
     background: #0f172a;
     
     @media (max-width: 768px) {
-      background: linear-gradient(180deg, transparent 0%, #0f172a 20%);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, #0f172a 100%);
+      backdrop-filter: blur(10px);
+      border-top-color: rgba(255, 255, 255, 0.1);
     }
   }
 
@@ -819,8 +986,8 @@
   }
 
   .mobileSwipeHint {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.2);
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.25);
     color: #60a5fa;
   }
 

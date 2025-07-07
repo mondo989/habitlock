@@ -18,23 +18,23 @@ const OnboardingCarousel = ({ onComplete }) => {
       content: (
         <div className={styles.welcomeContent}>
           <div className={styles.heroIcon}>🚀</div>
-          <p>HabitLock helps you build lasting habits through smart tracking, beautiful analytics, and proven habit-building strategies.</p>
+          <p>HabitLock helps you build lasting habits through smart tracking, beautiful analytics, and achievement systems that make habit-building actually enjoyable.</p>
           <div className={styles.featureList}>
             <div className={styles.feature}>
-              <span className={styles.featureIcon}>📈</span>
-              <span>Visual progress tracking</span>
+              <span className={styles.featureIcon}>📅</span>
+              <span>Interactive calendar tracking</span>
             </div>
             <div className={styles.feature}>
               <span className={styles.featureIcon}>🔥</span>
-              <span>Streak motivation</span>
+              <span>Streak motivation & goals</span>
             </div>
             <div className={styles.feature}>
               <span className={styles.featureIcon}>📊</span>
-              <span>Detailed analytics</span>
+              <span>Detailed stats & heatmaps</span>
             </div>
             <div className={styles.feature}>
-              <span className={styles.featureIcon}>🎯</span>
-              <span>Goal setting & tracking</span>
+              <span className={styles.featureIcon}>🏆</span>
+              <span>Achievement badges</span>
             </div>
           </div>
         </div>
@@ -42,26 +42,37 @@ const OnboardingCarousel = ({ onComplete }) => {
     },
     {
       id: 'create-habits',
-      title: 'Creating Your First Habit 📝',
-      subtitle: 'Start small, think big',
+      title: 'Create & Customize Your Habits 🎨',
+      subtitle: 'Personalize your habit tracking experience',
       content: (
         <div className={styles.instructionContent}>
           <div className={styles.mockupContainer}>
             <div className={styles.mockHabitCard}>
-              <div className={styles.mockEmoji}>🏃‍♂️</div>
+              <div className={styles.mockEmoji} style={{ backgroundColor: '#3b82f6' }}>🏃‍♂️</div>
               <div className={styles.mockHabitInfo}>
                 <h4>Morning Run</h4>
-                <p>Goal: 5 times/week</p>
+                <p>Goal: 3 times/week</p>
+              </div>
+            </div>
+            <div className={styles.customizationPreview}>
+              <div className={styles.emojiGrid}>
+                <span>💪</span><span>📚</span><span>🧘‍♀️</span><span>💧</span>
+              </div>
+              <div className={styles.colorGrid}>
+                <div style={{ backgroundColor: '#3b82f6' }}></div>
+                <div style={{ backgroundColor: '#10b981' }}></div>
+                <div style={{ backgroundColor: '#f59e0b' }}></div>
+                <div style={{ backgroundColor: '#ef4444' }}></div>
               </div>
             </div>
           </div>
           <div className={styles.tips}>
-            <h4>💡 Pro Tips for Success:</h4>
+            <h4>🎯 Customization Options:</h4>
             <ul>
-              <li><strong>Start small:</strong> 10-minute walk → 30-minute run</li>
-              <li><strong>Be specific:</strong> "Exercise" → "20-minute morning jog"</li>
-              <li><strong>Set realistic goals:</strong> 3-4 times per week is often better than daily</li>
-              <li><strong>Choose meaningful emojis:</strong> They make tracking more fun!</li>
+              <li><strong>48 emojis:</strong> Choose from fitness, productivity, wellness & more</li>
+              <li><strong>48 colors:</strong> Personalize with vibrant colors for easy identification</li>
+              <li><strong>Weekly goals:</strong> Set realistic targets (default: 3 times/week)</li>
+              <li><strong>Descriptions:</strong> Add context to remember why this habit matters</li>
             </ul>
           </div>
         </div>
@@ -69,33 +80,43 @@ const OnboardingCarousel = ({ onComplete }) => {
     },
     {
       id: 'daily-tracking',
-      title: 'Daily Tracking Made Simple ✅',
-      subtitle: 'One click to build momentum',
+      title: 'Interactive Calendar Tracking 📅',
+      subtitle: 'Visual progress with emoji rewards',
       content: (
         <div className={styles.instructionContent}>
           <div className={styles.trackingDemo}>
             <div className={styles.calendarPreview}>
               <div className={styles.calendarHeader}>
                 <span>December 2024</span>
+                <div className={styles.weeklyProgress}>
+                  <span>3/3 goals met this week</span>
+                </div>
               </div>
               <div className={styles.calendarGrid}>
                 <div className={styles.calendarDay}>1</div>
                 <div className={styles.calendarDay}>2</div>
-                <div className={styles.calendarDay}>3</div>
-                <div className={`${styles.calendarDay} ${styles.completed}`}>4</div>
-                <div className={`${styles.calendarDay} ${styles.completed}`}>5</div>
+                <div className={`${styles.calendarDay} ${styles.completed}`}>
+                  <span className={styles.habitEmoji}>🏃‍♂️</span>
+                </div>
+                <div className={`${styles.calendarDay} ${styles.completed} ${styles.multiHabit}`}>
+                  <span className={styles.habitEmoji}>💪</span>
+                  <span className={styles.habitEmoji}>📚</span>
+                </div>
+                <div className={`${styles.calendarDay} ${styles.completed} ${styles.goalGlow}`}>
+                  <span className={styles.habitEmoji}>🧘‍♀️</span>
+                </div>
                 <div className={`${styles.calendarDay} ${styles.today}`}>6</div>
                 <div className={styles.calendarDay}>7</div>
               </div>
             </div>
           </div>
           <div className={styles.tips}>
-            <h4>🎯 Tracking Best Practices:</h4>
+            <h4>✨ Interactive Features:</h4>
             <ul>
-              <li><strong>Track immediately:</strong> Mark complete right after doing the habit</li>
-              <li><strong>Be honest:</strong> Only mark complete when you actually do it</li>
-              <li><strong>Don't break the chain:</strong> Consistency beats perfection</li>
-              <li><strong>Review regularly:</strong> Check your progress weekly</li>
+              <li><strong>Emoji tracking:</strong> See your habits as emojis on completed days</li>
+              <li><strong>Goal glow effect:</strong> Habits glow when weekly goals are achieved</li>
+              <li><strong>Multi-habit days:</strong> Stack multiple habits on the same day</li>
+              <li><strong>Click any day:</strong> Quickly mark habits complete or incomplete</li>
             </ul>
           </div>
         </div>
@@ -103,33 +124,38 @@ const OnboardingCarousel = ({ onComplete }) => {
     },
     {
       id: 'streaks-goals',
-      title: 'Understanding Streaks & Goals 🔥',
-      subtitle: 'The psychology of momentum',
+      title: 'Weekly Goals & Streak Tracking 🔥',
+      subtitle: 'Sustainable progress with smart psychology',
       content: (
         <div className={styles.instructionContent}>
           <div className={styles.streakDemo}>
-            <div className={styles.streakCard}>
-              <div className={styles.streakHeader}>
-                <span className={styles.streakEmoji}>🏃‍♂️</span>
-                <div>
+            <div className={styles.habitCardPreview}>
+              <div className={styles.habitCardHeader}>
+                <span className={styles.streakEmoji} style={{ backgroundColor: '#3b82f620' }}>🏃‍♂️</span>
+                <div className={styles.habitCardInfo}>
                   <h4>Morning Run</h4>
-                  <p>Goal: 5 times/week</p>
+                  <p>🔥 12 day streak</p>
                 </div>
-                <div className={styles.streakBadge}>🔥 12</div>
+                <div className={styles.goalBadge}>🎯 Goal Met!</div>
               </div>
-              <div className={styles.progressBar}>
-                <div className={styles.progressFill} style={{ width: '80%' }}></div>
+              <div className={styles.weeklySection}>
+                <div className={styles.weeklyHeader}>
+                  <span>This Week</span>
+                  <span>3/3</span>
+                </div>
+                <div className={styles.progressBar}>
+                  <div className={styles.progressFill} style={{ width: '100%', backgroundColor: '#10b981' }}></div>
+                </div>
               </div>
-              <p>This week: 4/5 complete</p>
             </div>
           </div>
           <div className={styles.tips}>
-            <h4>🧠 The Science Behind Streaks:</h4>
+            <h4>🎯 Smart Goal System:</h4>
             <ul>
-              <li><strong>Momentum matters:</strong> Each day makes the next easier</li>
-              <li><strong>Visual progress:</strong> Seeing your streak motivates continuation</li>
-              <li><strong>Weekly goals:</strong> More sustainable than daily requirements</li>
-              <li><strong>Recovery mindset:</strong> One missed day doesn't ruin progress</li>
+              <li><strong>Weekly targets:</strong> More flexible than daily requirements</li>
+              <li><strong>Visual feedback:</strong> Progress bars and goal achievement badges</li>
+              <li><strong>Streak psychology:</strong> Build momentum with consecutive days</li>
+              <li><strong>Forgiving system:</strong> Missing one day doesn't break progress</li>
             </ul>
           </div>
         </div>
@@ -137,37 +163,48 @@ const OnboardingCarousel = ({ onComplete }) => {
     },
     {
       id: 'analytics',
-      title: 'Powerful Analytics & Insights 📊',
-      subtitle: 'Data-driven habit building',
+      title: 'Detailed Analytics & Achievements 🏆',
+      subtitle: 'Track progress and unlock badges',
       content: (
         <div className={styles.instructionContent}>
           <div className={styles.analyticsDemo}>
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={styles.statNumber}>12</div>
+                <div className={styles.statLabel}>Current Streak</div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statNumber}>87%</div>
+                <div className={styles.statLabel}>Completion Rate</div>
+              </div>
+            </div>
             <div className={styles.heatmapPreview}>
-              <h5>🗓️ Activity Overview</h5>
+              <h5>📅 Year Activity Heatmap</h5>
               <div className={styles.miniHeatmap}>
                 <div className={styles.heatmapRow}>
                   <div className={styles.daySquare}></div>
-                  <div className={styles.daySquare}></div>
+                  <div className={`${styles.daySquare} ${styles.light}`}></div>
                   <div className={`${styles.daySquare} ${styles.active}`}></div>
                   <div className={`${styles.daySquare} ${styles.active}`}></div>
                   <div className={styles.daySquare}></div>
+                  <div className={`${styles.daySquare} ${styles.light}`}></div>
                   <div className={`${styles.daySquare} ${styles.active}`}></div>
-                  <div className={styles.daySquare}></div>
                 </div>
               </div>
             </div>
-            <div className={styles.insightCard}>
-              <span>💪</span>
-              <p>Excellent consistency: 85% completion rate</p>
+            <div className={styles.achievementPreview}>
+              <span className={styles.badge}>🔥</span>
+              <span className={styles.badge}>💯</span>
+              <span className={styles.badge}>🎯</span>
             </div>
           </div>
           <div className={styles.tips}>
-            <h4>📈 Use Analytics To:</h4>
+            <h4>📊 What You'll Get:</h4>
             <ul>
-              <li><strong>Identify patterns:</strong> When are you most successful?</li>
-              <li><strong>Celebrate progress:</strong> See how far you've come</li>
-              <li><strong>Optimize goals:</strong> Adjust based on real performance</li>
-              <li><strong>Stay motivated:</strong> Visual progress builds momentum</li>
+              <li><strong>GitHub-style heatmaps:</strong> Visual year overview per habit</li>
+              <li><strong>Detailed metrics:</strong> Streaks, completion rates, weekly progress</li>
+              <li><strong>Achievement badges:</strong> Unlock 20+ badges for milestones</li>
+              <li><strong>Habit insights:</strong> Individual performance analytics</li>
             </ul>
           </div>
         </div>
