@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { mergeAchievementsWithBadgeData, getUserAchievements } from '../services/achievements';
 import { getUserInfo } from '../services/firebase';
 import analytics from '../services/analytics';
+import ShareModal from './ShareModal';
 import styles from './BadgesModal.module.scss';
 
 // Animated Counter Component
@@ -43,6 +44,8 @@ const AnimatedCounter = ({ value, duration = 1500, className = '' }) => {
 const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false, achievements = {} }) => {
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const [firebaseAchievements, setFirebaseAchievements] = useState({});
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareAchievement, setShareAchievement] = useState(null);
 
   // Comprehensive badge definitions with requirements
   const badgeDefinitions = [
@@ -333,6 +336,19 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
     onClose();
   };
 
+  // Handle share badge
+  const handleShareBadge = (badge) => {
+    if (!badge.earned) return;
+    setShareAchievement(badge);
+    setShowShareModal(true);
+    analytics.capture('badge_share_initiated', {
+      badge_id: badge.id,
+      badge_name: badge.title,
+      badge_rarity: badge.rarity,
+      user_id: getUserInfo()?.uid
+    });
+  };
+
   // Add keyboard shortcuts
   useEffect(() => {
     if (!isOpen && !isFullPage) return;
@@ -451,6 +467,19 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
                       <div className={styles.checkmark}>✓</div>
                     </div>
                   )}
+
+                  {badge.earned && (
+                    <button 
+                      className={styles.shareButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleShareBadge(badge);
+                      }}
+                      title="Share this achievement"
+                    >
+                      🎉
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -489,12 +518,35 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
   );
 
   if (isFullPage) {
-    return content;
+    return (
+      <>
+        {content}
+        {/* Share Modal */}
+        <ShareModal
+          achievement={shareAchievement}
+          isOpen={showShareModal}
+          onClose={() => {
+            setShowShareModal(false);
+            setShareAchievement(null);
+          }}
+        />
+      </>
+    );
   }
 
   return (
     <div className={styles.modalOverlay} onClick={handleClose}>
       {content}
+      
+      {/* Share Modal */}
+      <ShareModal
+        achievement={shareAchievement}
+        isOpen={showShareModal}
+        onClose={() => {
+          setShowShareModal(false);
+          setShareAchievement(null);
+        }}
+      />
     </div>
   );
 };

@@ -1,0 +1,383 @@
+@import '../styles/mixins.scss';
+
+// Modal overlay and base
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  @include flex-center;
+  padding: 24px;
+  opacity: 0;
+  visibility: hidden;
+  @include transition-standard;
+
+  &.open {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.modal {
+  background: white;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  @include elevated-shadow;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.06);
+  transform: scale(0.95);
+  @include transition-standard;
+
+  .modalOverlay.open & {
+    transform: scale(1);
+  }
+}
+
+// Header section
+.header {
+  @include flex-between;
+  align-items: flex-start;
+  padding: 24px 24px 20px;
+  @include border-subtle;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.achievementInfo {
+  @include flex-start;
+  gap: 16px;
+  flex: 1;
+}
+
+.achievementEmoji {
+  font-size: 3rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.achievementDetails {
+  flex: 1;
+}
+
+.achievementTitle {
+  margin: 0 0 8px 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #1f2937;
+  letter-spacing: -0.025em;
+}
+
+.achievementDescription {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.closeButton {
+  @include reset-button;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  color: #6b7280;
+  font-size: 1.25rem;
+  @include flex-center;
+  @include transition-fast;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #374151;
+    transform: scale(1.1);
+  }
+}
+
+// Share options section
+.shareOptions {
+  padding: 24px;
+}
+
+.shareTitle {
+  margin: 0 0 20px 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  letter-spacing: -0.025em;
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.shareOption {
+  @include reset-button;
+  @include flex-column-center;
+  gap: 8px;
+  padding: 16px 12px;
+  border-radius: 12px;
+  background: white;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.08);
+  @include transition-standard;
+  position: relative;
+  min-height: 80px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    background: #f8fafc;
+    border-color: var(--option-color, #3b82f6);
+    @include hover-lift;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &.loading {
+    background: #f8fafc;
+    border-color: var(--option-color, #3b82f6);
+    cursor: not-allowed;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.optionIcon {
+  font-size: 1.75rem;
+  line-height: 1;
+  @include transition-standard;
+  @include flex-center;
+  width: 32px;
+  height: 32px;
+}
+
+.socialIcon {
+  width: 100%;
+  height: 100%;
+  color: var(--option-color);
+}
+
+.optionName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  text-align: center;
+  @include transition-standard;
+}
+
+.loadingSpinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+// Preview section
+.previewSection {
+  padding: 0 24px 24px;
+}
+
+.previewTitle {
+  margin: 0 0 16px 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  letter-spacing: -0.025em;
+}
+
+.previewMessage {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.previewText {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #4b5563;
+  word-wrap: break-word;
+
+  strong {
+    color: #1f2937;
+    font-weight: 600;
+  }
+}
+
+.rarityBadge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+// Animations
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+// Responsive design
+@include mobile {
+  .modalOverlay {
+    padding: 16px;
+  }
+
+  .modal {
+    max-height: 85vh;
+    border-radius: 16px;
+  }
+
+  .header {
+    padding: 20px 20px 16px;
+  }
+
+  .achievementEmoji {
+    font-size: 2.5rem;
+  }
+
+  .achievementTitle {
+    font-size: 1.25rem;
+  }
+
+  .achievementDescription {
+    font-size: 0.875rem;
+  }
+
+  .shareOptions {
+    padding: 20px;
+  }
+
+  .optionsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+  }
+
+  .shareOption {
+    padding: 14px 10px;
+    min-height: 70px;
+  }
+
+  .optionIcon {
+    font-size: 1.5rem;
+  }
+
+  .optionName {
+    font-size: 0.8125rem;
+  }
+
+  .previewSection {
+    padding: 0 20px 20px;
+  }
+
+  .previewMessage {
+    padding: 16px;
+  }
+
+  .previewText {
+    font-size: 0.875rem;
+  }
+}
+
+// Dark mode support
+:global(html.dark-mode) {
+  .modalOverlay {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .modal {
+    background: #1a1d23;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .achievementTitle {
+    color: #f9fafb;
+  }
+
+  .achievementDescription {
+    color: #9ca3af;
+  }
+
+  .closeButton {
+    background: rgba(255, 255, 255, 0.1);
+    color: #9ca3af;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #d1d5db;
+    }
+  }
+
+  .shareTitle,
+  .previewTitle {
+    color: #e5e7eb;
+  }
+
+  .shareOption {
+    background: #232830;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      background: #2d343e;
+      border-color: var(--option-color, #3b82f6);
+    }
+
+    &.loading {
+      background: #2d343e;
+    }
+  }
+
+  .optionName {
+    color: #e5e7eb;
+  }
+
+  .previewMessage {
+    background: #232830;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .previewText {
+    color: #d1d5db;
+
+    strong {
+      color: #f9fafb;
+    }
+  }
+
+  .rarityBadge {
+    background: rgba(139, 92, 246, 0.2);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: #c4b5fd;
+  }
+} 

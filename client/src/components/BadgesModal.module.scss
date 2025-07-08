@@ -407,6 +407,33 @@
   box-shadow: 0 4px 8px -2px rgba(16, 185, 129, 0.4);
 }
 
+.shareButton {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  @include reset-button;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  @include flex-center;
+  font-size: 0.875rem;
+  @include transition-standard;
+  box-shadow: 0 4px 8px -2px rgba(59, 130, 246, 0.4);
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px -2px rgba(59, 130, 246, 0.5);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
 // Hover Tooltip
 .hoverTooltip {
   position: fixed;

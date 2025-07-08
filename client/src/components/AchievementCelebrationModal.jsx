@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import ShareModal from './ShareModal';
 import styles from './AchievementCelebrationModal.module.scss';
 
 const AchievementCelebrationModal = ({ achievement, isOpen, onClose }) => {
   const [showContent, setShowContent] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Motivational quotes mapped to achievement categories and specific badges
   const motivationalQuotes = {
@@ -188,10 +190,7 @@ const AchievementCelebrationModal = ({ achievement, isOpen, onClose }) => {
         <div className={styles.actionButtons}>
           <button 
             className={styles.shareButton}
-            onClick={() => {
-              // Future: Could add sharing functionality
-              console.log('Share achievement:', achievement.title);
-            }}
+            onClick={() => setShowShareModal(true)}
           >
             <span>🎉</span>
             Share Achievement
@@ -210,6 +209,13 @@ const AchievementCelebrationModal = ({ achievement, isOpen, onClose }) => {
           ×
         </button>
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        achievement={achievement}
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
     </div>
   );
 };
