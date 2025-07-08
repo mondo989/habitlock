@@ -156,6 +156,17 @@
   line-height: 1.4;
 }
 
+.completionTime {
+  @include text-small;
+  color: #059669;
+  font-weight: 500;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 3px 8px;
+  @include border-radius-sm;
+  display: inline-block;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
 .habitStats {
   @include flex-column-center;
   align-items: flex-start;
@@ -565,6 +576,14 @@
 .habitDescription {
   :global(html.dark-mode) & {
     color: #9ca3af;
+  }
+}
+
+.completionTime {
+  :global(html.dark-mode) & {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
   }
 }
 

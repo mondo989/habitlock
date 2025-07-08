@@ -44,17 +44,17 @@ const StatsView = () => {
   }, [activeTooltip]);
 
   // Generate insights and recommendations
-  const generateInsights = (habit, currentStreak, bestStreak, thirtyDay, sevenDay) => {
+  const generateInsights = (habit, currentStreak, bestStreak, currentMonth, sevenDay) => {
     const insights = [];
     
     if (currentStreak === bestStreak && currentStreak > 0) {
       insights.push({ type: 'achievement', text: `🔥 New personal record: ${currentStreak} day streak!` });
     }
     
-    if (thirtyDay.completionRate >= 90) {
-      insights.push({ type: 'success', text: `💪 Excellent consistency: ${Math.round(thirtyDay.completionRate)}% completion rate` });
-    } else if (thirtyDay.completionRate < 50) {
-      insights.push({ type: 'warning', text: `📈 Room for improvement: ${Math.round(thirtyDay.completionRate)}% completion rate` });
+    if (currentMonth.completionRate >= 90) {
+      insights.push({ type: 'success', text: `💪 Excellent consistency: ${Math.round(currentMonth.completionRate)}% completion rate` });
+    } else if (currentMonth.completionRate < 50) {
+      insights.push({ type: 'warning', text: `📈 Room for improvement: ${Math.round(currentMonth.completionRate)}% completion rate` });
     }
     
     if (sevenDay.completedDays >= (habit.weeklyGoal || 7)) {
@@ -76,7 +76,9 @@ const StatsView = () => {
 
     const now = new Date();
     const currentYear = now.getFullYear();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    
+    // Use current month instead of rolling 30 days for more accurate success rate
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     
     // Get proper Sunday-Saturday week boundaries for current week
     const currentWeekBoundaries = getWeekBoundaries(now);
@@ -84,9 +86,9 @@ const StatsView = () => {
     return habits.map(habit => {
       const currentStreak = streaks[habit.id] || 0;
       const bestStreak = getBestStreak(habit.id, calendarEntries);
-      const thirtyDayStats = getHabitStatsForRange(
+      const currentMonthStats = getHabitStatsForRange(
         habit.id, 
-        thirtyDaysAgo.toISOString().split('T')[0],
+        currentMonthStart.toISOString().split('T')[0],
         now.toISOString().split('T')[0],
         calendarEntries
       );
@@ -104,13 +106,13 @@ const StatsView = () => {
       const weeklyGoalPercentage = ((currentWeekProgress / (habit.weeklyGoal || 7)) * 100);
       
       // Generate insights
-      const insights = generateInsights(habit, currentStreak, bestStreak, thirtyDayStats, currentWeekStats);
+      const insights = generateInsights(habit, currentStreak, bestStreak, currentMonthStats, currentWeekStats);
       
       return {
         habit,
         currentStreak,
         bestStreak,
-        thirtyDayStats,
+        currentMonthStats,
         currentWeekStats,
         heatmapData,
         weeklyGoalPercentage,
@@ -134,9 +136,9 @@ const StatsView = () => {
     const insights = [];
     const totalHabits = statsData.length;
     const activeStreaks = statsData.filter(d => d.currentStreak > 0).length;
-    const excellentHabits = statsData.filter(d => d.thirtyDayStats.completionRate >= 80).length;
+    const excellentHabits = statsData.filter(d => d.currentMonthStats.completionRate >= 80).length;
     const avgCompletionRate = Math.round(
-      statsData.reduce((sum, d) => sum + d.thirtyDayStats.completionRate, 0) / totalHabits
+      statsData.reduce((sum, d) => sum + d.currentMonthStats.completionRate, 0) / totalHabits
     );
     
     if (activeStreaks === totalHabits) {
@@ -160,12 +162,12 @@ const StatsView = () => {
   const badgeSystem = useMemo(() => {
     if (!statsData) return { featured: [], all: [] };
     
-    const totalCompletions = statsData.reduce((sum, d) => sum + d.thirtyDayStats.completedDays, 0);
+    const totalCompletions = statsData.reduce((sum, d) => sum + d.currentMonthStats.completedDays, 0);
     const maxStreak = Math.max(...statsData.map(d => d.bestStreak));
     const currentMaxStreak = Math.max(...statsData.map(d => d.currentStreak));
     const perfectWeeks = statsData.filter(d => d.weeklyGoalPercentage >= 100).length;
     const avgCompletionRate = Math.round(
-      statsData.reduce((sum, d) => sum + d.thirtyDayStats.completionRate, 0) / statsData.length
+      statsData.reduce((sum, d) => sum + d.currentMonthStats.completionRate, 0) / statsData.length
     );
 
     // Define all possible badges with progress calculation
@@ -385,11 +387,19 @@ const StatsView = () => {
         // Backfill if no achievements exist
         if (Object.keys(achievements).length === 0) {
           console.log('No achievements found, backfilling...');
-          achievements = await backfillUserAchievements(userInfo.uid, statsData);
+          achievements = await backfillUserAchievements(userInfo.uid, statsData, {
+            calendarEntries,
+            habitCreationDates: {}, // TODO: Add habit creation dates tracking
+            statsVisits: 0 // No stats visits for backfill
+          });
         }
         
         // Check for new achievements based on current stats
-        const { newCompletions, allAchievements } = await checkAndUpdateAchievements(userInfo.uid, statsData);
+        const { newCompletions, allAchievements } = await checkAndUpdateAchievements(userInfo.uid, statsData, {
+          calendarEntries,
+          habitCreationDates: {}, // TODO: Add habit creation dates tracking
+          statsVisits: 1 // Increment visit count for Stats Lover badge
+        });
         
         if (newCompletions.length > 0) {
           console.log('New achievements earned:', newCompletions.map(a => a.title));
@@ -483,18 +493,18 @@ const StatsView = () => {
         <div className={styles.quickStatsGrid}>
           <div className={styles.quickStat}>
             <div className={styles.statValue}>
-              {statsData.reduce((sum, { thirtyDayStats }) => sum + thirtyDayStats.completedDays, 0)}
+              {statsData.reduce((sum, { currentMonthStats }) => sum + currentMonthStats.completedDays, 0)}
             </div>
-            <div className={styles.statLabel}>Total Days Completed</div>
+            <div className={styles.statLabel}>Days Completed This Month</div>
           </div>
           <div className={styles.quickStat}>
             <div className={styles.statValue}>
               {Math.round(
-                statsData.reduce((sum, { thirtyDayStats }) => sum + thirtyDayStats.completionRate, 0) / 
+                statsData.reduce((sum, { currentMonthStats }) => sum + currentMonthStats.completionRate, 0) / 
                 statsData.length
               )}%
             </div>
-            <div className={styles.statLabel}>Average Success Rate</div>
+            <div className={styles.statLabel}>Monthly Success Rate</div>
           </div>
           <div className={styles.quickStat}>
             <div className={styles.statValue}>
@@ -515,7 +525,7 @@ const StatsView = () => {
       <div className={styles.habitDetailsSection}>
         <h2>🎯 Habit Performance</h2>
         <div className={styles.habitDetailsGrid}>
-          {statsData.map(({ habit, currentStreak, bestStreak, thirtyDayStats, currentWeekStats, weeklyGoalPercentage, currentWeekProgress, insights }) => (
+          {statsData.map(({ habit, currentStreak, bestStreak, currentMonthStats, currentWeekStats, weeklyGoalPercentage, currentWeekProgress, insights }) => (
             <div 
               key={habit.id} 
               className={styles.habitDetailCard}
@@ -568,11 +578,11 @@ const StatsView = () => {
                   <div className={styles.metricLabel}>Best Streak</div>
                 </div>
                 <div className={styles.metric}>
-                  <div className={styles.metricValue}>{thirtyDayStats.completedDays}</div>
-                  <div className={styles.metricLabel}>Total Days</div>
+                  <div className={styles.metricValue}>{currentMonthStats.completedDays}</div>
+                  <div className={styles.metricLabel}>This Month</div>
                 </div>
                 <div className={styles.metric}>
-                  <div className={styles.metricValue}>{Math.round(thirtyDayStats.completionRate)}%</div>
+                  <div className={styles.metricValue}>{Math.round(currentMonthStats.completionRate)}%</div>
                   <div className={styles.metricLabel}>Success Rate</div>
                 </div>
               </div>

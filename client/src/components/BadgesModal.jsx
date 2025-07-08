@@ -139,7 +139,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
       description: '90%+ completion rate for 30 days',
       category: 'Consistency',
       rarity: 'rare',
-      requirement: (data) => data.some(d => d.thirtyDayStats.completionRate >= 90)
+              requirement: (data) => data.some(d => d.currentMonthStats.completionRate >= 90)
     },
 
     // Milestone Badges
@@ -150,7 +150,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
       description: 'Complete your very first habit',
       category: 'Milestones',
       rarity: 'common',
-      requirement: (data) => data.some(d => d.thirtyDayStats.completedDays > 0)
+              requirement: (data) => data.some(d => d.currentMonthStats.completedDays > 0)
     },
     { 
       id: 'century_club', 
@@ -159,7 +159,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
       description: '100 total habit completions',
       category: 'Milestones',
       rarity: 'uncommon',
-      requirement: (data) => data.reduce((sum, d) => sum + d.thirtyDayStats.completedDays, 0) >= 100
+      requirement: (data) => data.reduce((sum, d) => sum + d.currentMonthStats.completedDays, 0) >= 100
     },
     { 
       id: 'millennium', 
@@ -168,7 +168,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
       description: '1000 total completions',
       category: 'Milestones',
       rarity: 'legendary',
-      requirement: (data) => data.reduce((sum, d) => sum + d.thirtyDayStats.completedDays, 0) >= 1000
+      requirement: (data) => data.reduce((sum, d) => sum + d.currentMonthStats.completedDays, 0) >= 1000
     },
 
     // Habit Mastery Badges
@@ -223,10 +223,10 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
       id: 'perfectionist', 
       emoji: '💎', 
       title: 'Perfectionist', 
-      description: '30 days with 100% completion',
+      description: 'This month with 100% completion',
       category: 'Special',
       rarity: 'epic',
-      requirement: (data) => data.some(d => d.thirtyDayStats.completionRate === 100)
+      requirement: (data) => data.some(d => d.currentMonthStats.completionRate === 100)
     },
   ];
 

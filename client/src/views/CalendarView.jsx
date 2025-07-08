@@ -93,14 +93,16 @@ const CalendarView = () => {
       try {
         // Generate stats data similar to StatsView for achievement checking
         const now = new Date();
-        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        
+        // Use current month instead of rolling 30 days for more accurate success rate
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
         
         const statsData = habits.map(habit => {
           const currentStreak = streaks[habit.id] || 0;
           const bestStreak = getBestStreak(habit.id, calendarEntries);
-          const thirtyDayStats = getHabitStatsForRange(
+          const currentMonthStats = getHabitStatsForRange(
             habit.id, 
-            thirtyDaysAgo.toISOString().split('T')[0],
+            currentMonthStart.toISOString().split('T')[0],
             now.toISOString().split('T')[0],
             calendarEntries
           );
@@ -111,13 +113,17 @@ const CalendarView = () => {
             habit,
             currentStreak,
             bestStreak,
-            thirtyDayStats,
+            currentMonthStats,
             weeklyGoalPercentage
           };
         });
 
         // Check for new achievements
-        const { newCompletions } = await checkAndUpdateAchievements(userInfo.uid, statsData);
+        const { newCompletions } = await checkAndUpdateAchievements(userInfo.uid, statsData, {
+          calendarEntries,
+          habitCreationDates: {}, // TODO: Add habit creation dates tracking
+          statsVisits: 0 // Calendar view doesn't track stats visits
+        });
         
         if (newCompletions.length > 0) {
           console.log('New achievements earned in calendar:', newCompletions.map(a => a.title));
@@ -413,6 +419,7 @@ const CalendarView = () => {
         completedHabits={selectedDate ? getCompletedHabits(selectedDate) : []}
         hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
         weekStats={selectedWeekStats}
+        calendarEntry={selectedDate ? calendarEntries[selectedDate] : null}
       />
 
       {/* Habit Stats Modal */}
@@ -425,6 +432,7 @@ const CalendarView = () => {
         weekStats={weekStats}
         getCompletedHabits={getCompletedHabits}
         calendarMatrix={calendarMatrix}
+        calendarEntries={calendarEntries}
       />
 
       {/* Achievement Celebration Modal */}

@@ -19,22 +19,43 @@ const OnboardingCarousel = ({ onComplete }) => {
         <div className={styles.welcomeContent}>
           <div className={styles.heroIcon}>🚀</div>
           <p>HabitLock helps you build lasting habits through smart tracking, beautiful analytics, and achievement systems that make habit-building actually enjoyable.</p>
-          <div className={styles.featureList}>
-            <div className={styles.feature}>
-              <span className={styles.featureIcon}>📅</span>
-              <span>Interactive calendar tracking</span>
-            </div>
-            <div className={styles.feature}>
-              <span className={styles.featureIcon}>🔥</span>
-              <span>Streak motivation & goals</span>
-            </div>
-            <div className={styles.feature}>
-              <span className={styles.featureIcon}>📊</span>
-              <span>Detailed stats & heatmaps</span>
-            </div>
-            <div className={styles.feature}>
-              <span className={styles.featureIcon}>🏆</span>
-              <span>Achievement badges</span>
+          
+          <div className={styles.modernFeatures}>
+            <div className={styles.featureSection}>
+              <h3>✨ What makes HabitLock special?</h3>
+              <div className={styles.featureGrid}>
+                <div className={styles.featureItem}>
+                  <div className={styles.featureIconBadge}>📅</div>
+                  <div className={styles.featureContent}>
+                    <h4>Interactive Calendar Tracking</h4>
+                    <p>Visual habit tracking with emoji rewards and streak highlights</p>
+                  </div>
+                </div>
+                
+                <div className={styles.featureItem}>
+                  <div className={styles.featureIconBadge}>🔥</div>
+                  <div className={styles.featureContent}>
+                    <h4>Smart Goals & Streaks</h4>
+                    <p>Weekly targets that adapt to your lifestyle, not rigid daily requirements</p>
+                  </div>
+                </div>
+                
+                <div className={styles.featureItem}>
+                  <div className={styles.featureIconBadge}>📊</div>
+                  <div className={styles.featureContent}>
+                    <h4>Beautiful Analytics</h4>
+                    <p>Activity heatmaps, completion rates, and time-based insights</p>
+                  </div>
+                </div>
+                
+                <div className={styles.featureItem}>
+                  <div className={styles.featureIconBadge}>🏆</div>
+                  <div className={styles.featureContent}>
+                    <h4>Achievement System</h4>
+                    <p>13+ unique badges including time-based challenges and milestones</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -201,7 +222,7 @@ const OnboardingCarousel = ({ onComplete }) => {
           <div className={styles.tips}>
             <h4>📊 What You'll Get:</h4>
             <ul>
-              <li><strong>GitHub-style heatmaps:</strong> Visual year overview per habit</li>
+              <li><strong>Visual activity heatmaps:</strong> Year-long overview per habit</li>
               <li><strong>Detailed metrics:</strong> Streaks, completion rates, weekly progress</li>
               <li><strong>Achievement badges:</strong> Unlock 20+ badges for milestones</li>
               <li><strong>Habit insights:</strong> Individual performance analytics</li>

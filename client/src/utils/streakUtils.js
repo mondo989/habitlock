@@ -99,16 +99,22 @@ export const getBestStreak = (habitId, calendarEntries) => {
 export const getHabitStatsForRange = (habitId, startDate, endDate, calendarEntries) => {
   const start = dayjs(startDate);
   const end = dayjs(endDate);
-  const totalDays = end.diff(start, 'day') + 1;
+  const today = dayjs();
+  
+  // Only count days up to today (inclusive) - can't complete habits in the future
+  const effectiveEndDate = end.isAfter(today, 'day') ? today : end;
+  const totalDays = effectiveEndDate.diff(start, 'day') + 1;
   
   let completedDays = 0;
   let current = start;
   
+  // Check all days in the original range for completions
   while (current.isBefore(end) || current.isSame(end, 'day')) {
     const dateStr = current.format('YYYY-MM-DD');
     const entry = calendarEntries[dateStr];
     
-    if (entry && entry.completedHabits && entry.completedHabits.includes(habitId)) {
+    // Only count completions for days that are not in the future
+    if (!current.isAfter(today, 'day') && entry && entry.completedHabits && entry.completedHabits.includes(habitId)) {
       completedDays++;
     }
     
@@ -116,7 +122,7 @@ export const getHabitStatsForRange = (habitId, startDate, endDate, calendarEntri
   }
   
   return {
-    totalDays,
+    totalDays: Math.max(totalDays, 0), // Ensure non-negative
     completedDays,
     completionRate: totalDays > 0 ? (completedDays / totalDays) * 100 : 0,
   };

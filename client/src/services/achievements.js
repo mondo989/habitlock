@@ -12,7 +12,7 @@ export const BADGE_DEFINITIONS = [
     category: 'Milestones',
     rarity: 'common',
     type: 'permanent',
-    requirement: (data) => data.some(d => d.thirtyDayStats.completedDays > 0)
+    requirement: (data) => data.some(d => d.currentMonthStats.completedDays > 0)
   },
   {
     id: 'habit_explorer',
@@ -32,7 +32,7 @@ export const BADGE_DEFINITIONS = [
     category: 'Milestones',
     rarity: 'uncommon',
     type: 'permanent',
-    requirement: (data) => data.reduce((sum, d) => sum + d.thirtyDayStats.completedDays, 0) >= 100
+    requirement: (data) => data.reduce((sum, d) => sum + d.currentMonthStats.completedDays, 0) >= 100
   },
 
   // Dynamic Badges (can be lost and re-earned)
@@ -140,11 +140,11 @@ export const BADGE_DEFINITIONS = [
     id: 'consistency_king',
     emoji: '👑',
     title: 'Consistency Royalty',
-    description: '90%+ completion rate for 30 days',
+    description: '90%+ completion rate this month',
     category: 'Consistency',
     rarity: 'rare',
     type: 'dynamic',
-    requirement: (data) => data.some(d => d.thirtyDayStats.completionRate >= 90)
+    requirement: (data) => data.some(d => d.currentMonthStats.completionRate >= 90)
   },
   
   // New Advanced Achievements
@@ -176,7 +176,7 @@ export const BADGE_DEFINITIONS = [
     category: 'Milestones',
     rarity: 'rare',
     type: 'permanent',
-    requirement: (data) => data.reduce((sum, d) => sum + d.thirtyDayStats.completedDays, 0) >= 500
+    requirement: (data) => data.reduce((sum, d) => sum + d.currentMonthStats.completedDays, 0) >= 500
   },
   {
     id: 'multi_streak_master',
@@ -192,11 +192,11 @@ export const BADGE_DEFINITIONS = [
     id: 'perfect_month',
     emoji: '💎',
     title: 'Perfect Month',
-    description: '100% completion rate for 30 days',
+    description: '100% completion rate this month',
     category: 'Consistency',
     rarity: 'rare',
     type: 'dynamic',
-    requirement: (data) => data.some(d => d.thirtyDayStats.completionRate >= 100)
+    requirement: (data) => data.some(d => d.currentMonthStats.completionRate >= 100)
   },
   {
     id: 'dedication_legend',
@@ -206,9 +206,397 @@ export const BADGE_DEFINITIONS = [
     category: 'Milestones',
     rarity: 'legendary',
     type: 'permanent',
-    requirement: (data) => data.reduce((sum, d) => sum + d.thirtyDayStats.completedDays, 0) >= 1000
+    requirement: (data) => data.reduce((sum, d) => sum + d.currentMonthStats.completedDays, 0) >= 1000
+  },
+
+  // New Achievement Badges
+  {
+    id: 'comeback_kid',
+    emoji: '🏅',
+    title: 'Comeback Kid',
+    description: 'Bounce back after 7 days of inactivity and complete a habit',
+    category: 'Resilience',
+    rarity: 'uncommon',
+    type: 'permanent',
+    requirement: (data, calendarEntries) => {
+      if (!calendarEntries) return false;
+      // Complex logic - needs calendar entries to detect gaps and returns
+      return checkComebackPattern(data, calendarEntries);
+    }
+  },
+  {
+    id: 'streak_saver',
+    emoji: '🧯',
+    title: 'Streak Saver',
+    description: 'Miss a day, then return the next day and log your habit',
+    category: 'Resilience',
+    rarity: 'common',
+    type: 'permanent',
+    requirement: (data, calendarEntries) => {
+      if (!calendarEntries) return false;
+      // Complex logic - needs calendar entries to detect miss+recovery pattern
+      return checkStreakSaverPattern(data, calendarEntries);
+    }
+  },
+  {
+    id: 'seasoned_tracker',
+    emoji: '🍂',
+    title: 'Seasoned Tracker',
+    description: 'Log a habit during all four seasons',
+    category: 'Consistency',
+    rarity: 'rare',
+    type: 'permanent',
+    requirement: (data, calendarEntries) => {
+      if (!calendarEntries) return false;
+      return checkSeasonalPattern(data, calendarEntries);
+    }
+  },
+  {
+    id: 'custom_coder',
+    emoji: '🎨',
+    title: 'Custom Coder',
+    description: 'Create and complete a custom habit for 7 days straight',
+    category: 'Creativity',
+    rarity: 'uncommon',
+    type: 'permanent',
+    requirement: (data) => {
+      // For now, any habit with 7+ day streak counts as "custom"
+      return data.some(d => d.currentStreak >= 7);
+    }
+  },
+  {
+    id: 'milestone_remix',
+    emoji: '🔄',
+    title: 'Milestone Remix',
+    description: 'Re-complete your first habit after 100 days',
+    category: 'Nostalgia',
+    rarity: 'rare',
+    type: 'permanent',
+    requirement: (data, calendarEntries, habitCreationDates) => {
+      if (!calendarEntries || !habitCreationDates) return false;
+      return checkMilestoneRemixPattern(data, calendarEntries, habitCreationDates);
+    }
+  },
+
+  // Meta Badges
+  {
+    id: 'meta_mastery',
+    emoji: '🎖️',
+    title: 'Meta Mastery',
+    description: 'Unlock 10 unique badges',
+    category: 'Meta',
+    rarity: 'rare',
+    type: 'dynamic',
+    requirement: (data, calendarEntries, habitCreationDates, earnedBadgeCount) => {
+      return (earnedBadgeCount || 0) >= 10;
+    }
+  },
+  {
+    id: 'time_traveler',
+    emoji: '⌛',
+    title: 'Time Traveler',
+    description: 'Habit tracked at least once in 3 different months',
+    category: 'Meta',
+    rarity: 'uncommon',
+    type: 'permanent',
+    requirement: (data, calendarEntries) => {
+      if (!calendarEntries) return false;
+      return checkTimeTravelerPattern(calendarEntries);
+    }
+  },
+  {
+    id: 'stats_lover',
+    emoji: '📈',
+    title: 'Stats Lover',
+    description: 'Visit the Stats tab 10 times',
+    category: 'Meta',
+    rarity: 'common',
+    type: 'permanent',
+    requirement: (data, calendarEntries, habitCreationDates, earnedBadgeCount, statsVisits) => {
+      return (statsVisits || 0) >= 10;
+    }
+  },
+  {
+    id: 'beta_supporter',
+    emoji: '🧪',
+    title: 'Beta Supporter',
+    description: 'Active user during pre-launch phase',
+    category: 'Meta',
+    rarity: 'legendary',
+    type: 'permanent',
+    requirement: (data, calendarEntries, habitCreationDates) => {
+      // All current users get this badge as early adopters
+      return data.length > 0;
+    }
+  },
+
+  // Time-based Achievements
+  {
+    id: 'power_hour',
+    emoji: '⚡',
+    title: 'Power Hour',
+    description: 'Complete 5+ habits during your most productive hour',
+    category: 'Timing',
+    rarity: 'uncommon',
+    type: 'permanent',
+    requirement: (data, calendarEntries) => {
+      if (!calendarEntries) return false;
+      return checkPowerHourPattern(calendarEntries);
+    }
+  },
+  {
+    id: 'night_owl',
+    emoji: '🌙',
+    title: 'Night Owl',
+    description: 'Complete habits after 10 PM on 5 different days',
+    category: 'Timing',
+    rarity: 'uncommon',
+    type: 'permanent',
+    requirement: (data, calendarEntries) => {
+      if (!calendarEntries) return false;
+      return checkNightOwlPattern(calendarEntries);
+    }
+  },
+  {
+    id: 'early_bird',
+    emoji: '☀️',
+    title: 'Early Bird',
+    description: 'Complete habits before 7 AM on 5 different days',
+    category: 'Timing',
+    rarity: 'uncommon',
+    type: 'permanent',
+    requirement: (data, calendarEntries) => {
+      if (!calendarEntries) return false;
+      return checkEarlyBirdPattern(calendarEntries);
+    }
   }
 ];
+
+// Helper functions for complex achievement patterns
+const checkComebackPattern = (data, calendarEntries) => {
+  try {
+    const sortedDates = Object.keys(calendarEntries).sort();
+    if (sortedDates.length < 8) return false; // Need enough data to detect 7-day gap
+    
+    // Look for a 7+ day gap followed by a completion
+    for (let i = 1; i < sortedDates.length; i++) {
+      const prevDate = new Date(sortedDates[i - 1]);
+      const currentDate = new Date(sortedDates[i]);
+      const daysBetween = Math.floor((currentDate - prevDate) / (1000 * 60 * 60 * 24));
+      
+      if (daysBetween >= 7 && calendarEntries[sortedDates[i]].completedHabits?.length > 0) {
+        return true; // Found comeback pattern
+      }
+    }
+    return false;
+  } catch (error) {
+    console.error('Error checking comeback pattern:', error);
+    return false;
+  }
+};
+
+const checkStreakSaverPattern = (data, calendarEntries) => {
+  try {
+    const sortedDates = Object.keys(calendarEntries).sort();
+    if (sortedDates.length < 3) return false; // Need at least 3 days of data
+    
+    // Look for miss-day followed by immediate return (next day completion)
+    for (let i = 1; i < sortedDates.length - 1; i++) {
+      const prevDate = new Date(sortedDates[i - 1]);
+      const missDate = new Date(sortedDates[i]);
+      const returnDate = new Date(sortedDates[i + 1]);
+      
+      const gap1 = Math.floor((missDate - prevDate) / (1000 * 60 * 60 * 24));
+      const gap2 = Math.floor((returnDate - missDate) / (1000 * 60 * 60 * 24));
+      
+      // Check if we have: completion -> 1 day gap (miss) -> 1 day gap (return)
+      if (gap1 === 1 && gap2 === 1 && 
+          calendarEntries[sortedDates[i - 1]].completedHabits?.length > 0 &&
+          calendarEntries[sortedDates[i]].completedHabits?.length === 0 &&
+          calendarEntries[sortedDates[i + 1]].completedHabits?.length > 0) {
+        return true;
+      }
+    }
+    return false;
+  } catch (error) {
+    console.error('Error checking streak saver pattern:', error);
+    return false;
+  }
+};
+
+const checkSeasonalPattern = (data, calendarEntries) => {
+  try {
+    const completionDates = Object.keys(calendarEntries).filter(date => 
+      calendarEntries[date].completedHabits?.length > 0
+    );
+    
+    if (completionDates.length === 0) return false;
+    
+    const seasons = new Set();
+    completionDates.forEach(dateStr => {
+      const date = new Date(dateStr);
+      const month = date.getMonth(); // 0-11
+      
+      // Determine season based on month
+      if (month >= 2 && month <= 4) seasons.add('spring'); // Mar-May
+      else if (month >= 5 && month <= 7) seasons.add('summer'); // Jun-Aug
+      else if (month >= 8 && month <= 10) seasons.add('fall'); // Sep-Nov
+      else seasons.add('winter'); // Dec-Feb
+    });
+    
+    return seasons.size >= 4; // All four seasons
+  } catch (error) {
+    console.error('Error checking seasonal pattern:', error);
+    return false;
+  }
+};
+
+const checkMilestoneRemixPattern = (data, calendarEntries, habitCreationDates) => {
+  try {
+    if (!habitCreationDates || Object.keys(habitCreationDates).length === 0) return false;
+    
+    // Find the first habit created
+    const firstHabitId = Object.keys(habitCreationDates).reduce((earliest, habitId) => {
+      return !earliest || habitCreationDates[habitId] < habitCreationDates[earliest] 
+        ? habitId : earliest;
+    });
+    
+    const creationDate = new Date(habitCreationDates[firstHabitId]);
+    const hundredDaysLater = new Date(creationDate.getTime() + 100 * 24 * 60 * 60 * 1000);
+    
+    // Check if first habit was completed after 100 days from creation
+    const laterCompletions = Object.keys(calendarEntries).filter(dateStr => {
+      const date = new Date(dateStr);
+      const entry = calendarEntries[dateStr];
+      return date >= hundredDaysLater && 
+             entry.completedHabits?.includes(firstHabitId);
+    });
+    
+    return laterCompletions.length > 0;
+  } catch (error) {
+    console.error('Error checking milestone remix pattern:', error);
+    return false;
+  }
+};
+
+const checkTimeTravelerPattern = (calendarEntries) => {
+  try {
+    const completionDates = Object.keys(calendarEntries).filter(date => 
+      calendarEntries[date].completedHabits?.length > 0
+    );
+    
+    if (completionDates.length === 0) return false;
+    
+    const months = new Set();
+    completionDates.forEach(dateStr => {
+      const date = new Date(dateStr);
+      const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+      months.add(monthKey);
+    });
+    
+    return months.size >= 3; // At least 3 different months
+  } catch (error) {
+    console.error('Error checking time traveler pattern:', error);
+    return false;
+  }
+};
+
+// Time-based achievement helpers
+const checkPowerHourPattern = (calendarEntries) => {
+  try {
+    const hourCompletions = {}; // hour -> count of completions
+    
+    // Analyze all completion timestamps
+    Object.values(calendarEntries).forEach(entry => {
+      if (entry.habits) {
+        Object.values(entry.habits).forEach(habitData => {
+          if (habitData.completedAt) {
+            try {
+              const completionDate = new Date(habitData.completedAt);
+              const hour = completionDate.getHours(); // 0-23
+              hourCompletions[hour] = (hourCompletions[hour] || 0) + 1;
+            } catch (timeError) {
+              // Skip invalid timestamps
+            }
+          }
+        });
+      }
+    });
+    
+    // Find the hour with most completions
+    const maxCompletions = Math.max(...Object.values(hourCompletions));
+    return maxCompletions >= 5; // Power hour = 5+ completions in the same hour
+  } catch (error) {
+    console.error('Error checking power hour pattern:', error);
+    return false;
+  }
+};
+
+const checkNightOwlPattern = (calendarEntries) => {
+  try {
+    const nightOwlDays = new Set();
+    
+    // Check each day for late night completions (after 22:00/10 PM)
+    Object.entries(calendarEntries).forEach(([date, entry]) => {
+      if (entry.habits) {
+        const hasLateNightCompletion = Object.values(entry.habits).some(habitData => {
+          if (habitData.completedAt) {
+            try {
+              const completionDate = new Date(habitData.completedAt);
+              const hour = completionDate.getHours();
+              return hour >= 22 || hour < 5; // After 10 PM or before 5 AM
+            } catch (timeError) {
+              return false;
+            }
+          }
+          return false;
+        });
+        
+        if (hasLateNightCompletion) {
+          nightOwlDays.add(date);
+        }
+      }
+    });
+    
+    return nightOwlDays.size >= 5; // Night owl = 5+ different days with late completions
+  } catch (error) {
+    console.error('Error checking night owl pattern:', error);
+    return false;
+  }
+};
+
+const checkEarlyBirdPattern = (calendarEntries) => {
+  try {
+    const earlyBirdDays = new Set();
+    
+    // Check each day for early morning completions (before 7:00 AM)
+    Object.entries(calendarEntries).forEach(([date, entry]) => {
+      if (entry.habits) {
+        const hasEarlyMorningCompletion = Object.values(entry.habits).some(habitData => {
+          if (habitData.completedAt) {
+            try {
+              const completionDate = new Date(habitData.completedAt);
+              const hour = completionDate.getHours();
+              return hour >= 5 && hour < 7; // Between 5 AM and 7 AM
+            } catch (timeError) {
+              return false;
+            }
+          }
+          return false;
+        });
+        
+        if (hasEarlyMorningCompletion) {
+          earlyBirdDays.add(date);
+        }
+      }
+    });
+    
+    return earlyBirdDays.size >= 5; // Early bird = 5+ different days with early completions
+  } catch (error) {
+    console.error('Error checking early bird pattern:', error);
+    return false;
+  }
+};
 
 /**
  * Get user's achievement data from Firebase
@@ -233,14 +621,31 @@ export const getUserAchievements = async (userId) => {
 /**
  * Check and update achievements based on current stats
  */
-export const checkAndUpdateAchievements = async (userId, statsData) => {
+export const checkAndUpdateAchievements = async (userId, statsData, extraData = {}) => {
   try {
     const currentAchievements = await getUserAchievements(userId);
     const newCompletions = [];
     const now = new Date();
     
+    // Extract extra data for complex achievements
+    const { 
+      calendarEntries = {}, 
+      habitCreationDates = {}, 
+      statsVisits = 0 
+    } = extraData;
+    
+    // Calculate earned badge count for meta achievements
+    const earnedBadgeCount = Object.values(currentAchievements)
+      .filter(achievement => achievement.isCurrentlyEarned).length;
+    
     for (const badge of BADGE_DEFINITIONS) {
-      const isCurrentlyEarned = badge.requirement(statsData);
+      const isCurrentlyEarned = badge.requirement(
+        statsData, 
+        calendarEntries, 
+        habitCreationDates, 
+        earnedBadgeCount, 
+        statsVisits
+      );
       const existingAchievement = currentAchievements[badge.id];
       
       if (isCurrentlyEarned) {
@@ -302,7 +707,7 @@ export const checkAndUpdateAchievements = async (userId, statsData) => {
 /**
  * Backfill achievements for existing users
  */
-export const backfillUserAchievements = async (userId, statsData) => {
+export const backfillUserAchievements = async (userId, statsData, extraData = {}) => {
   try {
     console.log('Backfilling achievements for user:', userId);
     const currentAchievements = await getUserAchievements(userId);
@@ -315,8 +720,23 @@ export const backfillUserAchievements = async (userId, statsData) => {
     const backfilledAchievements = {};
     const now = new Date();
     
+    // Extract extra data for complex achievements
+    const { 
+      calendarEntries = {}, 
+      habitCreationDates = {}, 
+      statsVisits = 0 
+    } = extraData;
+    
+    const earnedBadgeCount = 0; // No badges earned yet during backfill
+    
     for (const badge of BADGE_DEFINITIONS) {
-      const isEarned = badge.requirement(statsData);
+      const isEarned = badge.requirement(
+        statsData, 
+        calendarEntries, 
+        habitCreationDates, 
+        earnedBadgeCount, 
+        statsVisits
+      );
       
       if (isEarned) {
         const achievementData = {
@@ -430,7 +850,7 @@ export const testAchievements = async () => {
   const testStatsData = [
     {
       habit: { id: 'test1', name: 'Test Habit' },
-      thirtyDayStats: { completedDays: 0 },
+      currentMonthStats: { completedDays: 0 },
       currentStreak: 0,
       bestStreak: 0,
       weeklyGoalPercentage: 0
@@ -440,7 +860,11 @@ export const testAchievements = async () => {
   console.log('📊 Test stats data:', testStatsData);
   
   try {
-    const result = await checkAndUpdateAchievements(userInfo.uid, testStatsData);
+    const result = await checkAndUpdateAchievements(userInfo.uid, testStatsData, {
+      calendarEntries: {},
+      habitCreationDates: {},
+      statsVisits: 0
+    });
     console.log('🎯 Test result:', result);
     return result;
   } catch (error) {

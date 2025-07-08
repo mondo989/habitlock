@@ -229,6 +229,164 @@
   border: 2px solid #e5e7eb;
 }
 
+// Time Analysis Styles
+.timeAnalysisCard {
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.timeInsights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.timeInsight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.timeIcon {
+  width: 40px;
+  height: 40px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.timeInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timeLabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.timeValue {
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.timeSubtext {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.timeDistribution {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.distributionTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.timePeriods {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timePeriod {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.periodHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.periodEmoji {
+  font-size: 14px;
+}
+
+.periodName {
+  flex: 1;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.periodCount {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.periodBar {
+  height: 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.periodFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.recentCompletions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.completionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.completionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.8rem;
+}
+
+.completionDate {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.completionTime {
+  color: #1f2937;
+  font-weight: 600;
+}
+
 // Dark mode styles
 :global(html.dark-mode) {
   .modal {
@@ -326,6 +484,61 @@
   .colorSwatch {
     border-color: #374151;
   }
+
+  .timeAnalysisCard {
+    background: #111827;
+    border-color: #374151;
+  }
+
+  .timeInsight {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .timeIcon {
+    background: #374151;
+  }
+
+  .timeValue {
+    color: #f9fafb;
+  }
+
+  .timeLabel {
+    color: #d1d5db;
+  }
+
+  .timeSubtext {
+    color: #9ca3af;
+  }
+
+  .distributionTitle {
+    color: #f9fafb;
+  }
+
+  .periodName {
+    color: #d1d5db;
+  }
+
+  .periodCount {
+    color: #f9fafb;
+  }
+
+  .periodBar {
+    background: #374151;
+  }
+
+  .completionItem {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .completionDate {
+    color: #d1d5db;
+  }
+
+  .completionTime {
+    color: #f9fafb;
+  }
 }
 
 @keyframes fadeIn {
@@ -376,5 +589,35 @@
   
   .habitName {
     font-size: 1.3rem;
+  }
+
+  .timeAnalysisCard {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .timeInsights {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .timeInsight {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .timeIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .timeValue {
+    font-size: 0.9rem;
+  }
+
+  .completionItem {
+    padding: 6px 10px;
+    font-size: 0.75rem;
   }
 } 

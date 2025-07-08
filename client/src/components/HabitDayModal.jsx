@@ -1,6 +1,22 @@
 import { useState, useEffect } from 'react';
 import styles from './HabitDayModal.module.scss';
 
+// Helper function to format completion time
+const formatCompletionTime = (timestamp) => {
+  if (!timestamp) return null;
+  
+  try {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  } catch (error) {
+    return null;
+  }
+};
+
 const HabitDayModal = ({ 
   isOpen, 
   onClose, 
@@ -11,7 +27,8 @@ const HabitDayModal = ({
   habits,
   completedHabits,
   hasHabitMetWeeklyGoal,
-  weekStats
+  weekStats,
+  calendarEntry
 }) => {
   const [selectedHabits, setSelectedHabits] = useState([]);
 
@@ -111,6 +128,11 @@ const HabitDayModal = ({
               const wasOriginallyCompleted = completedHabits.includes(habit.id);
               const isCurrentlySelected = isSelected;
               
+              // Get completion time if habit was already completed
+              const completionTime = wasOriginallyCompleted && calendarEntry?.habits?.[habit.id]?.completedAt 
+                ? formatCompletionTime(calendarEntry.habits[habit.id].completedAt)
+                : null;
+              
               let adjustedCompletions = originalWeekStat.completions;
               
               // Adjust the completion count based on pending changes
@@ -155,6 +177,11 @@ const HabitDayModal = ({
                       <div className={styles.habitName}>{habit.name}</div>
                       {habit.description && (
                         <div className={styles.habitDescription}>{habit.description}</div>
+                      )}
+                      {completionTime && (
+                        <div className={styles.completionTime}>
+                          ⏰ Completed at {completionTime}
+                        </div>
                       )}
                     </div>
                   </div>

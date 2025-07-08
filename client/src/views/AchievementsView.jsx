@@ -26,7 +26,9 @@ const AchievementsView = () => {
 
     const now = new Date();
     const currentYear = now.getFullYear();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    
+    // Use current month instead of rolling 30 days for more accurate success rate
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     
     // Get proper Sunday-Saturday week boundaries for current week
     const currentWeekBoundaries = getWeekBoundaries(now);
@@ -34,9 +36,9 @@ const AchievementsView = () => {
     return habits.map(habit => {
       const currentStreak = streaks[habit.id] || 0;
       const bestStreak = getBestStreak(habit.id, calendarEntries);
-      const thirtyDayStats = getHabitStatsForRange(
+      const currentMonthStats = getHabitStatsForRange(
         habit.id, 
-        thirtyDaysAgo.toISOString().split('T')[0],
+        currentMonthStart.toISOString().split('T')[0],
         now.toISOString().split('T')[0],
         calendarEntries
       );
@@ -57,7 +59,7 @@ const AchievementsView = () => {
         habit,
         currentStreak,
         bestStreak,
-        thirtyDayStats,
+        currentMonthStats,
         currentWeekStats,
         heatmapData,
         weeklyGoalPercentage,
