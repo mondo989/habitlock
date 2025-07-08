@@ -231,10 +231,10 @@
   &::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    right: -50%;
-    bottom: -50%;
+    top: -75%;
+    left: -75%;
+    right: -75%;
+    bottom: -75%;
     background: var(--gradient-background);
     z-index: -1;
     opacity: 0;
@@ -255,10 +255,10 @@
 // New performant rotation animation for pseudo-element
 @keyframes gradientRotate {
   0% { 
-    transform: rotate(0deg) scale(1.2);
+    transform: rotate(0deg) scale(1.5);
   }
   100% { 
-    transform: rotate(360deg) scale(1.2);
+    transform: rotate(360deg) scale(1.5);
   }
 }
 
@@ -373,6 +373,7 @@
   // Slower rotation on mobile for better performance
   .animatedGradient::before {
     animation-duration: 90s !important; // Extra slow on mobile
+    opacity: 1 !important; // Ensure full opacity on mobile
   }
 }
 
@@ -494,18 +495,19 @@
       }
       
       &.otherMonth {
-        &::after {
-          background: rgba(0, 0, 0, 0.6); // Dark overlay for dark mode
-        }
+        // Remove the dark overlay that's making gradients too dark
+        // &::after {
+        //   background: rgba(0, 0, 0, 0.6); // Dark overlay for dark mode
+        // }
         
         .dayNumber {
-          color: rgba(255, 255, 255, 0.6);
+          color: rgba(255, 255, 255, 0.8); // Brighter text
           z-index: 3;
         }
         
         .habitEmoji {
-          opacity: 0.6;
-          filter: brightness(0.7) contrast(0.8);
+          opacity: 0.8; // Brighter emojis
+          filter: brightness(0.9) contrast(0.95); // Less filtering
           z-index: 3;
         }
         
@@ -590,6 +592,6 @@
 @media (prefers-reduced-motion: reduce) {
   .animatedGradient::before {
     animation: gradientFadeIn 0.6s ease-out var(--gradient-animation-delay, 0.1s) both !important;
-    transform: scale(1.2) !important; // Keep the scale but remove rotation
+    transform: scale(1.5) !important; // Keep the scale but remove rotation
   }
 } 

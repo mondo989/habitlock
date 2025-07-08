@@ -50,6 +50,9 @@ const CalendarCell = ({
   const backgroundStyle = useMemo(() => {
     if (completedHabitDetails.length === 0) return loadingAnimationStyle;
 
+    // Check if we're in dark mode (this is a simple check, in a real app you'd use proper context)
+    const isDarkMode = document.documentElement.classList.contains('dark-mode');
+    
     if (completedHabitDetails.length === 1) {
       const habit = completedHabitDetails[0];
       const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
@@ -64,35 +67,17 @@ const CalendarCell = ({
         int: (min, max) => Math.floor(min + (Math.sin(seedHash) * 10000 - Math.floor(Math.sin(seedHash) * 10000)) * (max - min))
       };
       
-      // Create harmonious color variations for single habit gradients
-      const createSingleHabitColors = (baseColor, hasMetGoal) => {
-        const hex = baseColor.replace('#', '');
-        const r = parseInt(hex.substr(0, 2), 16);
-        const g = parseInt(hex.substr(2, 2), 16);
-        const b = parseInt(hex.substr(4, 2), 16);
-        
-        if (hasMetGoal) {
-          // For goals met, create vibrant main color and slightly darker accent
-          const color1 = baseColor;
-          const darkenFactor = 0.8;
-          const newR = Math.round(r * darkenFactor);
-          const newG = Math.round(g * darkenFactor);
-          const newB = Math.round(b * darkenFactor);
-          const color2 = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
-          return { color1, color2 };
-        } else {
-          // For goals not met, create softer versions
-          const color1 = `rgba(${r}, ${g}, ${b}, 0.85)`;
-          const color2 = `rgba(${r}, ${g}, ${b}, 0.6)`;
-          return { color1, color2 };
-        }
-      };
+      // Make colors much brighter for dark mode and mobile
+      const color1 = hasMetGoal ? 
+        (isDarkMode ? `${validColor}F5` : validColor) : 
+        (isDarkMode ? `${validColor}F0` : `${validColor}E6`); // 96% and 94% opacity in dark mode
+      const color2 = hasMetGoal ? 
+        (isDarkMode ? `${validColor}F8` : `${validColor}F2`) : 
+        (isDarkMode ? `${validColor}E6` : `${validColor}D9`); // 96% and 90% opacity in dark mode
       
-      const { color1, color2 } = createSingleHabitColors(validColor, hasMetGoal);
-      
-      // Create a smooth gradient for single habits with better blending
+      // Create a subtle gradient even for single habits
       const angle = (seedHash % 360);
-      const primaryGradient = `linear-gradient(${angle}deg, ${color1} 0%, ${color1} 20%, ${color2} 40%, ${color2} 60%, ${color1} 80%, ${color1} 100%)`;
+      const primaryGradient = `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 50%, ${color1} 100%)`;
       
       const rotationDuration = 60; // 60 seconds for single habits
       const animationDelay = (seedHash % 3);
@@ -105,34 +90,14 @@ const CalendarCell = ({
       };
     }
 
-    // Helper function to create harmonious color variations
-    const createColorVariation = (baseColor, hasMetGoal) => {
-      // Remove the # and convert to RGB
-      const hex = baseColor.replace('#', '');
-      const r = parseInt(hex.substr(0, 2), 16);
-      const g = parseInt(hex.substr(2, 2), 16);
-      const b = parseInt(hex.substr(4, 2), 16);
-      
-      if (hasMetGoal) {
-        // For goals met, create a slightly brighter/more saturated version
-        const enhanceFactor = 1.1;
-        const newR = Math.min(255, Math.round(r * enhanceFactor));
-        const newG = Math.min(255, Math.round(g * enhanceFactor));
-        const newB = Math.min(255, Math.round(b * enhanceFactor));
-        return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
-      } else {
-        // For goals not met, create a softer version
-        const alpha = 0.85; // 85% opacity
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-      }
-    };
-
     // Multiple habits - create clean animated gradients using only habit colors
     const colors = completedHabitDetails.map(habit => {
       const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
       // Ensure we have a valid color, fallback to a default if needed
       const validColor = habit.color && habit.color.startsWith('#') && habit.color.length >= 7 ? habit.color : '#3b82f6';
-      return createColorVariation(validColor, hasMetGoal);
+      return hasMetGoal ? 
+        (isDarkMode ? `${validColor}F5` : validColor) : 
+        (isDarkMode ? `${validColor}F0` : `${validColor}E6`); // Much brighter for dark mode
     }).filter(color => color && color !== '#000000'); // Remove any invalid or black colors
 
     // Create unique seed for consistent animations
@@ -184,66 +149,36 @@ const CalendarCell = ({
       colors.push('#3b82f6');
     }
 
-    // Helper function to create smooth color transitions
-    const createSmoothStops = (colors, maxPosition = 100, isCircular = false) => {
-      if (colors.length === 1) {
-        return `${colors[0]} 0%, ${colors[0]} ${maxPosition}${isCircular ? 'deg' : '%'}`;
-      }
-      
-      if (colors.length === 2) {
-        // For two colors, create a smooth blend with overlap
-        return `${colors[0]} 0%, ${colors[0]} 25%, ${colors[1]} 75%, ${colors[1]} ${maxPosition}${isCircular ? 'deg' : '%'}`;
-      }
-      
-      // For multiple colors, create smooth overlapping transitions
-      const stops = [];
-      const segmentSize = maxPosition / colors.length;
-      const overlapPercentage = 0.3; // 30% overlap between colors
-      
-      colors.forEach((color, i) => {
-        const baseStart = i * segmentSize;
-        const baseEnd = (i + 1) * segmentSize;
-        const overlap = segmentSize * overlapPercentage;
-        
-        if (i === 0) {
-          // First color
-          stops.push(`${color} 0%`);
-          stops.push(`${color} ${Math.max(baseEnd - overlap, baseStart + segmentSize * 0.6)}${isCircular ? 'deg' : '%'}`);
-        } else if (i === colors.length - 1) {
-          // Last color
-          stops.push(`${color} ${Math.min(baseStart + overlap, baseEnd - segmentSize * 0.6)}${isCircular ? 'deg' : '%'}`);
-          stops.push(`${color} ${maxPosition}${isCircular ? 'deg' : '%'}`);
-        } else {
-          // Middle colors
-          stops.push(`${color} ${baseStart + overlap}${isCircular ? 'deg' : '%'}`);
-          stops.push(`${color} ${baseEnd - overlap}${isCircular ? 'deg' : '%'}`);
-        }
-      });
-      
-      return stops.join(', ');
-    };
-
-    // Create smooth, beautiful gradients using only habit colors
+    // Create simple, beautiful gradients using only habit colors
     const gradientTypes = [
-      // Smooth linear gradient with overlapping colors
+      // Clean linear gradient
       () => {
         const angle = rng.int(0, 360);
-        const stops = createSmoothStops(colors, 100, false);
+        const stops = colors.map((color, i) => {
+          const position = i * (100 / (colors.length - 1));
+          return `${color} ${position}%`;
+        }).join(', ');
         return `linear-gradient(${angle}deg, ${stops})`;
       },
       
-      // Smooth radial gradient with overlapping colors
+      // Radial gradient
       () => {
         const centerX = rng.int(30, 70);
         const centerY = rng.int(30, 70);
-        const stops = createSmoothStops(colors, 100, false);
+        const stops = colors.map((color, i) => {
+          const position = i * (100 / (colors.length - 1));
+          return `${color} ${position}%`;
+        }).join(', ');
         return `radial-gradient(ellipse at ${centerX}% ${centerY}%, ${stops})`;
       },
       
-      // Smooth conic gradient with overlapping colors
+      // Conic gradient
       () => {
         const rotation = rng.int(0, 360);
-        const stops = createSmoothStops(colors, 360, true);
+        const stops = colors.map((color, i) => {
+          const position = i * (360 / colors.length);
+          return `${color} ${position}deg`;
+        }).join(', ');
         return `conic-gradient(from ${rotation}deg, ${stops})`;
       }
     ];
