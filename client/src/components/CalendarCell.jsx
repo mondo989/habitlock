@@ -71,17 +71,14 @@ const CalendarCell = ({
       const angle = (seedHash % 360);
       const primaryGradient = `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 50%, ${color1} 100%)`;
       
-      const animationTypes = ['gradientFlow', 'gradientShift', 'gradientPulse'];
-      const animationType = animationTypes[seedHash % animationTypes.length];
-      const animationDuration = 10 + (seedHash % 8); // 10-18 seconds
+      const rotationDuration = 60; // 60 seconds for single habits
       const animationDelay = (seedHash % 3);
       
       return {
         ...loadingAnimationStyle,
         '--gradient-background': primaryGradient,
-        '--gradient-animation': `${animationType} ${animationDuration}s ease-in-out infinite`,
+        '--rotation-duration': `${rotationDuration}s`,
         '--gradient-animation-delay': `calc(var(--background-delay, 0.1s) + ${animationDelay}s)`,
-        willChange: 'background-position, background-size',
       };
     }
 
@@ -179,18 +176,15 @@ const CalendarCell = ({
     const gradientType = gradientTypes[rng.int(0, gradientTypes.length)];
     const primaryGradient = gradientType();
     
-    // Animation parameters for smooth movement
-    const animationTypes = ['gradientFlow', 'gradientShift', 'gradientPulse'];
-    const animationType = animationTypes[rng.int(0, animationTypes.length)];
-    const animationDuration = rng.range(8, 16);
+    // Animation parameters for rotation
+    const rotationDuration = 60; // 60 seconds for multiple habits
     const animationDelay = rng.range(0, 2);
     
     return {
       ...loadingAnimationStyle,
       '--gradient-background': primaryGradient,
-      '--gradient-animation': `${animationType} ${animationDuration.toFixed(1)}s ease-in-out infinite`,
+      '--rotation-duration': `${rotationDuration.toFixed(1)}s`,
       '--gradient-animation-delay': `calc(var(--background-delay, 0.1s) + ${animationDelay.toFixed(1)}s)`,
-      willChange: 'background-position, background-size',
     };
   }, [completedHabitDetails, hasHabitMetWeeklyGoal, date, habits.length]);
 
