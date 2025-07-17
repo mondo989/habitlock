@@ -62,9 +62,16 @@
 }
 
 .habitsList {
-  @include flex-column-center;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 12px;
+  width: 100%;
+
+  // Two columns on desktop
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
 }
 
 .habitItem {
