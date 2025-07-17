@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { signInWithGoogle, getUserInfo } from '../services/firebase';
+import useScrollLock from '../hooks/useScrollLock';
 import styles from './AuthModal.module.scss';
 
 const AuthModal = ({ isOpen, onClose, user }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Lock body scroll when modal is open
+  useScrollLock(isOpen);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);

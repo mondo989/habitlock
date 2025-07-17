@@ -2,10 +2,14 @@ import { useState } from 'react';
 import { getAvailableSharingOptions } from '../utils/shareUtils';
 import SocialIcons from './SocialIcons';
 import analytics from '../services/analytics';
+import useScrollLock from '../hooks/useScrollLock';
 import styles from './ShareModal.module.scss';
 
 const ShareModal = ({ achievement, isOpen, onClose }) => {
   const [sharing, setSharing] = useState(null);
+
+  // Lock body scroll when modal is open
+  useScrollLock(isOpen);
 
   const sharingOptions = getAvailableSharingOptions();
 

@@ -1,5 +1,6 @@
 import { useMemo, useEffect } from 'react';
 import dayjs from 'dayjs';
+import useScrollLock from '../hooks/useScrollLock';
 import styles from './HabitStatsModal.module.scss';
 
 // Helper function to analyze completion times
@@ -78,10 +79,12 @@ const HabitStatsModal = ({
   calendarMatrix,
   calendarEntries
 }) => {
-  if (!isOpen || !habit) return null;
+  // Lock body scroll when modal is open
+  useScrollLock(isOpen);
 
   // Add keyboard shortcuts
   useEffect(() => {
+    if (!isOpen) return; // Only add listeners when modal is open
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -91,7 +94,7 @@ const HabitStatsModal = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, isOpen]);
 
   // Calculate comprehensive stats
   const stats = useMemo(() => {
@@ -131,7 +134,7 @@ const HabitStatsModal = ({
     };
   }, [habit, streaks, weekStats, getCompletedHabits, calendarMatrix, calendarEntries]);
 
-  if (!stats) return null;
+  if (!isOpen || !habit || !stats) return null;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>

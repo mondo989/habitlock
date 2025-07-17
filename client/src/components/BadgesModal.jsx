@@ -3,6 +3,7 @@ import { mergeAchievementsWithBadgeData, getUserAchievements } from '../services
 import { getUserInfo } from '../services/firebase';
 import analytics from '../services/analytics';
 import ShareModal from './ShareModal';
+import useScrollLock from '../hooks/useScrollLock';
 import styles from './BadgesModal.module.scss';
 
 // Animated Counter Component
@@ -46,6 +47,9 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
   const [firebaseAchievements, setFirebaseAchievements] = useState({});
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareAchievement, setShareAchievement] = useState(null);
+
+  // Lock body scroll when modal is open (but not for full page view)
+  useScrollLock(isOpen && !isFullPage);
 
   // Comprehensive badge definitions with requirements
   const badgeDefinitions = [

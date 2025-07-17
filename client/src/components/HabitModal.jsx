@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import useScrollLock from '../hooks/useScrollLock';
 import styles from './HabitModal.module.scss';
 
 const HabitModal = ({ 
@@ -18,6 +19,9 @@ const HabitModal = ({
   
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Lock body scroll when modal is open
+  useScrollLock(isOpen);
 
   // Common emojis for habits - expanded to 48 emojis (6 rows × 8 columns)
   const commonEmojis = [

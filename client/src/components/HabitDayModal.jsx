@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import useScrollLock from '../hooks/useScrollLock';
 import styles from './HabitDayModal.module.scss';
 
 // Helper function to format completion time
@@ -31,6 +32,9 @@ const HabitDayModal = ({
   calendarEntry
 }) => {
   const [selectedHabits, setSelectedHabits] = useState([]);
+
+  // Lock body scroll when modal is open
+  useScrollLock(isOpen);
 
   useEffect(() => {
     if (isOpen) {

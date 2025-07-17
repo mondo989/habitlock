@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import ShareModal from './ShareModal';
+import useScrollLock from '../hooks/useScrollLock';
 import styles from './AchievementCelebrationModal.module.scss';
 
 const AchievementCelebrationModal = ({ achievement, isOpen, onClose }) => {
   const [showContent, setShowContent] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+
+  // Lock body scroll when modal is open
+  useScrollLock(isOpen);
 
   // Motivational quotes mapped to achievement categories and specific badges
   const motivationalQuotes = {
