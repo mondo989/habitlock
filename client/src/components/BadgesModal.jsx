@@ -398,6 +398,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
                   strokeWidth="8"
                   strokeDasharray={`${2 * Math.PI * 54}`}
                   strokeDashoffset={`${2 * Math.PI * 54 * (1 - earnedCount / totalCount)}`}
+                  style={{ '--progress-offset': `${2 * Math.PI * 54 * (1 - earnedCount / totalCount)}` }}
                 />
               </svg>
               <div className={styles.progressText}>

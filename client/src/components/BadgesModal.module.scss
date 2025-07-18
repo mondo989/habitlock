@@ -98,8 +98,8 @@
 .progressBar {
   stroke: rgba(255, 255, 255, 0.9);
   stroke-linecap: round;
-  transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);
   filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+  animation: progressFill 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .progressText {
@@ -577,6 +577,15 @@
   50% {
     opacity: 0.8;
     transform: scale(1.1) rotate(180deg);
+  }
+}
+
+@keyframes progressFill {
+  0% {
+    stroke-dashoffset: calc(2 * 3.14159 * 54); // Full circumference (no progress)
+  }
+  100% {
+    stroke-dashoffset: var(--progress-offset, calc(2 * 3.14159 * 54)); // Final calculated value
   }
 }
 

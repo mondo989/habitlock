@@ -1,4 +1,4 @@
-import { ref, push, set, get, remove, onValue, off } from 'firebase/database';
+import { ref, push, set, get, remove, update, onValue, off } from 'firebase/database';
 import { database } from './firebase';
 
 // Habit CRUD operations
@@ -67,7 +67,7 @@ export const deleteHabit = async (userId, habitId) => {
     
     if (Object.keys(updates).length > 0) {
       const entriesRef = ref(database, `calendarEntries/${userId}`);
-      await set(entriesRef, updates);
+      await update(entriesRef, updates);
     }
   }
 };
