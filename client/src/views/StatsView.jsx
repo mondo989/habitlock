@@ -469,7 +469,7 @@ const StatsView = () => {
   return (
     <div className={styles.statsView}>
       <div className={styles.header}>
-        <h1>Your Habit Analytics 📊</h1>
+        <h1>Your Habit Stats 📊</h1>
         <p>Comprehensive insights into your habit-building journey</p>
       </div>
 
@@ -495,7 +495,7 @@ const StatsView = () => {
             <div className={styles.statValue}>
               {statsData.reduce((sum, { currentMonthStats }) => sum + currentMonthStats.completedDays, 0)}
             </div>
-            <div className={styles.statLabel}>Days Completed This Month</div>
+            <div className={styles.statLabel}>Habits Tracked This Month</div>
           </div>
           <div className={styles.quickStat}>
             <div className={styles.statValue}>

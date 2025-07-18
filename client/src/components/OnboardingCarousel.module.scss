@@ -1,5 +1,5 @@
 // OnboardingCarousel.module.scss
-@import '../styles/mixins.scss';
+@use '../styles/mixins.scss' as *;
 
 .onboardingOverlay {
   @include modal-overlay;

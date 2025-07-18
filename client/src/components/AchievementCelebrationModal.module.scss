@@ -1,4 +1,4 @@
-@import '../styles/mixins.scss';
+@use '../styles/mixins.scss' as *;
 
 // Achievement Celebration Modal - Rich Animations & Visual Effects
 .modalOverlay {

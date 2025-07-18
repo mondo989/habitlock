@@ -1,6 +1,6 @@
 // BadgesModal.module.scss - Premium badges modal with Apple/Airbnb aesthetics
 
-@import '../styles/mixins.scss';
+@use '../styles/mixins.scss' as *;
 
 .modalOverlay {
   position: fixed;
