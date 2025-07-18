@@ -315,6 +315,7 @@ const CalendarView = () => {
             onHabitDetailClick={handleHabitDetailClick}
             onDayClick={handleDayClick}
             hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
+            calendarEntries={calendarEntries}
           />
         )}
       </div>

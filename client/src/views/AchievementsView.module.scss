@@ -25,6 +25,39 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+
+    // Mobile responsive: stack icon and text vertically
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 12px;
+      font-size: 2.25rem;
+    }
+  }
+
+  .achievementIcon {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    
+    // Animate the star element - use :global() for ID selectors
+    :global(#achievement-star) {
+      animation: starappear 1s ease-out forwards 1s, starrotate 8s linear infinite 1s;
+      transform-origin: 50% 50%;
+      transform-box: fill-box;
+      opacity: 0;
+    }
+    
+    // Animate the trophy element
+    :global(#achievement-trophy) {
+      animation: trophyAppears 0.8s ease-out forwards 0.5s;
+      opacity: 0;
+      transform-origin: 50% 100%;
+      transform-box: fill-box;
+    }
   }
 
   p {
@@ -143,5 +176,54 @@
 @include mobile-small {
   .header h1 {
     font-size: 1.75rem;
+  }
+}
+
+// Star appear animation - fades in first
+@keyframes starappear {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 1;
+    scale: 0.85;
+  }
+}
+
+// Star pulse animation - ENHANCED for visibility
+@keyframes starrotate {
+  0% {
+    transform: rotate(0);
+    scale: 0.85;
+  }
+  50% {
+    transform: rotate(180deg);
+    scale: 1.25;
+    
+  }
+  100% {
+    transform: rotate(360deg);
+    scale: 0.85;
+  }
+}
+
+// Trophy card flip animation from bottom up
+@keyframes trophyAppears {
+  0% {
+    opacity: 0;
+    transform: rotateX(-90deg);
+  }
+  40% {
+    opacity: 0.2;
+    transform: rotateX(-10deg);
+  }
+  70% {
+    opacity: 0.8;
+    transform: rotateX(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateX(0deg);
   }
 } 

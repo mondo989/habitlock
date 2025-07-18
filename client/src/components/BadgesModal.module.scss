@@ -669,9 +669,13 @@
     gap: 12px;
     text-align: center;
     flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
 
-    .headerContent h2 {
-      font-size: 1.5rem;
+    .headerContent {
+      h2 {
+        font-size: 1.5rem;
+      }
     }
   }
 

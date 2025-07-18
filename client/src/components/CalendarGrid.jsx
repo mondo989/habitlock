@@ -9,7 +9,8 @@ const CalendarGrid = ({
   onHabitDetailClick,
   onDayClick,
   hasHabitMetWeeklyGoal,
-  currentDate 
+  currentDate,
+  calendarEntries 
 }) => {
   const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -46,6 +47,7 @@ const CalendarGrid = ({
                   isCurrentMonth={day.isCurrentMonth}
                   isToday={day.isToday}
                   animationIndex={animationIndex}
+                  calendarEntries={calendarEntries}
                 />
               );
             })}

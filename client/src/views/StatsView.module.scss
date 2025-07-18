@@ -34,6 +34,42 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+
+    // Mobile responsive: stack icon and text vertically
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 12px;
+      font-size: 2.25rem;
+    }
+  }
+
+  .statsIcon {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    
+    // Animate the bars - use :global() for ID selectors
+    :global(#bar-1) {
+      animation: barGrow 0.7s ease-in-out forwards 0.4s;
+      transform-origin: bottom;
+      opacity: 0;
+    }
+    
+    :global(#bar-2) {
+      animation: barGrow 0.7s ease-in-out forwards 0.8s;
+      transform-origin: bottom;
+      opacity: 0;
+    }
+    
+    :global(#bar-3) {
+      animation: barGrow 0.7s ease-in-out forwards 1.2s;
+      transform-origin: bottom;
+      opacity: 0;
+    }
   }
 
   p {
@@ -938,6 +974,20 @@
         color: #1e293b;
         @include flex-start;
         gap: 12px;
+        align-items: center;
+        
+        .achievementIcon {
+          width: 40px;
+          height: 40px;
+          flex-shrink: 0;
+          
+          // Animate the star element
+          :global(#achievement-star),
+          :global(#achievement-star-stats) {
+            animation: starPulse 2s ease-in-out infinite;
+            transform-origin: center;
+          }
+        }
       }
 
       p {
@@ -1498,5 +1548,36 @@
     &:hover {
       background: linear-gradient(135deg, #4c1d95 0%, #6b21a8 100%);
     }
+  }
+}
+
+// ----------------------------------------
+// ANIMATIONS FOR INLINE SVG ICONS
+// ----------------------------------------
+
+// Bar growth animation for stats icon - ENHANCED for visibility
+@keyframes barGrow {
+  0% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+  50% {
+    transform: scaleY(1.2);
+  }
+     100% {
+     transform: scaleY(1);
+     opacity: 1;
+   }
+}
+
+// Star pulse animation for achievement icon - ENHANCED for visibility
+@keyframes starPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.8);
+    opacity: 0.5;
   }
 }

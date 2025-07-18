@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import Tooltip from './Tooltip';
+import { calculateWeeklyCompletions } from '../utils/streakUtils';
 import styles from './CalendarCell.module.scss';
 
 // Helper function to get day of year
@@ -20,7 +21,8 @@ const CalendarCell = ({
   hasHabitMetWeeklyGoal,
   isCurrentMonth = true,
   isToday = false,
-  animationIndex = 0
+  animationIndex = 0,
+  calendarEntries = {} // Add calendarEntries prop for weekly completions
 }) => {
   const { date } = day;
 
@@ -255,6 +257,11 @@ const CalendarCell = ({
         <div className={`${styles.habitEmojis} ${styles.loadingEmojis}`}>
           {completedHabitDetails.map((habit, emojiIndex) => {
             const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
+            // Check if habit has any weekly activity (completions > 0 in current week)
+            const weeklyCompletions = calculateWeeklyCompletions(habit.id, date, calendarEntries);
+            const hasWeeklyActivity = weeklyCompletions > 0;
+            
+
             
             // Individual tooltip content for each emoji
             const emojiTooltipContent = (
@@ -264,6 +271,9 @@ const CalendarCell = ({
                   <span className={styles.tooltipEmoji}>{habit.emoji}</span>
                   <span className={styles.tooltipName}>{habit.name}</span>
                   {hasMetGoal && <span className={styles.goalMet}>🎯 Goal met!</span>}
+                  {hasWeeklyActivity && !hasMetGoal && (
+                    <span className={styles.weeklyProgress}>{weeklyCompletions}/{habit.weeklyGoal} this week</span>
+                  )}
                 </div>
                 <div style={{ marginTop: '4px', fontSize: '0.75rem', opacity: 0.8 }}>
                   Click to view stats
@@ -278,6 +288,7 @@ const CalendarCell = ({
                     ${styles.habitEmoji}
                     ${styles.loadingEmoji}
                     ${hasMetGoal ? styles.glowing : ''}
+                    ${hasWeeklyActivity ? styles.weeklyActive : ''}
                   `}
                   style={{
                     '--emoji-index-delay': `${(animationIndex * 0.05) + 0.15 + (emojiIndex * 0.1)}s`
