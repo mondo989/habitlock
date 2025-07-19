@@ -31,6 +31,12 @@
   justify-content: flex-start;
 }
 
+@mixin flex-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 @mixin fullscreen-layout {
   min-height: 100vh;
   @include flex-column-center;

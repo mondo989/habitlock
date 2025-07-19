@@ -27,7 +27,10 @@
    VITE_FIREBASE_DATABASE_URL=https://your_project_id-default-rtdb.firebaseio.com/
    VITE_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
    VITE_FIREBASE_APP_ID=your_app_id_here
+   VITE_OPEN_AI_KEY=your_openai_api_key_here
    ```
+
+   **Note:** The OpenAI API key is optional and only needed for AI-generated habit insights feature.
 
 ## Running the Application
 

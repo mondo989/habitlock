@@ -17,6 +17,7 @@ import {
   mergeAchievementsWithBadgeData 
 } from '../services/achievements';
 import { getUserInfo } from '../services/firebase';
+import { generateHabitInsights } from '../services/openai';
 import styles from './StatsView.module.scss';
 
 const StatsView = () => {
@@ -28,8 +29,67 @@ const StatsView = () => {
   const [achievementsLoading, setAchievementsLoading] = useState(true);
   const [celebrationAchievement, setCelebrationAchievement] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
+  
+  // AI Insights state
+  const [aiInsights, setAiInsights] = useState(null);
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const [insightsError, setInsightsError] = useState(null);
+  const [insightsTimestamp, setInsightsTimestamp] = useState(null);
+
+  // Rate limiting state
+  const [dailyUsageCount, setDailyUsageCount] = useState(0);
+  const [lastResetDate, setLastResetDate] = useState(null);
+  const DAILY_LIMIT = 3; // Allow 3 AI generations per day
 
   const loading = habitsLoading || calendarLoading;
+
+  // Load AI insights from local storage on mount (user-specific)
+  useEffect(() => {
+    const userInfo = getUserInfo();
+    if (!userInfo?.uid) return;
+
+    const savedInsights = localStorage.getItem(`habitlock_ai_insights_${userInfo.uid}`);
+    const savedTimestamp = localStorage.getItem(`habitlock_ai_insights_timestamp_${userInfo.uid}`);
+    
+    if (savedInsights && savedTimestamp) {
+      const timestamp = parseInt(savedTimestamp, 10);
+      const now = Date.now();
+      const oneDay = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+      
+      // Only load insights if they're less than 24 hours old
+      if (now - timestamp < oneDay) {
+        setAiInsights(savedInsights);
+        setInsightsTimestamp(timestamp);
+      } else {
+        // Remove expired insights
+        localStorage.removeItem(`habitlock_ai_insights_${userInfo.uid}`);
+        localStorage.removeItem(`habitlock_ai_insights_timestamp_${userInfo.uid}`);
+      }
+    }
+  }, []);
+
+  // Load and manage daily usage tracking
+  useEffect(() => {
+    const userInfo = getUserInfo();
+    if (!userInfo?.uid) return;
+
+    const savedUsageCount = localStorage.getItem(`habitlock_ai_usage_count_${userInfo.uid}`);
+    const savedResetDate = localStorage.getItem(`habitlock_ai_reset_date_${userInfo.uid}`);
+    
+    const today = new Date().toDateString();
+    
+    if (savedResetDate === today && savedUsageCount) {
+      // Same day, load existing count
+      setDailyUsageCount(parseInt(savedUsageCount, 10));
+      setLastResetDate(today);
+    } else {
+      // New day or no previous data, reset counter
+      setDailyUsageCount(0);
+      setLastResetDate(today);
+      localStorage.setItem(`habitlock_ai_usage_count_${userInfo.uid}`, '0');
+      localStorage.setItem(`habitlock_ai_reset_date_${userInfo.uid}`, today);
+    }
+  }, []);
 
   // Close tooltip when clicking outside
   useEffect(() => {
@@ -421,6 +481,68 @@ const StatsView = () => {
     loadAchievements();
   }, [statsData]);
 
+  // AI Insights Generation Function
+  const handleGenerateInsights = async () => {
+    if (!statsData || isGeneratingInsights) return;
+    
+    // Check daily limit
+    if (dailyUsageCount >= DAILY_LIMIT) {
+      setInsightsError(`Daily limit reached (${DAILY_LIMIT} generations per day). Try again tomorrow!`);
+      return;
+    }
+    
+    setIsGeneratingInsights(true);
+    setInsightsError(null);
+    
+    try {
+      const totalHabits = statsData.length;
+      const activeStreaks = statsData.filter(d => d.currentStreak > 0).length;
+      const avgCompletionRate = Math.round(
+        statsData.reduce((sum, d) => sum + d.currentMonthStats.completionRate, 0) / totalHabits
+      );
+
+      const data = {
+        statsData,
+        overallInsights,
+        totalHabits,
+        activeStreaks,
+        avgCompletionRate
+      };
+
+      const insights = await generateHabitInsights(data);
+      setAiInsights(insights);
+      setInsightsTimestamp(Date.now());
+      
+      // Update usage counter
+      const newUsageCount = dailyUsageCount + 1;
+      setDailyUsageCount(newUsageCount);
+      
+      const userInfo = getUserInfo();
+      if (userInfo?.uid) {
+        localStorage.setItem(`habitlock_ai_insights_${userInfo.uid}`, insights);
+        localStorage.setItem(`habitlock_ai_insights_timestamp_${userInfo.uid}`, Date.now().toString());
+        localStorage.setItem(`habitlock_ai_usage_count_${userInfo.uid}`, newUsageCount.toString());
+      }
+    } catch (error) {
+      console.error('Failed to generate AI insights:', error);
+      setInsightsError(error.message);
+    } finally {
+      setIsGeneratingInsights(false);
+    }
+  };
+
+  // Clear AI insights
+  const clearAiInsights = () => {
+    const userInfo = getUserInfo();
+    if (userInfo?.uid) {
+      localStorage.removeItem(`habitlock_ai_insights_${userInfo.uid}`);
+      localStorage.removeItem(`habitlock_ai_insights_timestamp_${userInfo.uid}`);
+    }
+    setAiInsights(null);
+    setInsightsError(null);
+    setInsightsTimestamp(null);
+  };
+
   if (loading) {
     return (
       <div className={styles.statsView}>
@@ -493,10 +615,99 @@ const StatsView = () => {
         <p>Comprehensive insights into your habit-building journey</p>
       </div>
 
-      {/* Overall Insights */}
-      {overallInsights.length > 0 && (
-        <div className={styles.insightsSection}>
+      {/* Key Insights */}
+      <div className={styles.insightsSection}>
+        <div className={styles.insightsHeader}>
           <h2>📈 Key Insights</h2>
+          <div className={styles.generateButtonContainer}>
+            <button 
+              className={styles.generateButton}
+              onClick={handleGenerateInsights}
+              disabled={isGeneratingInsights || !statsData || dailyUsageCount >= DAILY_LIMIT}
+            >
+              {isGeneratingInsights ? (
+                <>
+                  <div className={styles.spinner}></div>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <span>🤖</span>
+                  Generate AI Summary
+                </>
+              )}
+            </button>
+            <div className={styles.usageIndicator}>
+              <span className={styles.usageCount}>
+                {dailyUsageCount >= DAILY_LIMIT ? (
+                  <span className={styles.limitReached}>Daily limit reached</span>
+                ) : (
+                  <>
+                    {DAILY_LIMIT - dailyUsageCount} left today
+                  </>
+                )}
+              </span>
+              <div className={styles.usageBar}>
+                <div 
+                  className={styles.usageFill}
+                  style={{ 
+                    width: `${(dailyUsageCount / DAILY_LIMIT) * 100}%`,
+                    backgroundColor: dailyUsageCount >= DAILY_LIMIT ? '#ef4444' : '#6366f1'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* AI-Generated Insights */}
+        {aiInsights && (
+          <div className={styles.aiInsightsCard}>
+            <div className={styles.aiInsightsHeader}>
+              <div className={styles.aiInsightsTitle}>
+                <span className={styles.aiIcon}>🤖</span>
+                <h3>AI-Generated Insights</h3>
+              </div>
+              {insightsTimestamp && (
+                <span className={styles.insightsTimestamp}>
+                  Generated {new Date(insightsTimestamp).toLocaleString()}
+                </span>
+              )}
+            </div>
+            <div className={styles.aiInsightsContent}>
+              {aiInsights.split('\n').map((line, index) => (
+                <p key={index}>{line}</p>
+              ))}
+            </div>
+            <button 
+              className={styles.clearInsightsButton}
+              onClick={clearAiInsights}
+              disabled={!aiInsights}
+            >
+              Clear Insights
+            </button>
+          </div>
+        )}
+
+        {/* Error State */}
+        {insightsError && (
+          <div className={`${styles.errorCard} ${insightsError.includes('Daily limit') ? styles.rateLimitError : ''}`}>
+            <p>
+              {insightsError.includes('Daily limit') ? (
+                <>
+                  🚫 {insightsError}
+                  <br />
+                  <small>Resets at midnight in your timezone</small>
+                </>
+              ) : (
+                <>⚠️ {insightsError}</>
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Manual Insights */}
+        {overallInsights.length > 0 && (
           <div className={styles.insightsGrid}>
             {overallInsights.map((insight, index) => (
               <div key={index} className={`${styles.insightCard} ${styles[insight.type]}`}>
@@ -504,8 +715,8 @@ const StatsView = () => {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Quick Stats */}
       <div className={styles.quickStatsSection}>
