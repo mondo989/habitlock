@@ -74,8 +74,6 @@
   min-height: 400px; // Reduced from 500px to allow better mobile fit
   display: flex;
   align-items: center;
-  touch-action: pan-y pinch-zoom; // Allow vertical scrolling but enable horizontal swipes
-  user-select: none; // Prevent text selection during swipes
 }
 
 .slideContent {
@@ -512,6 +510,80 @@
   border-radius: 16px;
 }
 
+// Achievement demo styles
+.achievementDemo {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 32px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 16px;
+}
+
+.badgeShowcase {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.badgeCategory {
+  text-align: center;
+  
+  h5 {
+    margin: 0 0 12px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+}
+
+.badgeRow {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.levelProgress {
+  margin-top: 8px;
+}
+
+.levelCard {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  
+  span:first-child {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+  
+  span:last-child {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+  
+  .progressBar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    
+    .progressFill {
+      height: 100%;
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+  }
+}
+
 .statsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -683,16 +755,7 @@
   background: #fafbfc;
 }
 
-.mobileSwipeHint {
-  display: none;
-  text-align: center;
-  font-size: 0.875rem;
-  color: #64748b;
-  padding: 8px 0;
-  font-weight: 500;
-}
-
-.desktopNavigation {
+.navigation {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -869,19 +932,7 @@
     z-index: 10;
   }
 
-  .mobileSwipeHint {
-    display: block;
-    margin-bottom: 12px;
-    background: rgba(59, 130, 246, 0.08);
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
-    font-weight: 600;
-    font-size: 0.8125rem;
-  }
-
-  .desktopNavigation {
+  .navigation {
     flex-direction: row;
     gap: 10px;
   }
@@ -895,7 +946,7 @@
   }
 
   .slideCounter {
-    display: none; // Hide on mobile since it's shown in swipe hint
+    font-size: 0.8125rem; // Smaller on mobile
   }
 
   // Better touch targets for progress dots
@@ -967,11 +1018,11 @@
     }
   }
 
-  .mockupContainer, .trackingDemo, .streakDemo, .analyticsDemo {
+  .mockupContainer, .trackingDemo, .streakDemo, .analyticsDemo, .achievementDemo {
     background: linear-gradient(135deg, #334155, #475569);
   }
 
-  .mockHabitCard, .calendarPreview, .streakCard, .heatmapPreview, .insightCard {
+  .mockHabitCard, .calendarPreview, .streakCard, .heatmapPreview, .insightCard, .levelCard {
     background: #1e293b;
     border: 1px solid rgba(255, 255, 255, 0.1);
     
@@ -980,6 +1031,20 @@
     }
     
     p {
+      color: #cbd5e1 !important;
+    }
+  }
+
+  .badgeCategory h5 {
+    color: #f8fafc !important;
+  }
+
+  .levelCard span {
+    &:first-child {
+      color: #f8fafc !important;
+    }
+    
+    &:last-child {
       color: #cbd5e1 !important;
     }
   }
@@ -1063,12 +1128,6 @@
 
   .slideCounter {
     color: #94a3b8;
-  }
-
-  .mobileSwipeHint {
-    background: rgba(59, 130, 246, 0.12);
-    border-color: rgba(59, 130, 246, 0.25);
-    color: #60a5fa;
   }
 
   .progressDot {
