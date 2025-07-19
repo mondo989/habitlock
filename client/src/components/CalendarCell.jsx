@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Tooltip from './Tooltip';
 import { calculateWeeklyCompletions } from '../utils/streakUtils';
 import styles from './CalendarCell.module.scss';
@@ -11,6 +11,24 @@ const getDayOfYear = (date) => {
   return Math.floor(diff / oneDay);
 };
 
+// Hook to detect if we're on mobile with proper resize handling
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 768); // Mobile and tablet detection
+    };
+    
+    checkIsMobile(); // Check on mount
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+  
+  return isMobile;
+};
+
 const CalendarCell = ({ 
   day, 
   habits, 
@@ -18,6 +36,7 @@ const CalendarCell = ({
   onHabitToggle,
   onHabitDetailClick,
   onDayClick,
+  onDayHabitsClick, // New prop for showing day habits modal
   hasHabitMetWeeklyGoal,
   isCurrentMonth = true,
   isToday = false,
@@ -25,6 +44,7 @@ const CalendarCell = ({
   calendarEntries = {} // Add calendarEntries prop for weekly completions
 }) => {
   const { date } = day;
+  const isMobile = useIsMobile();
 
   // Get habit details for completed habits
   const completedHabitDetails = useMemo(() => {
@@ -34,6 +54,11 @@ const CalendarCell = ({
       completedHabits.includes(habit.id)
     );
   }, [habits, completedHabits]);
+
+  // Determine display mode: stacked (mobile with any habits) or grid (desktop)  
+  const shouldShowStacked = useMemo(() => {
+    return isMobile && completedHabitDetails.length > 0;
+  }, [isMobile, completedHabitDetails.length]);
 
   // Calculate sequential loading animation delays
   const loadingAnimationStyle = useMemo(() => {
@@ -222,6 +247,8 @@ const CalendarCell = ({
 
   const handleCellClick = (e) => {
     e.preventDefault();
+    
+    // Always allow adding habits on day click, regardless of mobile/desktop
     if (onDayClick) {
       onDayClick(date, day);
     }
@@ -230,6 +257,21 @@ const CalendarCell = ({
   const handleHabitClick = (e, habitId) => {
     e.stopPropagation();
     onHabitDetailClick(habitId);
+  };
+
+  const handleStackedHabitsClick = (e) => {
+    e.stopPropagation();
+    if (onDayHabitsClick) {
+      onDayHabitsClick(day);
+    }
+  };
+
+  const handleMobileEmojiAreaClick = (e) => {
+    e.stopPropagation();
+    // Allow adding habits when clicking emoji area on mobile
+    if (onDayClick) {
+      onDayClick(date, day);
+    }
   };
 
   return (
@@ -253,53 +295,98 @@ const CalendarCell = ({
         </Tooltip>
       </div>
       
-      {completedHabitDetails.length > 0 && (
-        <div className={`${styles.habitEmojis} ${styles.loadingEmojis}`}>
-          {completedHabitDetails.map((habit, emojiIndex) => {
-            const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
-            // Check if habit has any weekly activity (completions > 0 in current week)
-            const weeklyCompletions = calculateWeeklyCompletions(habit.id, date, calendarEntries);
-            const hasWeeklyActivity = weeklyCompletions > 0;
-            
-
-            
-            // Individual tooltip content for each emoji
-            const emojiTooltipContent = (
-              <div>
-                <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
-                <div className={styles.tooltipHabit}>
-                  <span className={styles.tooltipEmoji}>{habit.emoji}</span>
-                  <span className={styles.tooltipName}>{habit.name}</span>
-                  {hasMetGoal && <span className={styles.goalMet}>🎯 Goal met!</span>}
-                  {hasWeeklyActivity && !hasMetGoal && (
-                    <span className={styles.weeklyProgress}>{weeklyCompletions}/{habit.weeklyGoal} this week</span>
-                  )}
-                </div>
-                <div style={{ marginTop: '4px', fontSize: '0.75rem', opacity: 0.8 }}>
-                  Click to view stats
-                </div>
+            {completedHabitDetails.length > 0 && (
+        <div className={`${styles.habitEmojis} ${styles.loadingEmojis} ${shouldShowStacked ? styles.stackedLayout : ''}`}>
+          {shouldShowStacked ? (
+            // Mobile: Row 1 (≤4 emojis below day number), Row 2 (5+ emojis with count badge)
+            <div className={styles.mobileEmojiContainer}>
+              {/* First row - up to 4 emojis */}
+              <div 
+                className={`${styles.mobileEmojiRow} ${styles[`habits${Math.min(completedHabitDetails.length, 4)}`]}`} 
+                onClick={handleMobileEmojiAreaClick}
+              >
+                {completedHabitDetails.slice(0, 4).map((habit, emojiIndex) => (
+                  <span
+                    key={habit.id}
+                    className={`${styles.mobileEmoji} ${styles.loadingEmoji}`}
+                    style={{
+                      '--emoji-index-delay': `${(animationIndex * 0.05) + 0.15 + (emojiIndex * 0.05)}s`
+                    }}
+                  >
+                    {habit.emoji}
+                  </span>
+                ))}
               </div>
-            );
-            
-            return (
-              <Tooltip key={habit.id} content={emojiTooltipContent} position="top">
-                <span
-                  className={`
-                    ${styles.habitEmoji}
-                    ${styles.loadingEmoji}
-                    ${hasMetGoal ? styles.glowing : ''}
-                    ${hasWeeklyActivity ? styles.weeklyActive : ''}
-                  `}
-                  style={{
-                    '--emoji-index-delay': `${(animationIndex * 0.05) + 0.15 + (emojiIndex * 0.1)}s`
-                  }}
-                  onClick={(e) => handleHabitClick(e, habit.id)}
-                >
-                  {habit.emoji}
-                </span>
-              </Tooltip>
-            );
-          })}
+              
+              {/* Second row - additional emojis (5+) */}
+              {completedHabitDetails.length > 4 && (
+                <div className={styles.mobileEmojiSecondRow} onClick={handleMobileEmojiAreaClick}>
+                  {completedHabitDetails.slice(4).map((habit, emojiIndex) => (
+                    <span
+                      key={habit.id}
+                      className={`${styles.mobileEmoji} ${styles.loadingEmoji}`}
+                      style={{
+                        '--emoji-index-delay': `${(animationIndex * 0.05) + 0.15 + ((emojiIndex + 4) * 0.05)}s`
+                      }}
+                    >
+                      {habit.emoji}
+                    </span>
+                  ))}
+                </div>
+              )}
+              
+              {/* Count badge - always in bottom right corner */}
+              <div 
+                className={styles.mobileHabitCount} 
+                onClick={handleStackedHabitsClick}
+              >
+                {completedHabitDetails.length}
+              </div>
+            </div>
+          ) : (
+            // Desktop: Original layout unchanged
+            completedHabitDetails.map((habit, emojiIndex) => {
+              const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
+              const weeklyCompletions = calculateWeeklyCompletions(habit.id, date, calendarEntries);
+              const hasWeeklyActivity = weeklyCompletions > 0;
+              
+              const emojiTooltipContent = (
+                <div>
+                  <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
+                  <div className={styles.tooltipHabit}>
+                    <span className={styles.tooltipEmoji}>{habit.emoji}</span>
+                    <span className={styles.tooltipName}>{habit.name}</span>
+                    {hasMetGoal && <span className={styles.goalMet}>🎯 Goal met!</span>}
+                    {hasWeeklyActivity && !hasMetGoal && (
+                      <span className={styles.weeklyProgress}>{weeklyCompletions}/{habit.weeklyGoal} this week</span>
+                    )}
+                  </div>
+                  <div style={{ marginTop: '4px', fontSize: '0.75rem', opacity: 0.8 }}>
+                    Click to view stats
+                  </div>
+                </div>
+              );
+              
+              return (
+                <Tooltip key={habit.id} content={emojiTooltipContent} position="top">
+                  <span
+                    className={`
+                      ${styles.habitEmoji}
+                      ${styles.loadingEmoji}
+                      ${hasMetGoal ? styles.glowing : ''}
+                      ${hasWeeklyActivity ? styles.weeklyActive : ''}
+                    `}
+                    style={{
+                      '--emoji-index-delay': `${(animationIndex * 0.05) + 0.15 + (emojiIndex * 0.1)}s`
+                    }}
+                    onClick={(e) => handleHabitClick(e, habit.id)}
+                  >
+                    {habit.emoji}
+                  </span>
+                </Tooltip>
+              );
+            })
+          )}
         </div>
       )}
     </div>

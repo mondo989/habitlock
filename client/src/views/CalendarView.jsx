@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useHabits } from '../hooks/useHabits';
+import { useCalendar } from '../hooks/useCalendar';
+import { getWeekStatsForDate, getBestStreak, getHabitStatsForRange } from '../utils/streakUtils';
 import CalendarGrid from '../components/CalendarGrid';
 import HabitModal from '../components/HabitModal';
 import HabitDayModal from '../components/HabitDayModal';
 import HabitStatsModal from '../components/HabitStatsModal';
 import AchievementCelebrationModal from '../components/AchievementCelebrationModal';
-import { useHabits } from '../hooks/useHabits';
-import { useCalendar } from '../hooks/useCalendar';
-import { getWeekStatsForDate, getHabitStatsForRange, getBestStreak } from '../utils/streakUtils';
-import { checkAndUpdateAchievements, getUserAchievements } from '../services/achievements';
+import DayHabitsModal from '../components/DayHabitsModal';
+import analytics from '../services/analytics';
+import { checkAndUpdateAchievements } from '../services/achievements';
 import { getUserInfo } from '../services/firebase';
 import styles from './CalendarView.module.scss';
 
@@ -31,6 +33,10 @@ const CalendarView = () => {
 
   // State for onboarding prompt
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // State for day habits modal (mobile stacked view)
+  const [isDayHabitsModalOpen, setIsDayHabitsModalOpen] = useState(false);
+  const [selectedDayForHabits, setSelectedDayForHabits] = useState(null);
 
   const {
     habits,
@@ -191,6 +197,17 @@ const CalendarView = () => {
     }
   };
 
+  // Handle day habits click to show mobile stacked view modal
+  const handleDayHabitsClick = (day) => {
+    setSelectedDayForHabits(day);
+    setIsDayHabitsModalOpen(true);
+    
+    // Dismiss onboarding when user interacts with calendar
+    if (showOnboarding) {
+      dismissOnboarding();
+    }
+  };
+
   // Handle saving habits for a specific day
   const handleSaveDayHabits = async (date, selectedHabits) => {
     try {
@@ -314,6 +331,7 @@ const CalendarView = () => {
             onHabitToggle={toggleHabitCompletion}
             onHabitDetailClick={handleHabitDetailClick}
             onDayClick={handleDayClick}
+            onDayHabitsClick={handleDayHabitsClick}
             hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
             calendarEntries={calendarEntries}
           />
@@ -433,6 +451,18 @@ const CalendarView = () => {
         weekStats={weekStats}
         getCompletedHabits={getCompletedHabits}
         calendarMatrix={calendarMatrix}
+        calendarEntries={calendarEntries}
+      />
+
+      {/* Day Habits Modal (Mobile Stacked View) */}
+      <DayHabitsModal
+        isOpen={isDayHabitsModalOpen}
+        onClose={() => setIsDayHabitsModalOpen(false)}
+        day={selectedDayForHabits}
+        habits={habits}
+        completedHabits={selectedDayForHabits ? getCompletedHabits(selectedDayForHabits.date) : []}
+        hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
+        onHabitDetailClick={handleHabitDetailClick}
         calendarEntries={calendarEntries}
       />
 

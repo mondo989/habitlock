@@ -233,12 +233,30 @@
   @include border-subtle;
   border-color: rgba(0, 0, 0, 0.06);
   font-weight: 500;
+  
+  // Prevent overflow on mobile
+  @media (max-width: 480px) {
+    font-size: 0.875rem;
+    padding: 8px 12px;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
 }
 
 .habitsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+  
+  // On tablets, show 2 per row
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  // On mobile, show 1 per row
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .habitCard {
@@ -346,6 +364,14 @@
 .progressHeader {
   @include flex-between;
   margin-bottom: 16px;
+  gap: 12px;
+  
+  // Stack on mobile to prevent overflow
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }
 
 .progressLabel {
@@ -358,6 +384,14 @@
 .progressStats {
   @include flex-start;
   gap: 12px;
+  flex-wrap: wrap;
+  
+  // Stack on mobile for better space utilization
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
 }
 
 .progressText {
@@ -452,10 +486,34 @@
 }
 
 // Responsive design
-@include tablet {
+@include mobile {
   .calendarView {
     padding: 20px;
     gap: 24px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+
+    .monthControls {
+      order: 2;
+      gap: 8px;
+    }
+
+    .headerActions {
+      order: 1;
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  .addHabitButton {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+    margin: 0 auto;
   }
   
   .habitsGrid {
@@ -464,6 +522,10 @@
   
   .habitCard {
     padding: 20px;
+    
+    // Ensure content doesn't overflow
+    min-width: 0; // Allow flex items to shrink below content size
+    overflow: hidden;
   }
 
   .habitsContainer {
@@ -474,10 +536,6 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
-  }
-  
-  .header {
-    padding: 24px;
   }
   
   .monthTitle {
@@ -492,20 +550,7 @@
   }
 
   .header {
-    flex-direction: column;
-    gap: 20px;
     padding: 20px;
-
-    .monthControls {
-      order: 2;
-      gap: 8px;
-    }
-
-    .headerActions {
-      order: 1;
-      width: 100%;
-      justify-content: center;
-    }
   }
 
   .subtleTodayButton {
@@ -518,97 +563,47 @@
   .monthNavigation {
     gap: 16px;
   }
-
+  
   .monthTitle {
-    font-size: 1.5rem;
-    min-width: auto;
-  }
-
-  // Mobile onboarding prompt
-  .onboardingPrompt {
-    padding: 16px 18px;
-    margin-bottom: 20px;
-  }
-
-  .onboardingContent {
-    gap: 12px;
-  }
-
-  .onboardingIcon {
-    font-size: 1.5rem;
-  }
-
-  .onboardingText {
-    h3 {
-      font-size: 1rem;
-    }
-    
-    p {
-      font-size: 0.875rem;
-    }
-  }
-
-  .onboardingDismiss {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
-  }
-
-  .navButton {
-    width: 40px;
-    height: 40px;
-    font-size: 1.125rem;
-  }
-
-  .headerActions {
-    flex-direction: column;
-    width: 100%;
-
-    .addHabitButton {
-      width: 100%;
-      text-align: center;
-    }
+    font-size: 1.75rem;
   }
   
   .habitsContainer {
-    padding: 20px;
-  }
-
-  .habitMainInfo {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .habitActions {
-    align-self: flex-end;
-  }
-
-  .habitEmoji {
-    width: 48px;
-    height: 48px;
-    font-size: 1.5rem;
+    padding: 16px;
   }
   
-  .emptyState {
-    padding: 40px 24px;
-  }
-  
-  .emptyStateContent {
-    h2 {
-      font-size: 1.5rem;
+  .habitCard {
+    padding: 16px;
+    
+    // Ensure text doesn't overflow
+    .habitName {
+      word-wrap: break-word;
+      hyphens: auto;
     }
     
-    p {
-      font-size: 1rem;
+    .habitDescription {
+      word-wrap: break-word;
+      hyphens: auto;
     }
   }
+  
+  .progressText {
+    font-size: 0.8125rem;
+  }
+  
+  .goalMet {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
 }
+
+// Media queries for habits styles (moved to proper location)
 
 // Dark mode styles
 .calendarView {
   :global(html.dark-mode) & {
-  background: #1a1f2e;
-}
+    background: #1a1f2e;
+  }
 }
 
 .loading, .error {

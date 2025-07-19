@@ -620,23 +620,23 @@ const StatsView = () => {
         <div className={styles.insightsHeader}>
           <h2>📈 Key Insights</h2>
           <div className={styles.generateButtonContainer}>
-            <button 
-              className={styles.generateButton}
-              onClick={handleGenerateInsights}
+          <button 
+            className={styles.generateButton}
+            onClick={handleGenerateInsights}
               disabled={isGeneratingInsights || !statsData || dailyUsageCount >= DAILY_LIMIT}
-            >
-              {isGeneratingInsights ? (
-                <>
-                  <div className={styles.spinner}></div>
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <span>🤖</span>
-                  Generate AI Summary
-                </>
-              )}
-            </button>
+          >
+            {isGeneratingInsights ? (
+              <>
+                <div className={styles.spinner}></div>
+                Generating...
+              </>
+            ) : (
+              <>
+                <span>🤖</span>
+                Generate AI Summary
+              </>
+            )}
+          </button>
             <div className={styles.usageIndicator}>
               <span className={styles.usageCount}>
                 {dailyUsageCount >= DAILY_LIMIT ? (
@@ -665,8 +665,8 @@ const StatsView = () => {
           <div className={styles.aiInsightsCard}>
             <div className={styles.aiInsightsHeader}>
               <div className={styles.aiInsightsTitle}>
-                <span className={styles.aiIcon}>🤖</span>
-                <h3>AI-Generated Insights</h3>
+              <span className={styles.aiIcon}>🤖</span>
+              <h3>AI-Generated Insights</h3>
               </div>
               {insightsTimestamp && (
                 <span className={styles.insightsTimestamp}>

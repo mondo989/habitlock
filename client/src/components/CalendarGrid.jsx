@@ -8,6 +8,7 @@ const CalendarGrid = ({
   onHabitToggle,
   onHabitDetailClick,
   onDayClick,
+  onDayHabitsClick, // New prop for mobile stacked view
   hasHabitMetWeeklyGoal,
   currentDate,
   calendarEntries 
@@ -43,6 +44,7 @@ const CalendarGrid = ({
                   onHabitToggle={onHabitToggle}
                   onHabitDetailClick={onHabitDetailClick}
                   onDayClick={onDayClick}
+                  onDayHabitsClick={onDayHabitsClick}
                   hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
                   isCurrentMonth={day.isCurrentMonth}
                   isToday={day.isToday}

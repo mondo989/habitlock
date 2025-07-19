@@ -297,19 +297,19 @@
     @include flex-start;
     gap: 12px;
 
-    .aiIcon {
-      font-size: 1.5rem;
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+  .aiIcon {
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 
-    h3 {
-      margin: 0;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #4338ca;
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #4338ca;
     }
   }
 
