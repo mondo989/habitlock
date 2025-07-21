@@ -23,20 +23,22 @@ const HabitModal = ({
   // Lock body scroll when modal is open
   useScrollLock(isOpen);
 
-  // Common emojis for habits - expanded to 48 emojis (6 rows × 8 columns)
+  // Common emojis for habits - expanded to 56 emojis (7 rows × 8 columns)
   const commonEmojis = [
-    // Row 1 - Basic habits & activities
-    '💰', '💪', '🏃‍♂️', '📚', '🧘‍♀️', '💧', '🔧', '😴',
-    // Row 2 - Goals & productivity  
-    '🎯', '💼', '🎨', '🎵', '📝', '🌱', '🔎', '🧹',
-    // Row 3 - Achievement & motivation
-    '🔥', '⭐', '💸', '🎉', '🌟', '💎', '🚀', '📈',
-    // Row 4 - Health & wellness
-    '🏋️‍♀️', '🚶‍♂️', '🧠', '❤️', '🍎', '🥤', '💊', '🛁',
-    // Row 5 - Learning & creativity
-    '✍️', '🔬', '💻', '📖', '🎭', '🎪', '🎬', '📷',
-    // Row 6 - Lifestyle & hobbies
-    '🏠', '🌺', '🎸', '🍳', '🧧', '🎲', '⚽', '🎮'
+    // Row 1 - Fitness & Sports
+    '💪', '🏃‍♂️', '🏋️‍♀️', '🧘‍♀️', '🚶‍♂️', '🏊‍♂️', '🚴‍♂️', '🧗‍♂️',
+    // Row 2 - More Sports & Physical Activities
+    '🤸‍♂️', '⚽', '🏈', '⛹️‍♂️', '🥊', '🎾', '🎯', '⛰️',
+    // Row 3 - Health & Wellness
+    '🧠', '❤️', '🍎', '🥤', '💊', '🛁', '😴', '🧋',
+    // Row 4 - Work & Productivity
+    '💼', '💻', '📊', '💹', '✉️', '📱', '⏰', '✅',
+    // Row 5 - Learning & Creativity
+    '📚', '✍️', '🔬', '📖', '🎨', '🎵', '🎬', '📷',
+    // Row 6 - Finance & Achievement
+    '💰', '💸', '📈', '🔥', '⭐', '🌟', '💎', '🚀',
+    // Row 7 - Lifestyle & Home
+    '🏠', '🌱', '🧹', '🍳', '🛠️', '💧', '🌺', '📝'
   ];
 
   // Predefined colors - 48 diverse, vibrant colors (6 rows × 8 columns)

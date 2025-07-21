@@ -295,7 +295,7 @@ const CalendarCell = ({
         </Tooltip>
       </div>
       
-            {completedHabitDetails.length > 0 && (
+      {completedHabitDetails.length > 0 && (
         <div className={`${styles.habitEmojis} ${styles.loadingEmojis} ${shouldShowStacked ? styles.stackedLayout : ''}`}>
           {shouldShowStacked ? (
             // Mobile: Row 1 (≤4 emojis below day number), Row 2 (5+ emojis with count badge)
@@ -346,45 +346,45 @@ const CalendarCell = ({
           ) : (
             // Desktop: Original layout unchanged
             completedHabitDetails.map((habit, emojiIndex) => {
-              const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
-              const weeklyCompletions = calculateWeeklyCompletions(habit.id, date, calendarEntries);
-              const hasWeeklyActivity = weeklyCompletions > 0;
-              
-              const emojiTooltipContent = (
-                <div>
-                  <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
-                  <div className={styles.tooltipHabit}>
-                    <span className={styles.tooltipEmoji}>{habit.emoji}</span>
-                    <span className={styles.tooltipName}>{habit.name}</span>
-                    {hasMetGoal && <span className={styles.goalMet}>🎯 Goal met!</span>}
-                    {hasWeeklyActivity && !hasMetGoal && (
-                      <span className={styles.weeklyProgress}>{weeklyCompletions}/{habit.weeklyGoal} this week</span>
-                    )}
-                  </div>
-                  <div style={{ marginTop: '4px', fontSize: '0.75rem', opacity: 0.8 }}>
-                    Click to view stats
-                  </div>
+            const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
+            const weeklyCompletions = calculateWeeklyCompletions(habit.id, date, calendarEntries);
+            const hasWeeklyActivity = weeklyCompletions > 0;
+            
+            const emojiTooltipContent = (
+              <div>
+                <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
+                <div className={styles.tooltipHabit}>
+                  <span className={styles.tooltipEmoji}>{habit.emoji}</span>
+                  <span className={styles.tooltipName}>{habit.name}</span>
+                  {hasMetGoal && <span className={styles.goalMet}>🎯 Goal met!</span>}
+                  {hasWeeklyActivity && !hasMetGoal && (
+                    <span className={styles.weeklyProgress}>{weeklyCompletions}/{habit.weeklyGoal} this week</span>
+                  )}
                 </div>
-              );
-              
-              return (
-                <Tooltip key={habit.id} content={emojiTooltipContent} position="top">
-                  <span
-                    className={`
-                      ${styles.habitEmoji}
-                      ${styles.loadingEmoji}
-                      ${hasMetGoal ? styles.glowing : ''}
-                      ${hasWeeklyActivity ? styles.weeklyActive : ''}
-                    `}
-                    style={{
-                      '--emoji-index-delay': `${(animationIndex * 0.05) + 0.15 + (emojiIndex * 0.1)}s`
-                    }}
-                    onClick={(e) => handleHabitClick(e, habit.id)}
-                  >
-                    {habit.emoji}
-                  </span>
-                </Tooltip>
-              );
+                <div style={{ marginTop: '4px', fontSize: '0.75rem', opacity: 0.8 }}>
+                  Click to view stats
+                </div>
+              </div>
+            );
+            
+            return (
+              <Tooltip key={habit.id} content={emojiTooltipContent} position="top">
+                <span
+                  className={`
+                    ${styles.habitEmoji}
+                    ${styles.loadingEmoji}
+                    ${hasMetGoal ? styles.glowing : ''}
+                    ${hasWeeklyActivity ? styles.weeklyActive : ''}
+                  `}
+                  style={{
+                    '--emoji-index-delay': `${(animationIndex * 0.05) + 0.15 + (emojiIndex * 0.1)}s`
+                  }}
+                  onClick={(e) => handleHabitClick(e, habit.id)}
+                >
+                  {habit.emoji}
+                </span>
+              </Tooltip>
+            );
             })
           )}
         </div>

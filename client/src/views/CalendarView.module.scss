@@ -563,7 +563,7 @@
   .monthNavigation {
     gap: 16px;
   }
-  
+
   .monthTitle {
     font-size: 1.75rem;
   }
@@ -571,7 +571,7 @@
   .habitsContainer {
     padding: 16px;
   }
-  
+
   .habitCard {
     padding: 16px;
     
@@ -579,8 +579,8 @@
     .habitName {
       word-wrap: break-word;
       hyphens: auto;
-    }
-    
+  }
+
     .habitDescription {
       word-wrap: break-word;
       hyphens: auto;
@@ -602,8 +602,8 @@
 // Dark mode styles
 .calendarView {
   :global(html.dark-mode) & {
-    background: #1a1f2e;
-  }
+  background: #1a1f2e;
+}
 }
 
 .loading, .error {
