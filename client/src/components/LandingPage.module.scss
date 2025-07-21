@@ -1193,3 +1193,51 @@
     gap: 8px;
   }
 } 
+
+.footerBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  gap: 24px;
+  
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+}
+
+.socialIcons {
+  display: flex;
+  gap: 16px;
+
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    
+    svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--text-color, #fff);
+      transition: all 0.3s ease;
+    }
+
+    &:hover {
+      background: var(--text-color, #fff);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+      svg {
+        fill: var(--bg-color, #000);
+      }
+    }
+  }
+} 
