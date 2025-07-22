@@ -60,23 +60,22 @@ const CalendarCell = ({
     return isMobile && completedHabitDetails.length > 0;
   }, [isMobile, completedHabitDetails.length]);
 
-  // Calculate sequential loading animation delays in three distinct phases
+  // Calculate sequential loading animation delays with overlapping phases
   const loadingAnimationStyle = useMemo(() => {
-    // Phase 1: Calendar cells animate first (0-2.1s)
+    // Phase 1: Calendar cells animate first
     const cellDelay = animationIndex * 0.05; // 50ms between each cell
     
-    // Phase 2: Emojis animate after all cells are done (starting at 2.5s)
-    const allCellsComplete = 2.5; // Allow time for all 42 cells + their animation duration
-    const emojiPhaseDelay = allCellsComplete + (animationIndex * 0.03); // Faster emoji cascade
+    // Phase 2: Emojis start animating when we reach day 22 (index 21)
+    const emojiStartIndex = 21; // Start emoji animations at day 22
+    const emojiCascadeDelay = Math.max(0, cellDelay - (emojiStartIndex * 0.05)); // Begin emoji cascade when we hit day 22
     
-    // Phase 3: Gradients animate after all emojis are done (starting at 4.0s)
-    const allEmojisComplete = 4.0;
-    const gradientPhaseDelay = allEmojisComplete + (animationIndex * 0.02); // Even faster gradient cascade
+    // Phase 3: Gradients follow shortly after their cell's emojis
+    const gradientDelay = emojiCascadeDelay + 0.3; // Start gradient 0.3s after emojis begin
     
     return {
       '--loading-delay': `${cellDelay}s`,
-      '--emoji-phase-delay': `${emojiPhaseDelay}s`, 
-      '--gradient-phase-delay': `${gradientPhaseDelay}s`,
+      '--emoji-cascade-start': `${emojiCascadeDelay}s`,
+      '--gradient-delay': `${gradientDelay}s`,
     };
   }, [animationIndex]);
 
@@ -120,7 +119,7 @@ const CalendarCell = ({
         ...loadingAnimationStyle,
         '--gradient-background': primaryGradient,
         '--rotation-duration': `${rotationDuration}s`,
-        '--gradient-animation-delay': `var(--gradient-phase-delay, 4s)`,
+        '--gradient-animation-delay': `var(--gradient-delay)`,
       };
     }
 
@@ -228,7 +227,7 @@ const CalendarCell = ({
       ...loadingAnimationStyle,
       '--gradient-background': primaryGradient,
       '--rotation-duration': `${rotationDuration.toFixed(1)}s`,
-      '--gradient-animation-delay': `var(--gradient-phase-delay, 4s)`,
+      '--gradient-animation-delay': `var(--gradient-delay)`,
     };
   }, [completedHabitDetails, hasHabitMetWeeklyGoal, date, habits.length]);
 
@@ -320,7 +319,7 @@ const CalendarCell = ({
                     key={habit.id}
                     className={`${styles.mobileEmoji} ${styles.loadingEmoji}`}
                     style={{
-                      '--emoji-index-delay': `calc(var(--emoji-phase-delay, 2.5s) + ${emojiIndex * 0.1}s)`
+                      '--emoji-index-delay': `calc(var(--emoji-cascade-start) + ${emojiIndex * 0.08}s)`
                     }}
                   >
                     {habit.emoji}
@@ -336,7 +335,7 @@ const CalendarCell = ({
                       key={habit.id}
                       className={`${styles.mobileEmoji} ${styles.loadingEmoji}`}
                       style={{
-                        '--emoji-index-delay': `calc(var(--emoji-phase-delay, 2.5s) + ${(emojiIndex + 4) * 0.1}s)`
+                        '--emoji-index-delay': `calc(var(--emoji-cascade-start) + ${(emojiIndex + 4) * 0.08}s)`
                       }}
                     >
                       {habit.emoji}
@@ -387,7 +386,7 @@ const CalendarCell = ({
                     ${hasWeeklyActivity ? styles.weeklyActive : ''}
                   `}
                   style={{
-                    '--emoji-index-delay': `calc(var(--emoji-phase-delay, 2.5s) + ${emojiIndex * 0.15}s)`
+                    '--emoji-index-delay': `calc(var(--emoji-cascade-start) + ${emojiIndex * 0.08}s)`
                   }}
                   onClick={(e) => handleHabitClick(e, habit.id)}
                 >
