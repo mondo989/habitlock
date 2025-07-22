@@ -60,16 +60,23 @@ const CalendarCell = ({
     return isMobile && completedHabitDetails.length > 0;
   }, [isMobile, completedHabitDetails.length]);
 
-  // Calculate sequential loading animation delays
+  // Calculate sequential loading animation delays in three distinct phases
   const loadingAnimationStyle = useMemo(() => {
-    const baseDelay = animationIndex * 0.05; // 50ms between each cell
-    const backgroundDelay = baseDelay;
-    const emojiDelay = baseDelay + 0.15; // Emoji appears 150ms after background
+    // Phase 1: Calendar cells animate first (0-2.1s)
+    const cellDelay = animationIndex * 0.05; // 50ms between each cell
+    
+    // Phase 2: Emojis animate after all cells are done (starting at 2.5s)
+    const allCellsComplete = 2.5; // Allow time for all 42 cells + their animation duration
+    const emojiPhaseDelay = allCellsComplete + (animationIndex * 0.03); // Faster emoji cascade
+    
+    // Phase 3: Gradients animate after all emojis are done (starting at 4.0s)
+    const allEmojisComplete = 4.0;
+    const gradientPhaseDelay = allEmojisComplete + (animationIndex * 0.02); // Even faster gradient cascade
     
     return {
-      '--loading-delay': `${baseDelay}s`,
-      '--background-delay': `${backgroundDelay}s`,
-      '--emoji-delay': `${emojiDelay}s`,
+      '--loading-delay': `${cellDelay}s`,
+      '--emoji-phase-delay': `${emojiPhaseDelay}s`, 
+      '--gradient-phase-delay': `${gradientPhaseDelay}s`,
     };
   }, [animationIndex]);
 
@@ -113,7 +120,7 @@ const CalendarCell = ({
         ...loadingAnimationStyle,
         '--gradient-background': primaryGradient,
         '--rotation-duration': `${rotationDuration}s`,
-        '--gradient-animation-delay': `calc(var(--background-delay, 0.1s) + ${animationDelay}s)`,
+        '--gradient-animation-delay': `var(--gradient-phase-delay, 4s)`,
       };
     }
 
@@ -221,7 +228,7 @@ const CalendarCell = ({
       ...loadingAnimationStyle,
       '--gradient-background': primaryGradient,
       '--rotation-duration': `${rotationDuration.toFixed(1)}s`,
-      '--gradient-animation-delay': `calc(var(--background-delay, 0.1s) + ${animationDelay.toFixed(1)}s)`,
+      '--gradient-animation-delay': `var(--gradient-phase-delay, 4s)`,
     };
   }, [completedHabitDetails, hasHabitMetWeeklyGoal, date, habits.length]);
 
@@ -274,6 +281,9 @@ const CalendarCell = ({
     }
   };
 
+  // Performance optimization: use simple gradient for high-density layouts
+  const shouldUseSimpleGradient = completedHabitDetails.length > 6;
+
   return (
     <div
       className={`
@@ -282,7 +292,7 @@ const CalendarCell = ({
         ${!isCurrentMonth ? styles.otherMonth : ''}
         ${isToday ? styles.today : ''}
         ${completedHabitDetails.length > 0 ? styles.hasCompletions : ''}
-        ${completedHabitDetails.length > 0 ? styles.animatedGradient : ''}
+        ${completedHabitDetails.length > 0 ? (shouldUseSimpleGradient ? styles.simpleGradient : styles.animatedGradient) : ''}
       `}
       style={backgroundStyle}
       onClick={handleCellClick}
@@ -310,7 +320,7 @@ const CalendarCell = ({
                     key={habit.id}
                     className={`${styles.mobileEmoji} ${styles.loadingEmoji}`}
                     style={{
-                      '--emoji-index-delay': `${(animationIndex * 0.05) + 0.15 + (emojiIndex * 0.05)}s`
+                      '--emoji-index-delay': `calc(var(--emoji-phase-delay, 2.5s) + ${emojiIndex * 0.1}s)`
                     }}
                   >
                     {habit.emoji}
@@ -326,7 +336,7 @@ const CalendarCell = ({
                       key={habit.id}
                       className={`${styles.mobileEmoji} ${styles.loadingEmoji}`}
                       style={{
-                        '--emoji-index-delay': `${(animationIndex * 0.05) + 0.15 + ((emojiIndex + 4) * 0.05)}s`
+                        '--emoji-index-delay': `calc(var(--emoji-phase-delay, 2.5s) + ${(emojiIndex + 4) * 0.1}s)`
                       }}
                     >
                       {habit.emoji}
@@ -377,7 +387,7 @@ const CalendarCell = ({
                     ${hasWeeklyActivity ? styles.weeklyActive : ''}
                   `}
                   style={{
-                    '--emoji-index-delay': `${(animationIndex * 0.05) + 0.15 + (emojiIndex * 0.1)}s`
+                    '--emoji-index-delay': `calc(var(--emoji-phase-delay, 2.5s) + ${emojiIndex * 0.15}s)`
                   }}
                   onClick={(e) => handleHabitClick(e, habit.id)}
                 >

@@ -342,7 +342,7 @@ const CalendarView = () => {
       {habits.length > 0 && (
         <div className={styles.habitsContainer}>
           <div className={styles.habitsHeader}>
-            <h3>Your Habits & Weekly Progress</h3>
+            <h3>Your Completed Habits Today & Weekly Progress</h3>
             <div className={styles.weeklyStats}>
               {Object.values(weekStats || {}).filter(stat => stat?.hasMetGoal).length} of {habits.length} goals met this week
             </div>
