@@ -354,8 +354,16 @@ const CalendarView = () => {
               const weekStat = weekStats[habit.id];
               const percentage = weekStat?.percentage || 0;
               
+              // Check if habit is completed today
+              const today = new Date().toISOString().split('T')[0];
+              const isCompletedToday = calendarEntries[today]?.completedHabits?.includes(habit.id);
+              
               return (
-                <div key={habit.id} className={styles.habitCard}>
+                <div 
+                  key={habit.id} 
+                  className={`${styles.habitCard} ${isCompletedToday ? styles.completed : ''}`}
+                  style={{ '--habit-color': habit.color }}
+                >
                   <div className={styles.habitMainInfo}>
                     <div className={styles.habitBasics}>
                       <span 
@@ -365,7 +373,10 @@ const CalendarView = () => {
                         {habit.emoji}
                       </span>
                       <div className={styles.habitDetails}>
-                        <div className={styles.habitName}>{habit.name}</div>
+                        <div className={styles.habitName}>
+                          <span className={styles.checkmark}>✓</span>
+                          {habit.name}
+                        </div>
                         <div className={styles.habitDescription}>{habit.description}</div>
                         <div className={styles.habitStats}>
                           🔥 {streak} day streak
