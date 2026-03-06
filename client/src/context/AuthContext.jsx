@@ -1,6 +1,7 @@
 // AuthContext.jsx
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { initializeAuth, onAuthChange, signOutUser, signInWithGoogle } from '../services/firebase';
+import { saveUserProfile } from '../services/db';
 import analytics from '../services/analytics';
 
 const AuthContext = createContext(null);
@@ -35,13 +36,24 @@ export function AuthProvider({ children }) {
     };
 
     // Set up auth state listener
-    const unsubscribe = onAuthChange((authUser) => {
+    const unsubscribe = onAuthChange(async (authUser) => {
       if (!mounted) return;
       
       setUser(authUser);
       setIsLoading(false);
 
       if (authUser) {
+        // Save user profile to database for admin tracking
+        try {
+          await saveUserProfile(authUser.uid, {
+            email: authUser.email,
+            displayName: authUser.displayName,
+            photoURL: authUser.photoURL,
+          });
+        } catch (err) {
+          console.warn('Failed to save user profile:', err);
+        }
+
         analytics.identify(authUser.uid, {
           email: authUser.email,
           name: authUser.displayName,

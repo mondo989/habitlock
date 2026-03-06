@@ -1,6 +1,24 @@
 import { ref, push, set, get, remove, update, onValue, off } from 'firebase/database';
 import { database } from './firebase';
 
+// User profile operations (for admin tracking)
+export const saveUserProfile = async (userId, profileData) => {
+  const profileRef = ref(database, `userProfiles/${userId}`);
+  await set(profileRef, {
+    email: profileData.email || null,
+    displayName: profileData.displayName || null,
+    photoURL: profileData.photoURL || null,
+    lastLoginAt: Date.now(),
+    updatedAt: Date.now(),
+  });
+};
+
+export const getUserProfiles = async () => {
+  const profilesRef = ref(database, 'userProfiles');
+  const snapshot = await get(profilesRef);
+  return snapshot.exists() ? snapshot.val() : {};
+};
+
 // Habit CRUD operations
 export const createHabit = async (userId, habitData) => {
   const habitsRef = ref(database, `habits/${userId}`);

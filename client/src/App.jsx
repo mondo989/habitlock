@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { usePostHog } from 'posthog-js/react';
 import analytics from './services/analytics';
@@ -16,6 +16,12 @@ import LandingPageAnimated from './components/LandingPageAnimated';
 import OnboardingGuide from './components/OnboardingGuide';
 import { CalendarIcon, HabitsIcon, StatsIcon } from './components/Icons'
 import styles from './App.module.scss';
+
+// DEV-ONLY: Lazy load AdminView only in development
+// This ensures the admin code is never bundled in production
+const AdminView = import.meta.env.DEV 
+  ? lazy(() => import('./views/AdminView'))
+  : null;
 
 // Main App Layout component (for authenticated users)
 function AppLayout({ children }) {
@@ -378,6 +384,22 @@ function App() {
                   <StatsView />
                 </ProtectedRoute>
               } />
+              
+              {/* DEV-ONLY: Admin dashboard for viewing production data locally */}
+              {import.meta.env.DEV && AdminView && (
+                <Route path="/admin" element={
+                  <ProtectedRoute>
+                    <Suspense fallback={
+                      <div className={styles.loadingScreen}>
+                        <div className={styles.spinner}></div>
+                        <p>Loading admin...</p>
+                      </div>
+                    }>
+                      <AdminView />
+                    </Suspense>
+                  </ProtectedRoute>
+                } />
+              )}
               
               {/* Redirect any unknown routes to calendar for authenticated users */}
               <Route path="*" element={<Navigate to="/calendar" replace />} />

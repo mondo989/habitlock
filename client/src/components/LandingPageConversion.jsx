@@ -89,8 +89,7 @@ const LandingPageConversion = () => {
   const faqs = [
     { q: 'Is it really free?', a: 'Yes! HabitLock is completely free to use. No hidden fees, no premium tiers.' },
     { q: 'Do I need to create an account?', a: 'Just sign in with Google - takes 2 seconds. Your data syncs across devices automatically.' },
-    { q: 'Can I track multiple habits?', a: 'Absolutely! Create unlimited habits with custom emojis, colors, and weekly goals.' },
-    { q: 'Is my data private?', a: 'Your data is stored securely in your own Google account. We never sell or share your information.' }
+    { q: 'Can I track multiple habits?', a: 'Absolutely! Create unlimited habits with custom emojis, colors, and weekly goals.' }
   ];
 
   return (
@@ -406,11 +405,64 @@ const LandingPageConversion = () => {
 
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
-          <div className={styles.footerLogo}>
-            <img src="/habit-lock-logo.svg" alt="HabitLock" className={styles.logoIcon} />
-            <span>HabitLock</span>
+          <div className={styles.footerMain}>
+            <div className={styles.footerBrand}>
+              <div className={styles.footerLogo}>
+                <img src="/habit-lock-logo.svg" alt="HabitLock" className={styles.logoIcon} />
+                <span>HabitLock</span>
+              </div>
+              <p className={styles.footerTagline}>
+                Build habits that stick. Track progress beautifully.
+              </p>
+              <div className={styles.footerSocial}>
+                <a 
+                  href="https://www.facebook.com/habitlock" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Follow us on Facebook"
+                  className={styles.socialLink}
+                >
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                </a>
+                <a 
+                  href="https://x.com/habitlock_" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Follow us on X (Twitter)"
+                  className={styles.socialLink}
+                >
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+            
+            <div className={styles.footerLinks}>
+              <div className={styles.footerColumn}>
+                <h4>Product</h4>
+                <a href="#features">Features</a>
+                <a href="#proof">Reviews</a>
+                <a href="#faq">FAQ</a>
+              </div>
+              <div className={styles.footerColumn}>
+                <h4>Resources</h4>
+                <a href="/blog">Blog</a>
+                <a href="/blog">Habit Tips</a>
+                <a href="/blog">Success Stories</a>
+              </div>
+            </div>
           </div>
-          <p>© 2026 HabitLock. Made with ❤️ for habit builders.</p>
+          
+          <div className={styles.footerBottom}>
+            <p>© 2026 HabitLock. Made with ❤️ for habit builders everywhere.</p>
+            <div className={styles.footerBottomLinks}>
+              <a href="/privacy">Privacy</a>
+              <a href="/terms">Terms</a>
+            </div>
+          </div>
         </div>
       </footer>
 
