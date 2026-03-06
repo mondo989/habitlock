@@ -447,12 +447,12 @@ const LandingPageConversion = () => {
                 <a href="#proof">Reviews</a>
                 <a href="#faq">FAQ</a>
               </div>
-              <div className={styles.footerColumn}>
-                <h4>Resources</h4>
-                <a href="/blog">Blog</a>
-                <a href="/blog">Habit Tips</a>
-                <a href="/blog">Success Stories</a>
-              </div>
+            <div className={styles.footerColumn}>
+              <h4>Resources</h4>
+              <a href="/blog">Blog</a>
+              <a href="/blog/blog-why-most-habits-fail-after-a-good-start-and-what-actually-makes-them-stick.html">Why Habits Fail</a>
+              <a href="/blog/the-if-then-method-a-smarter-way-to-build-habits-that-last.html">The If-Then Method</a>
+            </div>
             </div>
           </div>
           
