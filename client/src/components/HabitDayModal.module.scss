@@ -34,13 +34,18 @@
 
 .closeButton {
   @include reset-button;
-  @include icon-md;
+  width: 32px;
+  height: 32px;
   @include flex-center;
   color: #6b7280;
-  padding: 4px;
   @include border-radius-sm;
   @include transition-fast;
-  line-height: 1;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
 
   &:hover {
     background: #f3f4f6;

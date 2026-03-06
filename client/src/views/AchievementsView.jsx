@@ -80,20 +80,32 @@ const AchievementsView = () => {
   }, [statsData]);
 
   useEffect(() => {
+    let cancelled = false;
+    
     const loadUserAchievements = async () => {
       if (auth.currentUser && !loading) {
         try {
           const userAchievements = await getUserAchievements(auth.currentUser.uid);
-          setAchievements(userAchievements);
+          if (!cancelled) {
+            setAchievements(userAchievements);
+          }
         } catch (error) {
-          console.error('Failed to load achievements:', error);
+          if (!cancelled) {
+            console.error('Failed to load achievements:', error);
+          }
         } finally {
-          setIsLoading(false);
+          if (!cancelled) {
+            setIsLoading(false);
+          }
         }
       }
     };
 
     loadUserAchievements();
+    
+    return () => {
+      cancelled = true;
+    };
   }, [loading]);
 
   if (loading || isLoading) {

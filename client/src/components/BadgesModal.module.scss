@@ -146,16 +146,20 @@
   background: rgba(255, 255, 255, 0.2);
   @include border-subtle;
   border-color: rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
+  border-radius: 10px;
   color: white;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   @include flex-center;
   @include reset-button;
   @include transition-standard;
-  font-size: 1.125rem;
-  font-weight: 600;
   @include backdrop-blur;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.3);
@@ -598,6 +602,10 @@
     box-shadow: 
       0 25px 50px -12px rgba(0, 0, 0, 0.4),
       0 0 0 1px rgba(255, 255, 255, 0.05);
+
+    &.fullPage {
+      background: transparent !important;
+    }
   }
 
   .modalHeader {
@@ -615,7 +623,7 @@
   }
 
   .categoryTitle {
-    color: #f9fafb;
+    color: #f3f4f6 !important;
 
     &::before {
       background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
@@ -625,33 +633,74 @@
   .badgeCard {
     background: #374151 !important;
     border-color: #4b5563 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
     
     &.earned {
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.12) 100%) !important;
-      border-color: rgba(34, 197, 94, 0.3) !important;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%) !important;
+      border-color: rgba(34, 197, 94, 0.4) !important;
+
+      &:hover {
+        box-shadow: 
+          0 20px 25px -5px rgba(0, 0, 0, 0.3),
+          0 10px 10px -5px rgba(34, 197, 94, 0.15);
+      }
     }
 
     &.locked {
-      background: linear-gradient(135deg, rgba(75, 85, 99, 0.4) 0%, rgba(75, 85, 99, 0.6) 100%) !important;
-      border-color: rgba(75, 85, 99, 0.5) !important;
+      background: rgba(55, 65, 81, 0.8) !important;
+      border-color: rgba(75, 85, 99, 0.6) !important;
+      opacity: 0.7;
+
+      &:hover {
+        opacity: 0.85;
+      }
     }
   }
 
   .badgeTitle {
-    color: #f9fafb;
+    color: #f9fafb !important;
   }
 
   .badgeDescription {
-    color: #d1d5db;
+    color: #d1d5db !important;
   }
 
   .badgeIcon {
     background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+
+    &.unlocked {
+      background: transparent;
+    }
+  }
+
+  .badgeProgress {
+    .progressLabel {
+      color: #9ca3af;
+    }
+  }
+
+  .completionInfo {
+    .completionText {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+  }
+
+  .rarityIndicator {
+    border-color: #374151;
   }
 
   .hoverTooltip {
     background: rgba(31, 41, 55, 0.95);
     border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .checkmark {
+    box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.4);
+  }
+
+  .shareButton {
+    box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -742,15 +791,20 @@
 
 // Full page styles
 .modalContent.fullPage {
-  position: static !important;
-  background: transparent !important;
-  backdrop-filter: none !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  max-width: none !important;
-  max-height: none !important;
-  transform: none !important;
+  position: static;
+  background: transparent;
+  backdrop-filter: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  max-width: none;
+  max-height: none;
+  transform: none;
   width: 100%;
   height: auto;
+
+  .modalBody {
+    max-height: none;
+    padding: 24px;
+  }
 } 

@@ -3,65 +3,228 @@
 
 .onboardingOverlay {
   @include modal-overlay;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 10000;
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .onboardingModal {
   @include modal-content;
-  border-radius: 24px;
+  border-radius: 16px;
   width: 100%;
-  max-width: 900px;
+  max-width: 520px;
   max-height: 90vh;
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.3),
-    0 8px 24px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modalHeader {
-  @include modal-header;
   @include flex-between;
   align-items: center;
-  padding: 24px 32px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .progressIndicator {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
 .progressDot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #e5e7eb;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
 
   &.active {
     background: #3b82f6;
-    transform: scale(1.25);
-  }
-
-  &:hover {
-    transform: scale(1.1);
-    background: #93c5fd;
+    width: 20px;
+    border-radius: 3px;
   }
 }
 
 .skipButton {
   background: none;
   border: none;
-  color: #6b7280;
+  color: #9ca3af;
   font-weight: 500;
+  font-size: 0.875rem;
   cursor: pointer;
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
   transition: all 0.2s ease;
+
+  &:hover {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+}
+
+.slideContainer {
+  padding: 24px;
+}
+
+.slideContent {
+  animation: slideIn 0.2s ease-out;
+}
+
+.slideHeader {
+  margin-bottom: 24px;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .slideSubtitle {
+    font-size: 0.9375rem;
+    color: #6b7280;
+    margin: 0;
+  }
+}
+
+.slideBody {
+  display: flex;
+  flex-direction: column;
+}
+
+// Welcome slide
+.welcomeContent {
+  .introText {
+    font-size: 0.9375rem;
+    color: #4b5563;
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+}
+
+.quickSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.stepNumber {
+  width: 28px;
+  height: 28px;
+  background: #f3f4f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.stepContent {
+  flex: 1;
+  padding-top: 2px;
+
+  h4 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 2px;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// Tips slide
+.tipsContent {
+  .tipsList {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+}
+
+.tipItem {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.tipIcon {
+  width: 24px;
+  height: 24px;
+  background: #dbeafe;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.tipText {
+  font-size: 0.9375rem;
+  color: #4b5563;
+  line-height: 1.5;
+
+  strong {
+    color: #111827;
+    font-weight: 600;
+  }
+}
+
+.readyMessage {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 14px 16px;
+  
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: #6b7280;
+  }
+}
+
+// Modal footer
+.modalFooter {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fafbfc;
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.prevButton {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  background: transparent;
+  color: #6b7280;
 
   &:hover {
     background: #f3f4f6;
@@ -69,1055 +232,118 @@
   }
 }
 
-.slideContainer {
-  padding: 0 32px;
-  min-height: 400px; // Reduced from 500px to allow better mobile fit
-  display: flex;
-  align-items: center;
-}
-
-.slideContent {
-  width: 100%;
-  animation: slideIn 0.3s ease-out;
-}
-
-.slideHeader {
-  text-align: center;
-  margin-bottom: 32px;
-
-  h2 {
-    font-size: 2.25rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 8px;
-    letter-spacing: -0.025em;
-  }
-
-  .slideSubtitle {
-    font-size: 1.125rem;
-    color: #64748b;
-    margin: 0;
-    font-weight: 500;
-  }
-}
-
-.slideBody {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-// Welcome slide styles
-.welcomeContent {
-  text-align: center;
-
-  .heroIcon {
-    font-size: 4rem;
-    margin-bottom: 24px;
-  }
-
-  p {
-    font-size: 1.125rem;
-    color: #475569;
-    line-height: 1.6;
-    margin-bottom: 32px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-// Modern Features Section
-.modernFeatures {
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.featureSection {
-  h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin: 0 0 24px;
-    text-align: center;
-  }
-}
-
-.featureGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 20px;
-}
-
-.featureItem {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  text-align: left;
-}
-
-.featureIconBadge {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
-}
-
-.featureContent {
-  flex: 1;
-  padding-top: 4px;
-
-  h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin: 0 0 6px;
-    line-height: 1.3;
-  }
-
-  p {
-    font-size: 0.875rem;
-    color: #64748b;
-    margin: 0;
-    line-height: 1.5;
-  }
-}
-
-// Instruction content styles
-.instructionContent {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  align-items: start;
-}
-
-// Customization preview styles
-.customizationPreview {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.emojiGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  
-  span {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f8fafc;
-    border-radius: 8px;
-    font-size: 1rem;
-  }
-}
-
-.colorGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  
-  div {
-    width: 32px;
-    height: 16px;
-    border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-  }
-}
-
-.mockupContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 32px;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.mockHabitCard {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  min-width: 250px;
-
-  .mockEmoji {
-    width: 48px;
-    height: 48px;
-    font-size: 1.5rem;
-    background: #dbeafe;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .mockHabitInfo {
-    h4 {
-      margin: 0 0 4px;
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #0f172a;
-    }
-
-    p {
-      margin: 0;
-      font-size: 0.875rem;
-      color: #64748b;
-    }
-  }
-}
-
-.tips {
-  h4 {
-    margin: 0 0 16px;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #0f172a;
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    
-    li {
-      padding: 8px 0;
-      font-size: 0.9375rem;
-      color: #475569;
-      line-height: 1.5;
-      
-      strong {
-        color: #0f172a;
-        font-weight: 600;
-      }
-    }
-  }
-}
-
-// Tracking demo styles
-.trackingDemo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 32px;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border-radius: 16px;
-}
-
-.calendarPreview {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
-  .calendarHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    font-weight: 600;
-    color: #0f172a;
-    
-    .weeklyProgress {
-      font-size: 0.75rem;
-      color: #059669;
-      background: #d1fae5;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-weight: 500;
-    }
-  }
-}
-
-.calendarGrid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-}
-
-.calendarDay {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #64748b;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  position: relative;
-  flex-direction: column;
-  gap: 1px;
-
-  &.completed {
-    background: #f8fafc;
-    color: #0f172a;
-    border-color: #e2e8f0;
-    
-    .habitEmoji {
-      font-size: 0.75rem;
-      line-height: 1;
-    }
-  }
-  
-  &.multiHabit {
-    .habitEmoji {
-      font-size: 0.6rem;
-    }
-  }
-  
-  &.goalGlow {
-    box-shadow: 0 0 0 2px #f59e0b, 0 0 8px rgba(245, 158, 11, 0.3);
-    background: linear-gradient(135deg, #fef3c7, #fde68a);
-  }
-
-  &.today {
-    background: #3b82f6;
-    color: white;
-    border-color: #2563eb;
-  }
-}
-
-.habitEmoji {
-  font-size: 0.75rem;
-  line-height: 1;
-}
-
-// Streak demo styles
-.streakDemo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 32px;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border-radius: 16px;
-}
-
-.habitCardPreview {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  min-width: 300px;
-  border: 2px solid rgba(0, 0, 0, 0.06);
-
-  .habitCardHeader {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
-
-    .streakEmoji {
-      width: 48px;
-      height: 48px;
-      font-size: 1.5rem;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid rgba(255, 255, 255, 0.8);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .habitCardInfo {
-      flex: 1;
-
-      h4 {
-        margin: 0 0 4px;
-        font-size: 1.125rem;
-        font-weight: 700;
-        color: #1f2937;
-      }
-
-      p {
-        margin: 0;
-        font-size: 0.9375rem;
-        color: #6b7280;
-        font-weight: 600;
-      }
-    }
-
-    .goalBadge {
-      background: #d1fae5;
-      color: #059669;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 0.8125rem;
-      font-weight: 700;
-      border: 1px solid #a7f3d0;
-    }
-  }
-
-  .weeklySection {
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-
-    .weeklyHeader {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      color: #374151;
-    }
-
-    .progressBar {
-      width: 100%;
-      height: 8px;
-      background: #e5e7eb;
-      border-radius: 4px;
-      overflow: hidden;
-
-      .progressFill {
-        height: 100%;
-        transition: width 0.3s ease;
-        border-radius: 4px;
-      }
-    }
-  }
-}
-
-// Analytics demo styles
-.analyticsDemo {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 32px;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border-radius: 16px;
-}
-
-// Achievement demo styles
-.achievementDemo {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 32px;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border-radius: 16px;
-}
-
-.badgeShowcase {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.badgeCategory {
-  text-align: center;
-  
-  h5 {
-    margin: 0 0 12px;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: #0f172a;
-  }
-}
-
-.badgeRow {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-
-.levelProgress {
-  margin-top: 8px;
-}
-
-.levelCard {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  
-  span:first-child {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #0f172a;
-  }
-  
-  span:last-child {
-    font-size: 0.875rem;
-    color: #64748b;
-    font-weight: 500;
-  }
-  
-  .progressBar {
-    width: 100%;
-    height: 8px;
-    background: #e5e7eb;
-    border-radius: 4px;
-    overflow: hidden;
-    
-    .progressFill {
-      height: 100%;
-      transition: width 0.3s ease;
-      border-radius: 4px;
-    }
-  }
-}
-
-.statsGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.statCard {
-  background: white;
-  padding: 16px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  
-  .statNumber {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 4px;
-  }
-  
-  .statLabel {
-    font-size: 0.75rem;
-    color: #64748b;
-    font-weight: 500;
-  }
-}
-
-.achievementPreview {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.badge {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  border-radius: 50%;
-  font-size: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.heatmapPreview {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
-  h5 {
-    margin: 0 0 12px;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: #0f172a;
-  }
-}
-
-.miniHeatmap {
-  .heatmapRow {
-    display: flex;
-    gap: 3px;
-  }
-
-  .daySquare {
-    width: 16px;
-    height: 16px;
-    background: #e5e7eb;
-    border-radius: 3px;
-
-    &.light {
-      background: #a7f3d0;
-    }
-
-    &.active {
-      background: #10b981;
-    }
-  }
-}
-
-.insightCard {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: white;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
-  span {
-    font-size: 1.25rem;
-  }
-
-  p {
-    margin: 0;
-    font-size: 0.9375rem;
-    font-weight: 500;
-    color: #059669;
-  }
-}
-
-// Success content styles
-.successContent {
-  text-align: center;
-}
-
-.strategyGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.strategyCard {
-  padding: 20px;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  text-align: center;
-
-  .strategyIcon {
-    font-size: 2rem;
-    margin-bottom: 12px;
-    display: block;
-  }
-
-  h4 {
-    margin: 0 0 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #0f172a;
-  }
-
-  p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: #64748b;
-    line-height: 1.4;
-  }
-}
-
-.finalMessage {
-  padding: 24px;
-  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-  border-radius: 16px;
-  border: 1px solid #3b82f6;
-
-  h4 {
-    margin: 0 0 12px;
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #1e40af;
-  }
-
-  p {
-    margin: 0;
-    font-size: 1rem;
-    color: #1e40af;
-    line-height: 1.5;
-  }
-}
-
-.modalFooter {
-  padding: 24px 32px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  background: #fafbfc;
-}
-
-.navigation {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.prevButton, .nextButton {
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-}
-
-.prevButton {
-  background: #f8fafc;
-  color: #64748b;
-
-  &:hover:not(:disabled) {
-    background: #f1f5f9;
-    color: #475569;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
 .nextButton {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  background: #3b82f6;
   color: white;
 
   &:hover {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    background: #2563eb;
   }
-}
-
-.slideCounter {
-  font-size: 0.875rem;
-  color: #64748b;
-  font-weight: 500;
 }
 
 // Responsive design
 @media (max-width: 768px) {
   .onboardingOverlay {
-    padding: 8px;
-    align-items: flex-start;
-    padding-top: max(8px, env(safe-area-inset-top, 8px));
-    padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    padding: 12px;
+    align-items: center;
   }
 
   .onboardingModal {
-    width: calc(100vw - 16px);
-    max-width: none;
-    // Allow modal to use full viewport height properly
-    height: calc(100vh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-    max-height: calc(100vh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    margin: 0 auto;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .modalHeader, .slideContainer, .modalFooter {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .modalHeader {
-    flex-shrink: 0;
-    padding-bottom: 12px;
-    padding-top: 16px;
-  }
-
-  .slideContainer {
-    flex: 1;
-    min-height: 0; // Allow flexbox to shrink
-    padding-top: 8px;
-    padding-bottom: 8px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    
-    // Remove min-height constraint on mobile
-    min-height: unset !important;
-    
-    // Better scroll behavior
-    &::-webkit-scrollbar {
-      display: none;
-    }
-    
-    // Ensure content doesn't get cut off
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    
-    // Add padding to bottom to ensure content visibility
-    &::after {
-      content: '';
-      display: block;
-      height: 20px;
-    }
-  }
-
-  .slideHeader h2 {
-    font-size: 1.75rem;
-  }
-
-  .instructionContent {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .strategyGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .modernFeatures {
     max-width: 100%;
-  }
-
-  .featureSection {
-    h3 {
-      font-size: 1.125rem;
-      margin-bottom: 20px;
-    }
-  }
-
-  .featureGrid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .featureItem {
-    gap: 12px;
-  }
-
-  .featureIconBadge {
-    width: 40px;
-    height: 40px;
-    font-size: 1.25rem;
-  }
-
-  .featureContent {
-    h4 {
-      font-size: 0.9375rem;
-    }
-
-    p {
-      font-size: 0.8125rem;
-    }
-  }
-
-  .modalFooter {
-    flex-shrink: 0;
-    padding-top: 16px;
-    padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
-    // Better mobile footer layout with stronger background
-    background: linear-gradient(180deg, rgba(250, 251, 252, 0.95) 0%, #fafbfc 100%);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    
-    // Ensure footer is always visible
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-  }
-
-  .navigation {
-    flex-direction: row;
-    gap: 10px;
-  }
-
-  .prevButton, .nextButton {
-    flex: 1;
-    padding: 16px 14px;
-    font-size: 1rem;
-    min-height: 52px; // Better touch target
+    max-height: calc(100vh - 24px);
     border-radius: 12px;
   }
 
-  .slideCounter {
-    font-size: 0.8125rem; // Smaller on mobile
+  .modalHeader {
+    padding: 16px 20px;
   }
 
-  // Better touch targets for progress dots
-  .progressDot {
-    width: 12px;
-    height: 12px;
-    margin: 4px; // Larger touch area
+  .slideContainer {
+    padding: 20px;
   }
 
-  // Disable hover effects on mobile
-  .prevButton:hover:not(:disabled),
-  .nextButton:hover,
-  .progressDot:hover {
-    transform: none;
-    box-shadow: none;
+  .slideHeader h2 {
+    font-size: 1.375rem;
+  }
+
+  .modalFooter {
+    padding: 14px 20px;
+  }
+
+  .prevButton, .nextButton {
+    padding: 12px 16px;
   }
 }
 
 // Dark mode support
 :global(html.dark-mode) {
   .onboardingModal {
-    background: #1e293b;
-    color: #f8fafc;
+    background: #1f2937;
+    color: #f9fafb;
   }
 
   .modalHeader {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
   }
 
   .modalFooter {
-    border-top-color: rgba(255, 255, 255, 0.15);
-    background: #0f172a;
-    
-    @media (max-width: 768px) {
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, #0f172a 100%);
-      backdrop-filter: blur(10px);
-      border-top-color: rgba(255, 255, 255, 0.1);
-    }
+    border-top-color: rgba(255, 255, 255, 0.08);
+    background: #111827;
   }
 
   .slideHeader h2 {
-    color: #f8fafc;
+    color: #f9fafb;
   }
 
   .slideSubtitle {
-    color: #94a3b8;
+    color: #9ca3af;
   }
 
-  .welcomeContent p {
-    color: #cbd5e1;
-  }
-
-  .featureSection h3 {
-    color: #f8fafc;
-  }
-
-  .featureIconBadge {
-    background: linear-gradient(135deg, #3b82f6, #1e40af);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-  }
-
-  .featureContent {
-    h4 {
-      color: #f8fafc;
-    }
-
-    p {
-      color: #cbd5e1;
-    }
-  }
-
-  .mockupContainer, .trackingDemo, .streakDemo, .analyticsDemo, .achievementDemo {
-    background: linear-gradient(135deg, #334155, #475569);
-  }
-
-  .mockHabitCard, .calendarPreview, .streakCard, .heatmapPreview, .insightCard, .levelCard {
-    background: #1e293b;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    
-    h4, h5 {
-      color: #f8fafc !important;
-    }
-    
-    p {
-      color: #cbd5e1 !important;
-    }
-  }
-
-  .badgeCategory h5 {
-    color: #f8fafc !important;
-  }
-
-  .levelCard span {
-    &:first-child {
-      color: #f8fafc !important;
-    }
-    
-    &:last-child {
-      color: #cbd5e1 !important;
-    }
-  }
-
-  .calendarHeader {
-    color: #f8fafc !important;
-  }
-
-  .streakCard {
-    .streakHeader {
-      h4 {
-        color: #f8fafc !important;
-      }
-      
-      p {
-        color: #94a3b8 !important;
-      }
-    }
-    
-    > p {
-      color: #94a3b8 !important;
-    }
-  }
-
-  .tips h4 {
-    color: #f8fafc;
-  }
-
-  .tips li {
-    color: #cbd5e1;
+  .introText,
+  .tipText {
+    color: #d1d5db;
     
     strong {
-      color: #f8fafc;
-    }
-  }
-
-  .strategyCard {
-    background: linear-gradient(135deg, #334155, #475569);
-    border-color: rgba(255, 255, 255, 0.1);
-
-    h4 {
-      color: #f8fafc;
-    }
-
-    p {
-      color: #cbd5e1;
-    }
-  }
-
-  .finalMessage {
-    background: linear-gradient(135deg, #1e40af, #2563eb);
-    border-color: #3b82f6;
-    
-    h4 {
-      color: #dbeafe;
-    }
-    
-    p {
-      color: #bfdbfe;
-    }
-  }
-
-  .prevButton {
-    background: #374151;
-    color: #d1d5db;
-
-    &:hover:not(:disabled) {
-      background: #4b5563;
       color: #f9fafb;
     }
   }
 
-  .skipButton {
+  .stepNumber {
+    background: #374151;
+    color: #9ca3af;
+  }
+
+  .stepContent {
+    h4 {
+      color: #f9fafb;
+    }
+
+    p {
+      color: #9ca3af;
+    }
+  }
+
+  .tipIcon {
+    background: #1e3a5f;
+    color: #60a5fa;
+  }
+
+  .readyMessage {
+    background: #374151;
+    
+    p {
+      color: #9ca3af;
+    }
+  }
+
+  .prevButton {
     color: #9ca3af;
 
     &:hover {
@@ -1126,19 +352,28 @@
     }
   }
 
-  .slideCounter {
-    color: #94a3b8;
+  .nextButton {
+    background: #3b82f6;
+
+    &:hover {
+      background: #2563eb;
+    }
+  }
+
+  .skipButton {
+    color: #6b7280;
+
+    &:hover {
+      background: #374151;
+      color: #9ca3af;
+    }
   }
 
   .progressDot {
-    background: #475569;
+    background: #4b5563;
     
     &.active {
       background: #3b82f6;
-    }
-    
-    &:hover {
-      background: #60a5fa;
     }
   }
 }

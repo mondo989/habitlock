@@ -1233,6 +1233,14 @@
       }
     }
   }
+
+  .achievementsContent {
+    background: white;
+    border-radius: 16px;
+    @include card-shadow;
+    @include border-subtle;
+    overflow: hidden;
+  }
 }
 
 .achievementsGrid {
@@ -1759,6 +1767,11 @@
         color: #9ca3af;
       }
     }
+  }
+
+  .achievementsContent {
+    background: #1f2937;
+    border-color: #374151;
   }
 
   .viewAllBadgesButton {

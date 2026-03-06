@@ -155,7 +155,7 @@ const HabitModal = ({
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} data-onboarding="habit-modal">
         <div className={styles.modalHeader}>
           <h2>{mode === 'edit' ? 'Edit Habit' : 'Create New Habit'}</h2>
           <button
@@ -163,7 +163,10 @@ const HabitModal = ({
             className={styles.closeButton}
             onClick={onClose}
           >
-            ×
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
           </button>
         </div>
 

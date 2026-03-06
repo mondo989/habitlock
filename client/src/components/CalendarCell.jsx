@@ -1,32 +1,84 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import Tooltip from './Tooltip';
 import { calculateWeeklyCompletions } from '../utils/streakUtils';
 import styles from './CalendarCell.module.scss';
 
-// Helper function to get day of year
-const getDayOfYear = (date) => {
-  const start = new Date(date.getFullYear(), 0, 0);
-  const diff = date - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  return Math.floor(diff / oneDay);
-};
-
-// Hook to detect if we're on mobile with proper resize handling
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
   
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768); // Mobile and tablet detection
+      setIsMobile(window.innerWidth <= 768);
     };
     
-    checkIsMobile(); // Check on mount
+    checkIsMobile();
     window.addEventListener('resize', checkIsMobile);
     
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
   
   return isMobile;
+};
+
+const seededRandom = (seed) => {
+  // Better seeded random using mulberry32 algorithm
+  let t = seed + 0x6D2B79F5;
+  t = Math.imul(t ^ t >>> 15, t | 1);
+  t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+  return ((t ^ t >>> 14) >>> 0) / 4294967296;
+};
+
+const usePrefersReducedMotion = () => {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handler = (e) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+  
+  return prefersReducedMotion;
+};
+
+const BouncingEmoji = ({ habit, initialPosPercent, size, hasMetGoal, onHabitClick, tooltipContent, dateSeed, index, isHighlighted }) => {
+  // Generate unique animation parameters based on seed
+  const habitIdHash = habit.id.split('').reduce((acc, char, i) => acc + char.charCodeAt(0) * (i + 1) * 7, 0);
+  const seed = dateSeed * 1000 + index * 10000 + habitIdHash;
+  
+  // Random animation duration between 3-6 seconds
+  const duration = 3 + seededRandom(seed) * 3;
+  // Random delay so emojis don't all sync up
+  const delay = seededRandom(seed + 1) * -duration;
+  // Random starting position
+  const startX = 10 + seededRandom(seed + 2) * 80;
+  const startY = 10 + seededRandom(seed + 3) * 80;
+  // Random movement range
+  const moveX = 15 + seededRandom(seed + 4) * 25;
+  const moveY = 15 + seededRandom(seed + 5) * 25;
+  
+  return (
+    <Tooltip content={tooltipContent} position="top">
+      <span
+        className={`${styles.floatingEmoji} ${styles.bouncing} ${hasMetGoal ? styles.goalMet : ''} ${isHighlighted ? styles.highlighted : ''}`}
+        style={{
+          fontSize: `${size}rem`,
+          position: 'absolute',
+          left: `${startX}%`,
+          top: `${startY}%`,
+          '--move-x': `${moveX}%`,
+          '--move-y': `${moveY}%`,
+          '--duration': `${duration}s`,
+          '--delay': `${delay}s`,
+        }}
+        onClick={(e) => onHabitClick(e, habit.id)}
+      >
+        {habit.emoji}
+      </span>
+    </Tooltip>
+  );
 };
 
 const CalendarCell = ({ 
@@ -36,17 +88,17 @@ const CalendarCell = ({
   onHabitToggle,
   onHabitDetailClick,
   onDayClick,
-  onDayHabitsClick, // New prop for showing day habits modal
+  onDayHabitsClick,
   hasHabitMetWeeklyGoal,
   isCurrentMonth = true,
   isToday = false,
   animationIndex = 0,
-  calendarEntries = {} // Add calendarEntries prop for weekly completions
+  calendarEntries = {},
+  hoveredHabitId = null
 }) => {
   const { date } = day;
   const isMobile = useIsMobile();
 
-  // Get habit details for completed habits
   const completedHabitDetails = useMemo(() => {
     return habits.filter(habit => 
       habit && 
@@ -55,206 +107,181 @@ const CalendarCell = ({
     );
   }, [habits, completedHabits]);
 
-  // Determine display mode: stacked (mobile with any habits) or grid (desktop)  
-  const shouldShowStacked = useMemo(() => {
-    return isMobile && completedHabitDetails.length > 0;
-  }, [isMobile, completedHabitDetails.length]);
+  const completionPercentage = useMemo(() => {
+    if (habits.length === 0) return 0;
+    return (completedHabitDetails.length / habits.length) * 100;
+  }, [habits.length, completedHabitDetails.length]);
 
-  // Calculate sequential loading animation delays with overlapping phases
-  const loadingAnimationStyle = useMemo(() => {
-    // Phase 1: Calendar cells animate first
-    const cellDelay = animationIndex * 0.05; // 50ms between each cell
+  const canvasRef = useRef(null);
+  const dateSeed = useMemo(() => date.split('-').reduce((acc, num) => acc + parseInt(num), 0), [date]);
+  
+  const emojiData = useMemo(() => {
+    if (completedHabitDetails.length === 0) return [];
     
-    // Phase 2: Emojis start animating when we reach day 22 (index 21)
-    const emojiStartIndex = 21; // Start emoji animations at day 22
-    const emojiCascadeDelay = Math.max(0, cellDelay - (emojiStartIndex * 0.05)); // Begin emoji cascade when we hit day 22
+    const count = completedHabitDetails.length;
     
-    // Phase 3: Gradients follow shortly after their cell's emojis
-    const gradientDelay = emojiCascadeDelay + 0.3; // Start gradient 0.3s after emojis begin
-    
-    return {
-      '--loading-delay': `${cellDelay}s`,
-      '--emoji-cascade-start': `${emojiCascadeDelay}s`,
-      '--gradient-delay': `${gradientDelay}s`,
-    };
-  }, [animationIndex]);
+    return completedHabitDetails.map((habit, index) => {
+      const baseSeed = dateSeed + index * 100 + habit.id.charCodeAt(0);
+      
+      let size;
+      if (count === 1) {
+        size = 1.8;
+      } else if (count === 2) {
+        size = 1.4;
+      } else if (count === 3) {
+        size = 1.2;
+      } else if (count <= 6) {
+        size = 1.0 + seededRandom(baseSeed + 2) * 0.3;
+      } else {
+        size = 0.8 + seededRandom(baseSeed + 2) * 0.3;
+      }
+      
+      return { size };
+    });
+  }, [completedHabitDetails, dateSeed]);
 
-  // Generate background gradient for multiple habits
   const backgroundStyle = useMemo(() => {
-    if (completedHabitDetails.length === 0) return loadingAnimationStyle;
-
-    // Check if we're in dark mode (this is a simple check, in a real app you'd use proper context)
-    const isDarkMode = document.documentElement.classList.contains('dark-mode');
-    
-    if (completedHabitDetails.length === 1) {
-      const habit = completedHabitDetails[0];
-      const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
-      // Ensure we have a valid color, fallback to a default if needed
-      const validColor = habit.color && habit.color.startsWith('#') && habit.color.length >= 7 ? habit.color : '#3b82f6';
-      
-      // Even single habits should get animated gradients for consistency
-      const seedHash = Math.abs((habit.id + date).split('').reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0));
-      const rng = {
-        next: () => Math.sin(seedHash) * 10000 - Math.floor(Math.sin(seedHash) * 10000),
-        range: (min, max) => min + (Math.sin(seedHash) * 10000 - Math.floor(Math.sin(seedHash) * 10000)) * (max - min),
-        int: (min, max) => Math.floor(min + (Math.sin(seedHash) * 10000 - Math.floor(Math.sin(seedHash) * 10000)) * (max - min))
-      };
-      
-      // Make colors much brighter for dark mode and mobile
-      const color1 = hasMetGoal ? 
-        (isDarkMode ? `${validColor}F5` : validColor) : 
-        (isDarkMode ? `${validColor}F0` : `${validColor}E6`); // 96% and 94% opacity in dark mode
-      const color2 = hasMetGoal ? 
-        (isDarkMode ? `${validColor}F8` : `${validColor}F2`) : 
-        (isDarkMode ? `${validColor}E6` : `${validColor}D9`); // 96% and 90% opacity in dark mode
-      
-      // Create a subtle gradient even for single habits
-      const angle = (seedHash % 360);
-      const primaryGradient = `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 50%, ${color1} 100%)`;
-      
-      const rotationDuration = 60; // 60 seconds for single habits
-      const animationDelay = (seedHash % 3);
-      
-      return {
-        ...loadingAnimationStyle,
-        '--gradient-background': primaryGradient,
-        '--rotation-duration': `${rotationDuration}s`,
-        '--gradient-animation-delay': `var(--gradient-delay)`,
-      };
-    }
-
-    // Multiple habits - create clean animated gradients using only habit colors
-    const colors = completedHabitDetails.map(habit => {
-      const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
-      // Ensure we have a valid color, fallback to a default if needed
-      const validColor = habit.color && habit.color.startsWith('#') && habit.color.length >= 7 ? habit.color : '#3b82f6';
-      return hasMetGoal ? 
-        (isDarkMode ? `${validColor}F5` : validColor) : 
-        (isDarkMode ? `${validColor}F0` : `${validColor}E6`); // Much brighter for dark mode
-    }).filter(color => color && color !== '#000000'); // Remove any invalid or black colors
-
-    // Create unique seed for consistent animations
-    const habitSignature = completedHabitDetails
-      .map(h => `${h.id}-${h.color}`)
-      .sort()
-      .join('|');
-    
-    const dateNumbers = date.split('-').map(n => parseInt(n));
-    const dayOfYear = getDayOfYear(new Date(dateNumbers[0], dateNumbers[1] - 1, dateNumbers[2]));
-    
-    const createHash = (str) => {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-      }
-      return Math.abs(hash);
+    const baseStyle = {
+      '--animation-delay': `${animationIndex * 0.02}s`,
+      '--completion-percent': `${completionPercentage}%`,
     };
-    
-    const seedHash = createHash(habitSignature + date);
-    
-    // Simple seeded random
-    class SeededRandom {
-      constructor(seed) {
-        this.seed = seed % 2147483647;
-        if (this.seed <= 0) this.seed += 2147483646;
-      }
-      
-      next() {
-        this.seed = (this.seed * 16807) % 2147483647;
-        return (this.seed - 1) / 2147483646;
-      }
-      
-      range(min, max) {
-        return min + this.next() * (max - min);
-      }
-      
-      int(min, max) {
-        return Math.floor(this.range(min, max));
-      }
-    }
-    
-    const rng = new SeededRandom(seedHash);
 
-    // Safety check - if no valid colors, use default
+    if (completedHabitDetails.length === 0 || habits.length === 0) {
+      return baseStyle;
+    }
+
+    const defaultColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
+    const colors = completedHabitDetails.map((h, i) => h.color || defaultColors[i % defaultColors.length]);
+    
     if (colors.length === 0) {
-      colors.push('#3b82f6');
+      return baseStyle;
     }
-
-    // Create simple, beautiful gradients using only habit colors
-    const gradientTypes = [
-      // Clean linear gradient
-      () => {
-        const angle = rng.int(0, 360);
-        const stops = colors.map((color, i) => {
-          const position = i * (100 / (colors.length - 1));
-          return `${color} ${position}%`;
-        }).join(', ');
-        return `linear-gradient(${angle}deg, ${stops})`;
-      },
-      
-      // Radial gradient
-      () => {
-        const centerX = rng.int(30, 70);
-        const centerY = rng.int(30, 70);
-        const stops = colors.map((color, i) => {
-          const position = i * (100 / (colors.length - 1));
-          return `${color} ${position}%`;
-        }).join(', ');
-        return `radial-gradient(ellipse at ${centerX}% ${centerY}%, ${stops})`;
-      },
-      
-      // Conic gradient
-      () => {
-        const rotation = rng.int(0, 360);
-        const stops = colors.map((color, i) => {
-          const position = i * (360 / colors.length);
-          return `${color} ${position}deg`;
-        }).join(', ');
-        return `conic-gradient(from ${rotation}deg, ${stops})`;
-      }
-    ];
     
-    const gradientType = gradientTypes[rng.int(0, gradientTypes.length)];
-    const primaryGradient = gradientType();
+    const completionRatio = completedHabitDetails.length / habits.length;
     
-    // Animation parameters for rotation
-    const rotationDuration = 60; // 60 seconds for multiple habits
-    const animationDelay = rng.range(0, 2);
+    // Full opacity when any habit is completed
+    const baseOpacity = 1;
     
-    return {
-      ...loadingAnimationStyle,
-      '--gradient-background': primaryGradient,
-      '--rotation-duration': `${rotationDuration.toFixed(1)}s`,
-      '--gradient-animation-delay': `var(--gradient-delay)`,
+    // Glow intensity increases with completion
+    const glowIntensity = Math.pow(completionRatio, 1.5);
+    const glowOpacity = 0.1 + glowIntensity * 0.4;
+    
+    const toHex = (opacity) => Math.round(Math.min(1, Math.max(0, opacity)) * 255).toString(16).padStart(2, '0');
+    
+    // Helper to lighten color for glow effects
+    const lightenColor = (hex, amount) => {
+      const num = parseInt(hex.replace('#', ''), 16);
+      const r = Math.min(255, ((num >> 16) & 0xff) + Math.round(255 * amount));
+      const g = Math.min(255, ((num >> 8) & 0xff) + Math.round(255 * amount));
+      const b = Math.min(255, (num & 0xff) + Math.round(255 * amount));
+      return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
     };
-  }, [completedHabitDetails, hasHabitMetWeeklyGoal, date, habits.length]);
+    
+    const seed = date.split('-').reduce((acc, num) => acc + parseInt(num), 0);
+    const angle1 = Math.floor(seededRandom(seed) * 360);
+    const angle2 = (angle1 + 120 + Math.floor(seededRandom(seed + 1) * 60)) % 360;
+    const angle3 = (angle2 + 120 + Math.floor(seededRandom(seed + 2) * 60)) % 360;
+    
+    // Animation speeds up slightly with more completion (more "alive" feeling)
+    const animDuration = 12 - (completionRatio * 4);
+    const animDelay = Math.floor(seededRandom(seed + 3) * 3);
+    
+    // Determine completion tier for progressive effects
+    const tier = completionRatio >= 1 ? 'complete' 
+               : completionRatio >= 0.75 ? 'high' 
+               : completionRatio >= 0.5 ? 'medium' 
+               : completionRatio >= 0.25 ? 'low' 
+               : 'minimal';
+    
+    // Primary color (most prominent or average)
+    const primaryColor = colors[0];
+    const secondaryColor = colors[1] || colors[0];
+    const tertiaryColor = colors[2] || colors[1] || colors[0];
+    
+    // Create luminous center glow that intensifies with completion
+    const centerGlow = `radial-gradient(ellipse at 50% 50%, ${lightenColor(primaryColor, 0.3)}${toHex(glowOpacity * 0.6)} 0%, transparent 70%)`;
+    
+    // Ambient color orbs positioned uniquely per date
+    const orbs = colors.slice(0, Math.min(5, colors.length)).map((color, i) => {
+      const orbSeed = seed + i * 17;
+      const x = 15 + seededRandom(orbSeed) * 70;
+      const y = 15 + seededRandom(orbSeed + 1) * 70;
+      const size = 40 + seededRandom(orbSeed + 2) * 30 + (completionRatio * 20);
+      const orbOpacity = baseOpacity * (0.5 + completionRatio * 0.5);
+      return `radial-gradient(ellipse ${size}% ${size * 1.2}% at ${x}% ${y}%, ${color}${toHex(orbOpacity)} 0%, ${color}${toHex(orbOpacity * 0.3)} 40%, transparent 70%)`;
+    });
+    
+    // Soft edge glow for depth
+    const edgeGlow = `radial-gradient(ellipse at 50% 100%, ${secondaryColor}${toHex(baseOpacity * 0.4)} 0%, transparent 50%)`;
+    
+    // Aurora-like sweeping gradient (more visible at higher completion)
+    const auroraOpacity = baseOpacity * (0.3 + completionRatio * 0.5);
+    const aurora = colors.length >= 2 
+      ? `linear-gradient(${angle1}deg, ${colors.map((c, i) => `${c}${toHex(auroraOpacity)} ${(i / (colors.length)) * 100}%`).join(', ')}, transparent 100%)`
+      : `linear-gradient(${angle1}deg, ${primaryColor}${toHex(auroraOpacity)} 0%, ${lightenColor(primaryColor, 0.2)}${toHex(auroraOpacity * 0.5)} 100%)`;
+    
+    // Base fill that gives overall tone
+    const baseFill = `linear-gradient(180deg, ${primaryColor}${toHex(baseOpacity * 0.3)} 0%, ${secondaryColor}${toHex(baseOpacity * 0.5)} 100%)`;
+    
+    // High completion adds extra luminosity layers
+    const luminosityLayers = tier === 'complete' || tier === 'high' ? [
+      `radial-gradient(ellipse at ${30 + seededRandom(seed + 20) * 40}% ${20 + seededRandom(seed + 21) * 30}%, ${lightenColor(primaryColor, 0.4)}${toHex(0.25)} 0%, transparent 40%)`,
+      `radial-gradient(ellipse at ${50 + seededRandom(seed + 22) * 30}% ${60 + seededRandom(seed + 23) * 30}%, ${lightenColor(secondaryColor, 0.3)}${toHex(0.2)} 0%, transparent 45%)`,
+    ] : [];
+    
+    // Complete state gets extra celebration glow
+    const celebrationGlow = tier === 'complete' ? [
+      `radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.15) 0%, transparent 50%)`,
+      `radial-gradient(ellipse at 30% 30%, ${lightenColor(primaryColor, 0.5)}${toHex(0.3)} 0%, transparent 40%)`,
+    ] : [];
+    
+    const allLayers = [
+      ...celebrationGlow,
+      ...luminosityLayers,
+      centerGlow,
+      ...orbs,
+      edgeGlow,
+      aurora,
+      baseFill,
+    ].filter(Boolean);
 
-  // Generate tooltip content for day number
+    return {
+      ...baseStyle,
+      '--gradient-angle': `${angle1}deg`,
+      '--gradient-angle-2': `${angle2}deg`,
+      '--gradient-angle-3': `${angle3}deg`,
+      '--anim-duration': `${animDuration}s`,
+      '--anim-delay': `${animDelay}s`,
+      '--glow-intensity': glowIntensity,
+      '--completion-tier': tier,
+      '--primary-color': primaryColor,
+      '--primary-color-light': lightenColor(primaryColor, 0.3),
+      background: allLayers.join(', '),
+    };
+  }, [completedHabitDetails, habits.length, completionPercentage, animationIndex, date]);
+
   const dayNumberTooltipContent = useMemo(() => {
-    // For empty cells, show the manage habits message
     if (completedHabitDetails.length === 0) {
       return (
         <div>
           <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
-          <div>Click to manage habits</div>
+          <div className={styles.tooltipHint}>Click to track habits</div>
         </div>
       );
     }
     
-    // For cells with habits, just show the date
     return (
       <div>
         <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
+        <div className={styles.tooltipSummary}>
+          {completedHabitDetails.length} of {habits.length} completed
+        </div>
       </div>
     );
-  }, [completedHabitDetails, day]);
+  }, [completedHabitDetails, habits.length, day]);
 
   const handleCellClick = (e) => {
     e.preventDefault();
-    
-    // Always allow adding habits on day click, regardless of mobile/desktop
     if (onDayClick) {
       onDayClick(date, day);
     }
@@ -272,130 +299,118 @@ const CalendarCell = ({
     }
   };
 
-  const handleMobileEmojiAreaClick = (e) => {
-    e.stopPropagation();
-    // Allow adding habits when clicking emoji area on mobile
-    if (onDayClick) {
-      onDayClick(date, day);
-    }
-  };
-
-  // Performance optimization: use simple gradient for high-density layouts
-  const shouldUseSimpleGradient = completedHabitDetails.length > 6;
+  // Check if the hovered habit is completed on this day
+  const hasHoveredHabit = hoveredHabitId && completedHabitDetails.some(h => h.id === hoveredHabitId);
 
   return (
     <div
       className={`
         ${styles.calendarCell}
-        ${styles.loadingCell}
         ${!isCurrentMonth ? styles.otherMonth : ''}
         ${isToday ? styles.today : ''}
         ${completedHabitDetails.length > 0 ? styles.hasCompletions : ''}
-        ${completedHabitDetails.length > 0 ? (shouldUseSimpleGradient ? styles.simpleGradient : styles.animatedGradient) : ''}
+        ${completionPercentage === 100 ? styles.allComplete : ''}
+        ${hoveredHabitId ? styles.habitHovered : ''}
+        ${hasHoveredHabit ? styles.hasHoveredHabit : ''}
       `}
       style={backgroundStyle}
       onClick={handleCellClick}
+      data-date={date}
     >
-      <div className={styles.dayNumber}>
-        <Tooltip content={dayNumberTooltipContent} position="top">
-          <span>
-            {day.dayjs.date()}
-          </span>
-        </Tooltip>
-      </div>
+      {/* Overlay for habit hover effect */}
+      <div className={styles.habitOverlay} />
+      
+      <Tooltip content={dayNumberTooltipContent} position="top">
+        <div className={styles.dayNumber}>
+          {day.dayjs.date()}
+        </div>
+      </Tooltip>
       
       {completedHabitDetails.length > 0 && (
-        <div className={`${styles.habitEmojis} ${styles.loadingEmojis} ${shouldShowStacked ? styles.stackedLayout : ''}`}>
-          {shouldShowStacked ? (
-            // Mobile: Row 1 (≤4 emojis below day number), Row 2 (5+ emojis with count badge)
-            <div className={styles.mobileEmojiContainer}>
-              {/* First row - up to 4 emojis */}
-              <div 
-                className={`${styles.mobileEmojiRow} ${styles[`habits${Math.min(completedHabitDetails.length, 4)}`]}`} 
-                onClick={handleMobileEmojiAreaClick}
-              >
-                {completedHabitDetails.slice(0, 4).map((habit, emojiIndex) => (
-                  <span
-                    key={habit.id}
-                    className={`${styles.mobileEmoji} ${styles.loadingEmoji}`}
-                    style={{
-                      '--emoji-index-delay': `calc(var(--emoji-cascade-start) + ${emojiIndex * 0.08}s)`
-                    }}
-                  >
-                    {habit.emoji}
-                  </span>
-                ))}
-              </div>
-              
-              {/* Second row - additional emojis (5+) */}
-              {completedHabitDetails.length > 4 && (
-                <div className={styles.mobileEmojiSecondRow} onClick={handleMobileEmojiAreaClick}>
-                  {completedHabitDetails.slice(4).map((habit, emojiIndex) => (
-                    <span
-                      key={habit.id}
-                      className={`${styles.mobileEmoji} ${styles.loadingEmoji}`}
-                      style={{
-                        '--emoji-index-delay': `calc(var(--emoji-cascade-start) + ${(emojiIndex + 4) * 0.08}s)`
-                      }}
-                    >
-                      {habit.emoji}
-                    </span>
-                  ))}
-                </div>
-              )}
-              
-              {/* Count badge - always in bottom right corner */}
-              <div 
-                className={styles.mobileHabitCount} 
-                onClick={handleStackedHabitsClick}
-              >
-                {completedHabitDetails.length}
-              </div>
-            </div>
-          ) : (
-            // Desktop: Original layout unchanged
-            completedHabitDetails.map((habit, emojiIndex) => {
-            const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
-            const weeklyCompletions = calculateWeeklyCompletions(habit.id, date, calendarEntries);
-            const hasWeeklyActivity = weeklyCompletions > 0;
-            
-            const emojiTooltipContent = (
-              <div>
-                <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
-                <div className={styles.tooltipHabit}>
-                  <span className={styles.tooltipEmoji}>{habit.emoji}</span>
-                  <span className={styles.tooltipName}>{habit.name}</span>
-                  {hasMetGoal && <span className={styles.goalMet}>🎯 Goal met!</span>}
-                  {hasWeeklyActivity && !hasMetGoal && (
-                    <span className={styles.weeklyProgress}>{weeklyCompletions}/{habit.weeklyGoal} this week</span>
-                  )}
-                </div>
-                <div style={{ marginTop: '4px', fontSize: '0.75rem', opacity: 0.8 }}>
-                  Click to view stats
-                </div>
-              </div>
-            );
-            
-            return (
-              <Tooltip key={habit.id} content={emojiTooltipContent} position="top">
-                <span
-                  className={`
-                    ${styles.habitEmoji}
-                    ${styles.loadingEmoji}
-                    ${hasMetGoal ? styles.glowing : ''}
-                    ${hasWeeklyActivity ? styles.weeklyActive : ''}
-                  `}
-                  style={{
-                    '--emoji-index-delay': `calc(var(--emoji-cascade-start) + ${emojiIndex * 0.08}s)`
+        <div className={styles.emojiCanvas} ref={canvasRef}>
+          {isMobile ? (
+            <div className={styles.mobileLayout} onClick={handleStackedHabitsClick}>
+              {completedHabitDetails.slice(0, 4).map((habit, idx) => (
+                <span 
+                  key={habit.id} 
+                  className={`${styles.mobileEmoji} ${hoveredHabitId === habit.id ? styles.highlighted : ''}`}
+                  style={{ 
+                    fontSize: completedHabitDetails.length > 3 ? '1rem' : '1.2rem'
                   }}
-                  onClick={(e) => handleHabitClick(e, habit.id)}
                 >
                   {habit.emoji}
                 </span>
-              </Tooltip>
-            );
+              ))}
+              {completedHabitDetails.length > 4 && (
+                <span className={styles.moreCount}>+{completedHabitDetails.length - 4}</span>
+              )}
+            </div>
+          ) : (
+            completedHabitDetails.map((habit, index) => {
+              const data = emojiData[index];
+              const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
+              const weeklyCompletions = calculateWeeklyCompletions(habit.id, date, calendarEntries);
+              
+              const emojiTooltipContent = (
+                <div className={styles.emojiTooltip}>
+                  <div className={styles.tooltipHeader}>
+                    <span className={styles.tooltipEmoji}>{habit.emoji}</span>
+                    <span className={styles.tooltipName}>{habit.name}</span>
+                  </div>
+                  {hasMetGoal && <div className={styles.goalBadge}>Weekly goal reached</div>}
+                  {!hasMetGoal && weeklyCompletions > 0 && (
+                    <div className={styles.progressText}>{weeklyCompletions}/{habit.weeklyGoal} this week</div>
+                  )}
+                </div>
+              );
+              
+              // Create unique seed from habit ID (use multiple characters)
+              const habitIdHash = habit.id.split('').reduce((acc, char, i) => acc + char.charCodeAt(0) * (i + 1) * 7, 0);
+              const initialSeed = dateSeed * 1000 + index * 10000 + habitIdHash;
+              const initialPosPercent = {
+                x: 10 + seededRandom(initialSeed) * 80,
+                y: 10 + seededRandom(initialSeed + 99999) * 80
+              };
+              
+              return (
+                <BouncingEmoji
+                  key={habit.id}
+                  habit={habit}
+                  initialPosPercent={initialPosPercent}
+                  size={data.size}
+                  hasMetGoal={hasMetGoal}
+                  onHabitClick={handleHabitClick}
+                  tooltipContent={emojiTooltipContent}
+                  dateSeed={dateSeed}
+                  index={index}
+                  isHighlighted={hoveredHabitId === habit.id}
+                />
+              );
             })
           )}
+        </div>
+      )}
+
+      {habits.length > 0 && (
+        <div className={styles.progressMeter}>
+          <div className={styles.meterTrack}>
+            <div 
+              className={styles.meterFill}
+              style={{ 
+                width: `${completionPercentage}%`,
+                background: completedHabitDetails.length > 0 
+                  ? completedHabitDetails.length === 1
+                    ? completedHabitDetails[0].color
+                    : `linear-gradient(90deg, ${completedHabitDetails.map((h, i) => 
+                        `${h.color} ${(i / (completedHabitDetails.length - 1)) * 100}%`
+                      ).join(', ')})`
+                  : 'transparent'
+              }}
+            />
+          </div>
+          <span className={styles.taskCount}>
+            {completedHabitDetails.length}/{habits.length}
+          </span>
         </div>
       )}
     </div>

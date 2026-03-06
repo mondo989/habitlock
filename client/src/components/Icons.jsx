@@ -56,6 +56,35 @@ export const StatsIcon = ({ className }) => (
   </svg>
 );
 
+export const HabitsIcon = ({ className }) => (
+  <svg 
+    width="136" 
+    height="136" 
+    viewBox="0 0 136 136" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path 
+      d="M68 0C30.445 0 0 30.445 0 68C0 105.555 30.445 136 68 136C105.555 136 136 105.555 136 68C136 30.445 105.555 0 68 0ZM68 12C98.928 12 124 37.072 124 68C124 98.928 98.928 124 68 124C37.072 124 12 98.928 12 68C12 37.072 37.072 12 68 12ZM95.314 45.686C94.057 44.429 92.371 43.714 90.607 43.714C88.843 43.714 87.157 44.429 85.9 45.686L59.5 72.086L50.1 62.686C48.843 61.429 47.157 60.714 45.393 60.714C43.629 60.714 41.943 61.429 40.686 62.686C39.429 63.943 38.714 65.629 38.714 67.393C38.714 69.157 39.429 70.843 40.686 72.1L54.793 86.207C56.05 87.464 57.736 88.179 59.5 88.179C61.264 88.179 62.95 87.464 64.207 86.207L95.314 55.1C96.571 53.843 97.286 52.157 97.286 50.393C97.286 48.629 96.571 46.943 95.314 45.686Z" 
+      fill="url(#paint0_linear_habits)"
+    />
+    <defs>
+      <linearGradient 
+        id="paint0_linear_habits" 
+        x1="68" 
+        y1="0" 
+        x2="68" 
+        y2="136" 
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#DE4BAD"/>
+        <stop offset="1" stopColor="#6965F1"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 export const AchievementsIcon = ({ className }) => (
   <svg 
     width="136" 

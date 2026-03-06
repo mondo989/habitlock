@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { auth } from '../services/firebase';
 import {
   createHabit,
@@ -12,23 +12,38 @@ export const useHabits = () => {
   const [habits, setHabits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Use stable userId instead of auth.currentUser object reference
+  const userId = auth.currentUser?.uid ?? null;
+  const prevUserIdRef = useRef(userId);
 
   useEffect(() => {
-    if (!auth.currentUser) return;
+    // Reset state when user changes (including logout)
+    if (prevUserIdRef.current !== userId) {
+      setHabits([]);
+      setLoading(true);
+      setError(null);
+      prevUserIdRef.current = userId;
+    }
 
-    const unsubscribe = subscribeToHabits(auth.currentUser.uid, (habitsList) => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = subscribeToHabits(userId, (habitsList) => {
       setHabits(habitsList);
       setLoading(false);
       
       // Track habits loaded event
       analytics.capture('habits_loaded', {
         habit_count: habitsList.length,
-        user_id: auth.currentUser.uid
+        user_id: userId
       });
     });
 
     return unsubscribe;
-  }, [auth.currentUser]);
+  }, [userId]);
 
   const addHabit = async (habitData) => {
     if (!auth.currentUser) {

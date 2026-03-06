@@ -39,9 +39,20 @@
   position: relative;
   top: auto;
   right: auto;
-  font-size: 24px;
-  padding: 4px;
-  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
 
   &:hover {
     background: #f3f4f6;
@@ -282,6 +293,14 @@
     font-weight: 500;
     color: #6b7280;
   }
+  
+  :global(html.dark-mode) & {
+    background: #374151;
+    
+    h4 {
+      color: #9ca3af;
+    }
+  }
 }
 
 .previewCard {
@@ -291,6 +310,10 @@
   @include border-radius-sm;
   border: 2px solid;
   background: white;
+  
+  :global(html.dark-mode) & {
+    background: #1f2937;
+  }
 }
 
 .previewEmoji {
@@ -305,11 +328,19 @@
   font-weight: 500;
   color: #1f2937;
   margin-bottom: 2px;
+  
+  :global(html.dark-mode) & {
+    color: #f9fafb;
+  }
 }
 
 .previewGoal {
   font-size: 0.875rem;
   color: #6b7280;
+  
+  :global(html.dark-mode) & {
+    color: #9ca3af;
+  }
 }
 
 // Actions

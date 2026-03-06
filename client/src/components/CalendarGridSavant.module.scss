@@ -1,0 +1,539 @@
+// CalendarGridSavant.module.scss - Rule-breaking design
+// Brutalist-playful, asymmetric, Gen-Z chaos, paradigm-shifting
+
+@use '../styles/mixins.scss' as *;
+
+.savantCalendar {
+  background: #0a0a0a;
+  border: 3px solid #fff;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Space Mono', 'JetBrains Mono', monospace;
+}
+
+.chaosHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 2px solid #fff;
+  background: linear-gradient(90deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+}
+
+.glitchTitle {
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+}
+
+.titleMain {
+  color: #fff;
+  letter-spacing: -0.02em;
+  position: relative;
+  
+  &::before,
+  &::after {
+    content: 'habits';
+    position: absolute;
+    left: 0;
+    opacity: 0.5;
+  }
+  
+  &::before {
+    color: #FF3366;
+    animation: glitch1 3s infinite;
+  }
+  
+  &::after {
+    color: #00FFFF;
+    animation: glitch2 3s infinite;
+  }
+}
+
+.titleAccent {
+  color: #FF3366;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+@keyframes glitch1 {
+  0%, 90%, 100% { transform: translate(0); }
+  92% { transform: translate(-2px, 1px); }
+  94% { transform: translate(2px, -1px); }
+}
+
+@keyframes glitch2 {
+  0%, 90%, 100% { transform: translate(0); }
+  91% { transform: translate(2px, 1px); }
+  93% { transform: translate(-2px, -1px); }
+}
+
+.statusTag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid #00FF00;
+  font-size: 11px;
+  font-weight: 700;
+  color: #00FF00;
+  letter-spacing: 1px;
+}
+
+.blink {
+  animation: blink 1s infinite;
+  font-size: 8px;
+}
+
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0; }
+}
+
+.dayHeaders {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dayHeader {
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 2px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  transform: skewX(calc(var(--header-index) * -1deg));
+  
+  &:last-child {
+    border-right: none;
+  }
+  
+  &:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.02);
+  }
+}
+
+.calendarMesh {
+  padding: 16px;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 40px,
+    rgba(255, 255, 255, 0.02) 40px,
+    rgba(255, 255, 255, 0.02) 41px
+  );
+}
+
+.weekRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.dayBlock {
+  aspect-ratio: 1;
+  position: relative;
+  cursor: pointer;
+  transform: 
+    rotate(var(--rotation, 0deg))
+    translate(var(--offset-x, 0), var(--offset-y, 0));
+  transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+  animation: fadeInBlock 0.4s ease backwards;
+  animation-delay: calc(var(--cell-index) * 0.02s);
+  
+  &:hover {
+    transform: 
+      rotate(0deg)
+      translate(0, 0)
+      scale(1.08);
+    z-index: 10;
+    
+    .blockInner {
+      border-color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+  
+  &.ghost {
+    opacity: 0.2;
+    
+    .blockInner {
+      border-style: dashed;
+    }
+  }
+  
+  &.NOW {
+    .blockInner {
+      border-color: #FF3366;
+      border-width: 3px;
+      box-shadow: 
+        0 0 20px rgba(255, 51, 102, 0.4),
+        inset 0 0 20px rgba(255, 51, 102, 0.1);
+    }
+    
+    .dayNum {
+      color: #FF3366;
+    }
+  }
+  
+  // Vibe levels
+  &.vibe1 .blockInner { 
+    background: linear-gradient(135deg, rgba(var(--vibe-color), 0.1) 0%, transparent 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  &.vibe2 .blockInner { 
+    background: color-mix(in srgb, var(--vibe-color) 15%, transparent);
+    border-color: var(--vibe-color);
+    border-width: 2px;
+  }
+  
+  &.vibe3 .blockInner { 
+    background: color-mix(in srgb, var(--vibe-color) 25%, transparent);
+    border-color: var(--vibe-color);
+    border-width: 2px;
+    box-shadow: 0 0 15px color-mix(in srgb, var(--vibe-color) 30%, transparent);
+  }
+  
+  &.vibe4 .blockInner {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--vibe-color) 30%, transparent) 0%,
+      color-mix(in srgb, var(--vibe-color) 40%, transparent) 100%
+    );
+    border: 3px solid var(--vibe-color);
+    animation: legendaryPulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes fadeInBlock {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotate(var(--rotation, 0deg));
+  }
+}
+
+@keyframes legendaryPulse {
+  0%, 100% { 
+    box-shadow: 
+      0 0 20px color-mix(in srgb, var(--vibe-color) 40%, transparent),
+      0 0 40px color-mix(in srgb, var(--vibe-color) 20%, transparent);
+  }
+  50% { 
+    box-shadow: 
+      0 0 30px color-mix(in srgb, var(--vibe-color) 60%, transparent),
+      0 0 60px color-mix(in srgb, var(--vibe-color) 30%, transparent);
+  }
+}
+
+.blockInner {
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.dayLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dayNum {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.nowBadge {
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: #FF3366;
+  color: #000;
+  letter-spacing: 1px;
+}
+
+.vibeZone {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.emojiChaos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.floatingEmoji {
+  font-size: 18px;
+  position: relative;
+  transform: 
+    translate(var(--random-x), var(--random-y))
+    rotate(var(--random-rotate));
+  animation: floatEmoji 3s ease-in-out infinite;
+  animation-delay: calc(var(--emoji-index) * 0.2s);
+  filter: drop-shadow(0 0 8px var(--emoji-color));
+  
+  .dayBlock:hover & {
+    transform: translate(0, 0) rotate(0deg) scale(1.2);
+  }
+}
+
+@keyframes floatEmoji {
+  0%, 100% { transform: translate(var(--random-x), var(--random-y)) rotate(var(--random-rotate)); }
+  50% { transform: translate(calc(var(--random-x) * -0.5), calc(var(--random-y) + 3px)) rotate(calc(var(--random-rotate) * -0.5)); }
+}
+
+.fireIndicator {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 14px;
+  animation: fireWiggle 0.5s ease-in-out infinite;
+}
+
+@keyframes fireWiggle {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+.progressStrip {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-top: auto;
+}
+
+.progressFill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.legendaryGlow {
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    45deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 80%
+  );
+  animation: legendaryShine 2s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes legendaryShine {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.controlPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 24px;
+  border-top: 2px solid #fff;
+  background: #0a0a0a;
+}
+
+.panelSection {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.panelLabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1px;
+}
+
+.panelValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.panelDivider {
+  color: rgba(255, 255, 255, 0.2);
+  font-weight: 100;
+}
+
+.cornerDecor {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 4px;
+  
+  span {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 12px;
+    animation: twinkle 1.5s ease-in-out infinite;
+    
+    &:nth-child(2) { animation-delay: 0.5s; }
+    &:nth-child(3) { animation-delay: 1s; }
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+// Light mode - invert the chaos
+:global(html:not(.dark-mode)) .savantCalendar {
+  background: #fafafa;
+  border-color: #000;
+  
+  .chaosHeader {
+    background: linear-gradient(90deg, #fafafa 0%, #f0f0f0 50%, #fafafa 100%);
+  }
+  
+  .titleMain {
+    color: #000;
+    
+    &::before { color: #FF3366; }
+    &::after { color: #0066FF; }
+  }
+  
+  .statusTag {
+    border-color: #00AA00;
+    color: #00AA00;
+  }
+  
+  .dayHeaders {
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+  }
+  
+  .dayHeader {
+    color: rgba(0, 0, 0, 0.4);
+    border-right-color: rgba(0, 0, 0, 0.1);
+    
+    &:nth-child(odd) {
+      background: rgba(0, 0, 0, 0.02);
+    }
+  }
+  
+  .calendarMesh {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 40px,
+      rgba(0, 0, 0, 0.03) 40px,
+      rgba(0, 0, 0, 0.03) 41px
+    );
+  }
+  
+  .blockInner {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .dayBlock:hover .blockInner {
+    border-color: #000;
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  .dayNum {
+    color: #000;
+  }
+  
+  .controlPanel {
+    border-top-color: #000;
+    background: #fafafa;
+  }
+  
+  .panelLabel {
+    color: rgba(0, 0, 0, 0.4);
+  }
+  
+  .panelValue {
+    color: #000;
+  }
+  
+  .panelDivider {
+    color: rgba(0, 0, 0, 0.2);
+  }
+  
+  .cornerDecor span {
+    color: rgba(0, 0, 0, 0.2);
+  }
+}
+
+// Responsive
+@include mobile {
+  .chaosHeader {
+    padding: 16px 20px;
+  }
+  
+  .glitchTitle {
+    font-size: 18px;
+  }
+  
+  .statusTag {
+    font-size: 9px;
+    padding: 4px 8px;
+  }
+  
+  .calendarMesh {
+    padding: 12px;
+  }
+  
+  .weekRow {
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  
+  .blockInner {
+    padding: 4px;
+  }
+  
+  .dayNum {
+    font-size: 13px;
+  }
+  
+  .nowBadge {
+    font-size: 6px;
+    padding: 1px 4px;
+  }
+  
+  .floatingEmoji {
+    font-size: 14px;
+  }
+  
+  .fireIndicator {
+    font-size: 10px;
+  }
+  
+  .controlPanel {
+    padding: 12px 16px;
+    gap: 16px;
+  }
+  
+  .panelLabel {
+    font-size: 8px;
+  }
+  
+  .panelValue {
+    font-size: 13px;
+  }
+}

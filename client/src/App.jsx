@@ -1,16 +1,20 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { usePostHog } from 'posthog-js/react';
-import { initializeAuth, auth, onAuthChange, signOutUser, getUserInfo } from './services/firebase';
 import analytics from './services/analytics';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { OnboardingProvider, useOnboarding } from './context/OnboardingContext';
 import CalendarView from './views/CalendarView';
+import HabitsView from './views/HabitsView';
 import StatsView from './views/StatsView';
-import AchievementsView from './views/AchievementsView';
 import ThemeToggle from './components/ThemeToggle';
 import LandingPage from './components/LandingPage';
-import OnboardingCarousel from './components/OnboardingCarousel';
-import { CalendarIcon, StatsIcon, AchievementsIcon } from './components/Icons';
+import LandingPageSpotify from './components/LandingPageSpotify';
+import LandingPageConversion from './components/LandingPageConversion';
+import LandingPageAnimated from './components/LandingPageAnimated';
+import OnboardingGuide from './components/OnboardingGuide';
+import { CalendarIcon, HabitsIcon, StatsIcon } from './components/Icons'
 import styles from './App.module.scss';
 
 // Main App Layout component (for authenticated users)
@@ -18,9 +22,9 @@ function AppLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const posthog = usePostHog();
-  const [currentUser, setCurrentUser] = useState(null);
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const { userInfo, userId, signOut, isAuthenticated } = useAuth();
+  const [showProfileDropdown, setShowProfileDropdown] = React.useState(false);
+  const { startOnboarding } = useOnboarding();
 
   // Initialize analytics with PostHog instance
   useEffect(() => {
@@ -43,9 +47,9 @@ function AppLayout({ children }) {
     analytics.capture('page_viewed', {
       page: currentView,
       path: location.pathname,
-      user_id: getUserInfo()?.uid
+      user_id: userId
     });
-  }, [location.pathname, currentView]);
+  }, [location.pathname, currentView, userId]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -59,88 +63,47 @@ function AppLayout({ children }) {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [showProfileDropdown]);
 
-  // Set up authentication state listener
+  // Redirect to landing if user logs out
   useEffect(() => {
-    const unsubscribeAuth = onAuthChange((user) => {
-      setCurrentUser(user);
-      
-      if (user) {
-        console.log('User authenticated:', user.uid, user.email);
-        
-        // Track user authentication for analytics
-        analytics.identify(user.uid, {
-          email: user.email,
-          name: user.displayName,
-          avatar: user.photoURL
-        });
-        
-        analytics.capture('user_authenticated', {
-          user_id: user.uid,
-          email: user.email,
-          has_photo: !!user.photoURL,
-          provider: user.providerData?.[0]?.providerId
-        });
-        
-        // Track user authentication for analytics (optional)
-        analytics.trackUserAction('user_authenticated', {
-          userId: user.uid,
-          email: user.email,
-        });
-        
-        // Check if this is a first-time user
-        const hasCompletedOnboarding = localStorage.getItem('habitlock_onboarding_completed');
-        if (!hasCompletedOnboarding) {
-          setShowOnboarding(true);
-          analytics.capture('onboarding_started', {
-            user_id: user.uid
-          });
-        }
-      } else {
-        console.log('No user authenticated');
-        setShowOnboarding(false);
-        analytics.capture('user_signed_out');
-        // Redirect to landing page if not authenticated
-        navigate('/');
-      }
-    });
-
-    return () => unsubscribeAuth();
-  }, [navigate]);
+    if (!isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleNavigation = (path, viewName) => {
     navigate(path);
     analytics.capture('navigation_clicked', {
       from_view: currentView,
       to_view: viewName,
-      user_id: getUserInfo()?.uid
+      user_id: userId
     });
   };
 
   const handleSignOut = async () => {
     try {
-      analytics.capture('sign_out_initiated', {
-        user_id: getUserInfo()?.uid
-      });
-      await signOutUser();
+      await signOut();
       setShowProfileDropdown(false);
       navigate('/');
     } catch (error) {
       console.error('Sign out failed:', error);
-      analytics.capture('sign_out_failed', {
-        error: error.message,
-        user_id: getUserInfo()?.uid
-      });
     }
   };
 
-  const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
-    analytics.capture('onboarding_completed', {
-      user_id: getUserInfo()?.uid
+  const handleShowOnboarding = () => {
+    startOnboarding();
+    setShowProfileDropdown(false);
+    analytics.capture('onboarding_reopened', {
+      user_id: userId
     });
   };
 
-  const userInfo = getUserInfo();
+  // Expose function globally for debug mode
+  useEffect(() => {
+    window.__showOnboarding = handleShowOnboarding;
+    return () => {
+      delete window.__showOnboarding;
+    };
+  }, [startOnboarding]);
 
   return (
     <div className={styles.app}>
@@ -165,18 +128,18 @@ function AppLayout({ children }) {
               Calendar
             </button>
             <button
+              className={`${styles.navTab} ${currentView === 'habits' ? styles.active : ''}`}
+              onClick={() => handleNavigation('/habits', 'habits')}
+            >
+              <HabitsIcon className={styles.navIcon} />
+              Habits
+            </button>
+            <button
               className={`${styles.navTab} ${currentView === 'stats' ? styles.active : ''}`}
               onClick={() => handleNavigation('/stats', 'stats')}
             >
               <StatsIcon className={styles.navIcon} />
               Stats
-            </button>
-            <button
-              className={`${styles.navTab} ${currentView === 'achievements' ? styles.active : ''}`}
-              onClick={() => handleNavigation('/achievements', 'achievements')}
-            >
-              <AchievementsIcon className={styles.navIcon} />
-              Achievements
             </button>
           </div>
 
@@ -189,7 +152,7 @@ function AppLayout({ children }) {
                   setShowProfileDropdown(!showProfileDropdown);
                   analytics.capture('profile_dropdown_toggled', {
                     opened: !showProfileDropdown,
-                    user_id: getUserInfo()?.uid
+                    user_id: userId
                   });
                 }}
               >
@@ -232,9 +195,13 @@ function AppLayout({ children }) {
                     </div>
                   </div>
                   <div className={styles.dropdownDivider}></div>
+                  <div className={styles.dropdownItem} onClick={handleShowOnboarding}>
+                    <span className={styles.dropdownIcon}>?</span>
+                    Show welcome guide
+                  </div>
                   <div className={styles.dropdownItem} onClick={handleSignOut}>
-                    <span className={styles.dropdownIcon}>🚪</span>
-                    Sign Out
+                    <span className={styles.dropdownIcon}>→</span>
+                    Sign out
                   </div>
                 </div>
               )}
@@ -255,6 +222,15 @@ function AppLayout({ children }) {
           <span className={styles.mobileTabText}>Calendar</span>
         </button>
         <button
+          className={`${styles.mobileNavTab} ${currentView === 'habits' ? styles.active : ''}`}
+          onClick={() => handleNavigation('/habits', 'habits')}
+        >
+          <span className={styles.mobileTabIcon}>
+            <HabitsIcon className={styles.mobileNavIcon} />
+          </span>
+          <span className={styles.mobileTabText}>Habits</span>
+        </button>
+        <button
           className={`${styles.mobileNavTab} ${currentView === 'stats' ? styles.active : ''}`}
           onClick={() => handleNavigation('/stats', 'stats')}
         >
@@ -262,15 +238,6 @@ function AppLayout({ children }) {
             <StatsIcon className={styles.mobileNavIcon} />
           </span>
           <span className={styles.mobileTabText}>Stats</span>
-        </button>
-        <button
-          className={`${styles.mobileNavTab} ${currentView === 'achievements' ? styles.active : ''}`}
-          onClick={() => handleNavigation('/achievements', 'achievements')}
-        >
-          <span className={styles.mobileTabIcon}>
-            <AchievementsIcon className={styles.mobileNavIcon} />
-          </span>
-          <span className={styles.mobileTabText}>Achievements</span>
         </button>
       </nav>
 
@@ -313,54 +280,15 @@ function AppLayout({ children }) {
         </div>
       </footer>
 
-      {/* Onboarding Modal */}
-      {showOnboarding && (
-        <OnboardingCarousel onComplete={handleOnboardingComplete} />
-      )}
+      {/* Onboarding Guide */}
+      <OnboardingGuide />
     </div>
   );
 }
 
 // Protected Route component
 function ProtectedRoute({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [authError, setAuthError] = useState(null);
-
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        setAuthError(null);
-        await initializeAuth();
-        
-        // Initialize analytics after authentication is ready
-        analytics.initializeClarity();
-        
-        // Track app initialization
-        analytics.capture('app_initialized');
-      } catch (error) {
-        console.error('Authentication initialization failed:', error);
-        setAuthError('Failed to initialize authentication. Please refresh the page.');
-        
-        // Track initialization error
-        analytics.capture('app_initialization_failed', {
-          error: error.message
-        });
-      }
-    };
-
-    // Set up authentication state listener
-    const unsubscribeAuth = onAuthChange((user) => {
-      setIsAuthenticated(!!user);
-      setIsLoading(false);
-    });
-
-    // Initialize authentication
-    initAuth();
-
-    // Cleanup listener on unmount
-    return () => unsubscribeAuth();
-  }, []);
+  const { isAuthenticated, isLoading, error } = useAuth();
 
   if (isLoading) {
     return (
@@ -377,7 +305,7 @@ function ProtectedRoute({ children }) {
     );
   }
 
-  if (authError) {
+  if (error) {
     return (
       <div className={styles.app}>
         <div className={styles.errorScreen}>
@@ -387,7 +315,7 @@ function ProtectedRoute({ children }) {
           </div>
           <div className={styles.errorContent}>
             <h2>Oops! Something went wrong</h2>
-            <p>{authError}</p>
+            <p>{error}</p>
             <button 
               className={styles.retryButton}
               onClick={() => {
@@ -420,34 +348,43 @@ function ProtectedRoute({ children }) {
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <Routes>
-          {/* Landing page for unauthenticated users */}
-          <Route path="/" element={<LandingPage />} />
-          
-          {/* Protected routes for authenticated users */}
-          <Route path="/calendar" element={
-            <ProtectedRoute>
-              <CalendarView />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/stats" element={
-            <ProtectedRoute>
-              <StatsView />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/achievements" element={
-            <ProtectedRoute>
-              <AchievementsView />
-            </ProtectedRoute>
-          } />
-          
-          {/* Redirect any unknown routes to calendar for authenticated users */}
-          <Route path="*" element={<Navigate to="/calendar" replace />} />
-        </Routes>
-      </Router>
+      <AuthProvider>
+        <OnboardingProvider>
+          <Router>
+            <Routes>
+              {/* Landing page for unauthenticated users */}
+              <Route path="/" element={<LandingPageConversion />} />
+              
+              {/* Backup landing page designs */}
+              <Route path="/landing/original" element={<LandingPage />} />
+              <Route path="/landing/spotify" element={<LandingPageSpotify />} />
+              <Route path="/landing/animated" element={<LandingPageAnimated />} />
+              
+              {/* Protected routes for authenticated users */}
+              <Route path="/calendar" element={
+                <ProtectedRoute>
+                  <CalendarView />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/habits" element={
+                <ProtectedRoute>
+                  <HabitsView />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/stats" element={
+                <ProtectedRoute>
+                  <StatsView />
+                </ProtectedRoute>
+              } />
+              
+              {/* Redirect any unknown routes to calendar for authenticated users */}
+              <Route path="*" element={<Navigate to="/calendar" replace />} />
+            </Routes>
+          </Router>
+        </OnboardingProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

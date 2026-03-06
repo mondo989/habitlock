@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { auth } from '../services/firebase';
 import {
   updateCalendarEntry,
@@ -23,17 +23,32 @@ export const useCalendar = (habits = []) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Use stable userId instead of auth.currentUser object reference
+  const userId = auth.currentUser?.uid ?? null;
+  const prevUserIdRef = useRef(userId);
+
   // Subscribe to calendar entries
   useEffect(() => {
-    if (!auth.currentUser) return;
+    // Reset state when user changes (including logout)
+    if (prevUserIdRef.current !== userId) {
+      setCalendarEntries({});
+      setLoading(true);
+      setError(null);
+      prevUserIdRef.current = userId;
+    }
 
-    const unsubscribe = subscribeToCalendarEntries(auth.currentUser.uid, (entries) => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = subscribeToCalendarEntries(userId, (entries) => {
       setCalendarEntries(entries);
       setLoading(false);
     });
 
     return unsubscribe;
-  }, [auth.currentUser]);
+  }, [userId]);
 
   // Generate calendar matrix for current month
   const calendarMatrix = useMemo(() => {

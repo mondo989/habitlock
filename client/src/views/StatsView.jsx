@@ -24,7 +24,6 @@ const StatsView = () => {
   const { habits, loading: habitsLoading } = useHabits();
   const { calendarEntries, streaks, loading: calendarLoading } = useCalendar(habits);
   const [activeTooltip, setActiveTooltip] = useState(null);
-  const [isBadgesModalOpen, setIsBadgesModalOpen] = useState(false);
   const [firebaseAchievements, setFirebaseAchievements] = useState({});
   const [achievementsLoading, setAchievementsLoading] = useState(true);
   const [celebrationAchievement, setCelebrationAchievement] = useState(null);
@@ -1073,8 +1072,8 @@ const StatsView = () => {
         </div>
       )}
 
-      {/* Achievement Badges */}
-      {badgeSystem.featured.length > 0 && (
+      {/* Achievement Badges - Full View */}
+      {badgeSystem.all.length > 0 && (
         <div className={styles.achievementsSection}>
           <div className={styles.achievementsHeader}>
             <div className={styles.headerText}>
@@ -1097,74 +1096,21 @@ const StatsView = () => {
                 </svg>
                 Your Achievements
               </h2>
-              <p>Click on locked badges to discover all achievements</p>
+              <p>Celebrate your progress and milestones on your habit journey</p>
             </div>
-            <button 
-              className={styles.viewAllBadgesButton}
-              onClick={() => setIsBadgesModalOpen(true)}
-            >
-              View All Badges
-            </button>
           </div>
-          <div className={styles.achievementsGrid}>
-            {badgeSystem.featured.map((badge, index) => (
-              <div 
-                key={badge.id} 
-                className={`${styles.achievementBadge} ${badge.earned ? styles.earned : styles.inProgress} ${!badge.earned ? styles.clickable : ''}`}
-                onClick={!badge.earned ? () => setIsBadgesModalOpen(true) : undefined}
-                title={badge.displayText || (!badge.earned ? 'Click to view all badges and see how to unlock this achievement' : '')}
-              >
-                <div className={styles.badgeEmoji}>
-                  {badge.earned ? badge.emoji : '🔒'}
-                </div>
-                <div className={styles.badgeInfo}>
-                  <h4>{badge.title}</h4>
-                  <p>{badge.desc}</p>
-                  {badge.earned && badge.achievement && (
-                    <div className={styles.completionDate}>
-                      {badge.achievement.completionCount > 1 
-                        ? `${badge.title} ×${badge.achievement.completionCount}` 
-                        : `Earned on ${new Intl.DateTimeFormat('en-US', {
-                            month: 'long',
-                            day: 'numeric', 
-                            year: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true
-                          }).format(badge.achievement.lastCompletedAt.toDate ? badge.achievement.lastCompletedAt.toDate() : new Date(badge.achievement.lastCompletedAt))}`
-                      }
-                    </div>
-                  )}
-                  {!badge.earned && badge.progress > 0 && (
-                    <div className={styles.progressInfo}>
-                      <div className={styles.progressBar}>
-                        <div 
-                          className={styles.progressFill}
-                          style={{ width: `${badge.progress}%` }}
-                        ></div>
-                      </div>
-                      <span className={styles.progressText}>{Math.round(badge.progress)}%</span>
-                    </div>
-                  )}
-                  {!badge.earned && (
-                    <div className={styles.clickHint}>
-                      <span className={styles.clickText}>Click to explore all badges</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+          
+          <div className={styles.achievementsContent}>
+            <BadgesModal 
+              isOpen={true} 
+              onClose={() => {}}
+              badgeData={badgeSystem.all}
+              achievements={firebaseAchievements}
+              isFullPage={true}
+            />
           </div>
         </div>
       )}
-
-      {/* Badges Modal */}
-      <BadgesModal
-        isOpen={isBadgesModalOpen}
-        onClose={() => setIsBadgesModalOpen(false)}
-        statsData={statsData}
-        badgeData={badgeSystem.all}
-      />
 
       {/* Achievement Celebration Modal */}
       <AchievementCelebrationModal

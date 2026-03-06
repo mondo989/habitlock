@@ -58,8 +58,12 @@
   color: #6b7280;
   @include border-radius-sm;
   @include transition-fast;
-  font-size: 1.5rem;
-  font-weight: 300;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
   
   &:hover {
     background: rgba(0, 0, 0, 0.05);

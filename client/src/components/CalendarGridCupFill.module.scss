@@ -1,0 +1,438 @@
+// CalendarGridCupFill.module.scss - Water-like tumbling emoji animation
+
+.cupFillCalendar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: linear-gradient(180deg, #0f0f13 0%, #1a1a24 100%);
+  border-radius: 20px;
+  min-height: 500px;
+}
+
+.dayHeaders {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.dayHeader {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  padding: 8px 0;
+  letter-spacing: 0.5px;
+}
+
+.calendarBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  flex: 1;
+}
+
+.dayCell {
+  background: rgba(30, 30, 40, 0.6);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  min-height: 90px;
+  
+  &:hover {
+    background: rgba(40, 40, 55, 0.8);
+    transform: scale(1.02);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  &.otherMonth {
+    opacity: 0.35;
+  }
+  
+  &.today {
+    border: 2px solid rgba(138, 43, 226, 0.6);
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+  }
+  
+  &.hasActivity {
+    background: rgba(25, 25, 38, 0.6);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  
+  &.potionBrew {
+    border-color: rgba(168, 85, 247, 0.2);
+    box-shadow: 
+      inset 0 -20px 30px -15px rgba(168, 85, 247, 0.1),
+      0 4px 20px rgba(168, 85, 247, 0.08);
+    position: relative;
+    
+    // Magical bubble effect for 3+ habit colors
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 11px;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.12) 0%, transparent 3%),
+        radial-gradient(circle at 70% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 2%),
+        radial-gradient(circle at 40% 85%, rgba(255, 255, 255, 0.08) 0%, transparent 2.5%);
+      animation: bubbles 4s ease-in-out infinite;
+      animation-delay: 1.5s;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+    }
+    
+    .liquidBlend {
+      animation: potionFill 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      animation-delay: 0.2s;
+    }
+  }
+}
+
+.dayInner {
+  position: relative;
+  height: 100%;
+  padding: 6px;
+  overflow: hidden;
+}
+
+.dayNumber {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  z-index: 100;
+}
+
+.todayNumber {
+  background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+  color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+// Liquid blend background - fills cell with habit colors
+.liquidBlend {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  opacity: 0;
+  animation: liquidFill 0.6s ease-out forwards;
+  animation-delay: 0.1s;
+  pointer-events: none;
+  
+  // Subtle shimmer effect
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.06) 45%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.06) 55%,
+      transparent 70%
+    );
+    animation: shimmer 4s ease-in-out infinite;
+    animation-delay: 1s;
+  }
+  
+  // Multi-color swirl effect
+  &.multiColor {
+    animation: liquidFillSwirl 0.8s ease-out forwards;
+    animation-delay: 0.1s;
+    
+    &::after {
+      background: linear-gradient(
+        115deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.05) 40%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.05) 60%,
+        transparent 70%
+      );
+      animation: shimmer 2.5s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes liquidFill {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes liquidFillSwirl {
+  0% {
+    opacity: 0;
+    transform: translateY(100%) rotate(0deg);
+    filter: blur(2px);
+  }
+  30% {
+    opacity: 0.5;
+    filter: blur(1px);
+  }
+  60% {
+    transform: translateY(10%) rotate(2deg);
+    filter: blur(0);
+  }
+  80% {
+    transform: translateY(-5%) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+    filter: blur(0);
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(100%);
+    opacity: 1;
+  }
+}
+
+@keyframes bubbles {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  20% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-8px);
+  }
+  80% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes potionFill {
+  0% {
+    opacity: 0;
+    transform: translateY(100%) scale(0.9);
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    filter: hue-rotate(10deg);
+  }
+  50% {
+    opacity: 0.7;
+    filter: hue-rotate(-5deg);
+  }
+  75% {
+    transform: translateY(-8%) scale(1.02);
+    filter: hue-rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: hue-rotate(0deg);
+  }
+}
+
+.cupContainer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.emoji {
+  position: absolute;
+  font-size: 14px;
+  // Use fixed position, animate only with transform (GPU accelerated)
+  left: var(--x);
+  bottom: var(--bottom);
+  z-index: var(--z);
+  transform: translateX(-50%) rotate(var(--rotation));
+  // Single optimized animation
+  animation: emojiDropBob var(--anim-duration, 3s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--delay);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  
+  &.emojiLarge {
+    font-size: 22px;
+  }
+}
+
+// Combined drop + subtle bob animation - GPU accelerated (transform/opacity only)
+@keyframes emojiDropBob {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-400%) rotate(0deg) scale(0.6);
+  }
+  10% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-300%) rotate(calc(var(--spin) * 0.3)) scale(0.85);
+  }
+  25% {
+    transform: translateX(-50%) translateY(-50%) rotate(calc(var(--spin) * 0.7)) scale(1);
+  }
+  35% {
+    transform: translateX(-50%) translateY(15%) rotate(calc(var(--spin) * 0.9)) scale(0.95);
+  }
+  45% {
+    transform: translateX(-50%) translateY(-5%) rotate(var(--rotation)) scale(1.02);
+  }
+  55% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) rotate(var(--rotation)) scale(1);
+  }
+  // Subtle idle bob cycle
+  65% {
+    transform: translateX(-50%) translateY(-2px) rotate(calc(var(--rotation) + 1deg)) scale(1);
+  }
+  75% {
+    transform: translateX(-50%) translateY(1px) rotate(calc(var(--rotation) - 0.5deg)) scale(1);
+  }
+  85% {
+    transform: translateX(-50%) translateY(-1px) rotate(calc(var(--rotation) + 0.5deg)) scale(1);
+  }
+  95%, 100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) rotate(var(--rotation)) scale(1);
+  }
+}
+
+
+// Perfect day styling - all habits complete
+.perfectDay {
+  border-color: rgba(255, 215, 0, 0.5) !important;
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.25),
+    0 0 40px rgba(255, 215, 0, 0.15) !important;
+}
+
+.fullGlow {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: radial-gradient(
+    ellipse at center 60%,
+    rgba(255, 200, 50, 0.5) 0%,
+    rgba(255, 170, 30, 0.4) 30%,
+    rgba(255, 140, 20, 0.3) 50%,
+    rgba(200, 100, 20, 0.25) 70%,
+    rgba(150, 70, 30, 0.2) 100%
+  );
+  pointer-events: none;
+  animation: glowPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+// Crown emoji above day number
+.perfectDayNumber {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  top: 2px;
+  left: 4px;
+}
+
+.crownEmoji {
+  font-size: 14px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  animation: crownAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: 1.2s;
+  opacity: 0;
+}
+
+@keyframes crownAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0) translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// Summary section
+.summary {
+  display: flex;
+  justify-content: space-around;
+  padding: 16px;
+  background: rgba(30, 30, 40, 0.5);
+  border-radius: 16px;
+  margin-top: 8px;
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.summaryIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.summaryText {
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+.summaryLabel {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

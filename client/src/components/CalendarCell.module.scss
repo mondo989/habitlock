@@ -1,735 +1,730 @@
 @use '../styles/mixins.scss' as *;
 
+// ============================================================================
+// CalendarCell - Main Component
+// ============================================================================
+
 .calendarCell {
   position: relative;
+  z-index: 1;
   min-height: 120px;
-  border: none;
-  border-radius: 0;
-  padding: 16px 14px;
+  padding: 10px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--cell-bg, #fafbfc);
   display: flex;
   flex-direction: column;
-  overflow: visible;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-  &:hover {
-    // Hover styles are handled by CalendarGrid parent
-  }
-
-  &.otherMonth {
-    opacity: 0.35;
-    background: rgba(248, 250, 252, 0.3);
-
-    .dayNumber {
-      color: #cbd5e1;
-    }
-  }
-
-  &.today {
-    background: rgba(59, 130, 246, 0.03);
-    outline: 1px solid #3b82f6;
-    outline-offset: -1px;
-    
-    .dayNumber {
-      color: #3b82f6;
-      font-weight: 600;
-      font-size: 0.9375rem;
-      outline: 2px solid #3b82f6;
-      border-radius: 120px;
-      padding: 2.5px 4px;
-      width: fit-content;
-    }
-  }
-
-  &.hasCompletions {
-    background: transparent !important;
-    color: white;
-
-    .dayNumber {
-      color: white;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-      font-weight: 700;
-      font-size: 1rem;
-      z-index: 2;
-      position: relative;
-    }
-    
-    // Make previous/next month days with completions much darker
-    &.otherMonth {
-      // Add a dark overlay that sits between gradient (z-index: -1) and content (z-index: 2)  
-      &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.6); // Dark overlay
-        border-radius: inherit;
-        z-index: 0; // Between gradient (-1) and content (2)
-        pointer-events: none;
-      }
-      
-      // Make text and emojis much more subdued
-      .dayNumber {
-        color: rgba(255, 255, 255, 0.7);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-        font-weight: 600;
-        font-size: 0.9375rem;
-        z-index: 3; // Above the overlay
-        position: relative;
-      }
-      
-      .habitEmoji {
-        opacity: 0.7;
-        filter: brightness(0.8) contrast(0.9);
-        z-index: 3; // Above the overlay
-        position: relative;
-      }
-      
-      // Also target the habitEmojis container
-      .habitEmojis {
-        z-index: 3;
-        position: relative;
-      }
-    }
-  }
-}
-
-.dayNumber {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: #374151;
-  line-height: 1.2;
-  margin-bottom: 8px;
-  z-index: 2;
-  position: relative;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  display: inline-block;
-  width: auto;
-}
-
-.habitEmojis {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: auto;
-  z-index: 2;
-  position: relative;
-  justify-content: center;
-  align-items: center;
-  
-  // Mobile stacked layout
-  &.stackedLayout {
-    justify-content: flex-start;
-    align-items: flex-start;
-  }
-}
-
-.habitEmojis {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: auto;
-  z-index: 2;
-  position: relative;
-  justify-content: center;
-  align-items: center;
-  
-  // Mobile stacked layout
-  &.stackedLayout {
-    justify-content: flex-start;
-    align-items: flex-start;
-  }
-}
-
-// Mobile emoji container with overlaid count
-.mobileEmojiContainer {
-  position: relative;
-  width: 100%;
-  cursor: pointer;
-}
-
-// Remove unused grid styles since we're using rows now
-
-// First row (up to 4 emojis)
-.mobileEmojiRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  margin-bottom: 2px;
-  
-  // All habits use overlapping now
-  &.habits1,
-  &.habits2,
-  &.habits3,
-  &.habits4 {
-    justify-content: center;
-  }
-}
-
-// Second row (5+ emojis) with count
-.mobileEmojiSecondRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  position: relative;
-}
-
-.mobileEmoji {
-  font-size: 1rem;
-  line-height: 1;
-  cursor: pointer;
-  position: relative;
-  
-  // Overlapping effect for mobile
-  margin-left: -6px;
-  
-  // First emoji in each row - no left margin
-  &:first-child {
-    margin-left: 0;
-  }
-  
-  // Z-index stacking (left emojis on top)
-  @for $i from 1 through 10 {
-    &:nth-child(#{$i}) {
-      z-index: #{11 - $i};
-    }
-  }
-}
-
-// Habit count display - always bottom right corner
-.mobileHabitCount {
-  position: absolute;
-  bottom: -2px;
-  right: -5px;
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-  font-weight: 700;
-  cursor: pointer;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 2px 5px;
   border-radius: 10px;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
-  min-width: 16px;
-  text-align: center;
-  z-index: 100; // Always above emojis
-  
-  &:hover {
-    background: rgba(0, 0, 0, 0.6);
-    transform: scale(1.1);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-  
-  // Dark mode support
-  :global(html.dark-mode) & {
-    color: rgba(255, 255, 255, 0.98);
-    background: rgba(0, 0, 0, 0.6);
-    border-color: rgba(255, 255, 255, 0.15);
-    
-    &:hover {
-      background: rgba(0, 0, 0, 0.8);
-      border-color: rgba(255, 255, 255, 0.25);
-    }
-  }
-}
-
-// Desktop emoji styles (original unchanged)
-.habitEmoji {
-  cursor: pointer;
-  display: inline-block;
-  font-size: 1.5rem;
-  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  
-  // Scale down emojis when there are multiple habits
-  .habitEmojis:has(.habitEmoji:nth-child(2)) & {
-    font-size: 1.25rem;
-  }
-  
-  .habitEmojis:has(.habitEmoji:nth-child(3)) & {
-    font-size: 1.125rem;
-  }
-  
-  .habitEmojis:has(.habitEmoji:nth-child(4)) & {
-    font-size: 1rem;
-  }
-
-  &:hover {
-    transform: scale(1.2);
-  }
-
-  // Weekly active habits - subtle scale
-  &.weeklyActive {
-    transform: scale(1.1);
-    
-    &:hover {
-      transform: scale(1.3);
-    }
-  }
-
-  // Goal met habits - slightly larger scale
-  &.glowing {
-    transform: scale(1.15);
-    
-    &:hover {
-      transform: scale(1.35);
-    }
-  }
-}
-
-// Tooltip content styles
-.tooltipDate {
-  font-weight: 600;
-  @include text-body;
-  margin-bottom: 6px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.tooltipHabit {
-  @include flex-start;
-  gap: 8px;
-  margin: 4px 0;
-}
-
-.tooltipEmoji {
-  font-size: 1.1rem;
-}
-
-.tooltipName {
-  @include text-body;
-  font-weight: 500;
-}
-
-.goalMet {
-  @include text-small;
-  margin-left: auto;
-  font-weight: 600;
-}
-
-.weeklyProgress {
-  @include text-small;
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.1);
-  padding: 2px 6px;
-  @include border-radius-sm;
-  margin-left: 8px;
-  font-weight: 600;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-// Enhanced glow animation for habits that met weekly goal
-@keyframes glow {
-  from {
-    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
-    transform: scale(1);
-  }
-  to {
-    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
-    transform: scale(1.05);
-  }
-}
-
-// Optimized gradient class - GPU accelerated for smooth performance
-.animatedGradient {
-  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s;
+  animation: cellFadeIn 0.4s ease-out var(--animation-delay, 0s) both;
   overflow: hidden;
   
-  &::before {
-    content: '';
-    position: absolute;
-    top: -200%;
-    left: 0;
-    right: 0;
-    bottom: -50%;
-    background: var(--gradient-background);
-    z-index: -1;
-    opacity: 0;
-    border-radius: inherit;
-    scale: 3;
-    
-    // Force GPU layer creation and hardware acceleration
-    transform: translateZ(0) scale(1.5);
-    will-change: transform, opacity;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    
-    // Smooth animations using only compositor properties
-    animation: 
-      gradientRotateGPU var(--rotation-duration, 45s) linear infinite,
-      gradientFadeIn 0.6s ease-out var(--gradient-animation-delay, 0.1s) both;
-    
-    // Performance optimization for older devices
-    @media (max-width: 768px) and (max-height: 1024px) {
-      animation-duration: 60s, 0.4s; // Slower rotation on potentially weaker devices
-    }
-  }
-}
-
-// GPU-optimized rotation animation using transform3d
-@keyframes gradientRotateGPU {
-  0% { 
-    transform: translateZ(0) scale(1.5) rotate(0deg);
-  }
-  100% { 
-    transform: translateZ(0) scale(1.5) rotate(360deg);
-  }
-}
-
-// Performance optimization: Simple gradient for high-density layouts
-.simpleGradient {
-  position: relative;
-  overflow: hidden;
-  
+  // Base pseudo-element for shimmer effects
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--gradient-background);
-    z-index: -1;
+    background: inherit;
     opacity: 0;
+    transition: opacity 0.3s ease, background 0.3s ease;
     border-radius: inherit;
-    transform: translateZ(0);
-    
-    animation: gradientFadeIn 0.4s ease-out var(--gradient-animation-delay, 0.1s) forwards;
   }
-}
-
-// Sequential loading animations with cascading effect
-.loadingCell {
-  animation: cellFadeIn 0.4s ease-out var(--loading-delay, 0s) both;
   
+  // ---------------------------------------------------------------------------
+  // Hover State
+  // ---------------------------------------------------------------------------
+  &:hover {
+    transform: scale(1.03);
+    z-index: 10;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.15),
+      inset 0 0 30px rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    
+    &::before {
+      opacity: 0.1;
+      background: white;
+    }
+    
+    .floatingEmoji {
+      transform: translate(-50%, -50%) rotate(var(--emoji-rotation)) scale(1.1);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // State Modifiers
+  // ---------------------------------------------------------------------------
+  &.otherMonth {
+    opacity: 0.35;
+    
+    &:hover {
+      opacity: 0.5;
+    }
+  }
+
+  &.habitHovered {
+    .habitOverlay {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.55);
+    }
+    
+    // Dim non-highlighted emojis under the overlay
+    .floatingEmoji:not(.highlighted) {
+      opacity: 0.3;
+      filter: grayscale(0.5);
+    }
+    
+    .mobileEmoji:not(.highlighted) {
+      opacity: 0.3;
+      filter: grayscale(0.5);
+    }
+    
+    // Cells with the completed habit
+    &.hasHoveredHabit {
+      // 20% lighter overlay for completed days (0.55 - 0.20 = 0.35)
+      .habitOverlay {
+        background: rgba(0, 0, 0, 0.35);
+      }
+      
+      // Hide the highlighted emoji in the cell - it's rendered in the overlay layer instead
+      .floatingEmoji.highlighted {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .mobileEmoji.highlighted {
+        opacity: 0;
+        pointer-events: none;
+      }
+    }
+  }
+
+  &.today {
+    box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.5);
+    border-radius: 8px;
+    
+    .dayNumber {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+    }
+    
+    &:hover {
+      box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.7), 0 8px 32px rgba(0, 0, 0, 0.15);
+    }
+    
+    &.hasCompletions .dayNumber {
+      background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+      color: #1e40af;
+      text-shadow: none;
+    }
+  }
+
   &.hasCompletions {
-    animation: 
-      cellFadeIn 0.4s ease-out var(--loading-delay, 0s) both,
-      backgroundGlow 0.6s ease-out var(--gradient-delay) both;
+    .dayNumber {
+      color: white;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    &::before {
+      background: 
+        linear-gradient(
+          var(--gradient-angle, 135deg),
+          transparent 0%,
+          rgba(255, 255, 255, 0.04) 25%,
+          rgba(255, 255, 255, 0.08) 50%,
+          rgba(255, 255, 255, 0.04) 75%,
+          transparent 100%
+        ),
+        linear-gradient(
+          var(--gradient-angle-2, 225deg),
+          transparent 0%,
+          rgba(255, 255, 255, 0.03) 40%,
+          rgba(255, 255, 255, 0.05) 60%,
+          transparent 100%
+        );
+      background-size: 300% 300%, 250% 250%;
+      animation: 
+        gradientShimmer var(--anim-duration, 10s) ease-in-out infinite,
+        shimmerCross calc(var(--anim-duration, 10s) * 1.3) ease-in-out infinite reverse;
+      animation-delay: var(--anim-delay, 0s), calc(var(--anim-delay, 0s) + 1s);
+      opacity: 1;
+      will-change: background-position;
+    }
+    
+    &:hover::before {
+      opacity: 1;
+      animation-duration: calc(var(--anim-duration, 10s) * 0.7), calc(var(--anim-duration, 10s) * 0.9);
+    }
+    
+    &:not(.allComplete)::before {
+      background: 
+        linear-gradient(
+          var(--gradient-angle, 135deg),
+          transparent 0%,
+          rgba(255, 255, 255, 0.05) 25%,
+          rgba(255, 255, 255, 0.1) 50%,
+          rgba(255, 255, 255, 0.05) 75%,
+          transparent 100%
+        ),
+        linear-gradient(
+          var(--gradient-angle-2, 225deg),
+          transparent 0%,
+          rgba(255, 255, 255, 0.04) 40%,
+          rgba(255, 255, 255, 0.06) 60%,
+          transparent 100%
+        );
+    }
+  }
+
+  &.allComplete {
+    &::after {
+      content: '';
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle, #34d399 0%, #10b981 50%, transparent 70%);
+      border-radius: 50%;
+      box-shadow: 
+        0 0 8px rgba(16, 185, 129, 0.8),
+        0 0 16px rgba(16, 185, 129, 0.4),
+        0 0 24px rgba(16, 185, 129, 0.2);
+      animation: completePulse 2.5s ease-in-out infinite;
+    }
+    
+    .emojiCanvas::after {
+      content: '';
+      position: absolute;
+      inset: -20%;
+      background: radial-gradient(
+        ellipse at 50% 50%,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.04) 30%,
+        transparent 60%
+      );
+      pointer-events: none;
+      animation: bloomPulse 4s ease-in-out infinite;
+    }
   }
 }
 
-.loadingEmojis {
-  .habitEmoji.loadingEmoji {
-    opacity: 0;
-    animation: emojiPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) var(--emoji-index-delay) both;
+.habitOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.3s ease, background 0.3s ease;
+  border-radius: inherit;
+}
+
+// ============================================================================
+// Child Elements
+// ============================================================================
+
+.dayNumber {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  line-height: 1;
+  width: fit-content;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 5;
+}
+
+.emojiCanvas {
+  position: absolute;
+  inset: 28px 8px 24px;
+  pointer-events: none;
+  
+  &::after {
+    content: none;
   }
 }
 
-// Keyframe animations
+.floatingEmoji {
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 2;
+  user-select: none;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+
+  &:hover {
+    z-index: 10;
+  }
+
+  &.bouncing {
+    animation: bounce var(--duration, 4s) ease-in-out var(--delay, 0s) infinite;
+  }
+
+  &.highlighted {
+    z-index: 200;
+    font-size: 2rem !important;
+    left: 50% !important;
+    top: 50% !important;
+    animation: none !important;
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5))
+            drop-shadow(0 0 20px rgba(255, 200, 0, 0.8))
+            drop-shadow(0 0 40px rgba(255, 200, 0, 0.4));
+    transition: left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                font-size 0.2s ease,
+                filter 0.2s ease;
+    opacity: 1;
+    pointer-events: none;
+  }
+}
+
+.mobileLayout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+  flex-wrap: wrap;
+  pointer-events: auto;
+}
+
+.mobileEmoji {
+  line-height: 1;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+
+  &.highlighted {
+    transform: scale(1.5);
+    z-index: 100;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5))
+            drop-shadow(0 0 16px rgba(255, 200, 0, 0.8));
+  }
+}
+
+.moreCount {
+  font-size: 0.625rem;
+  color: white;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px 6px;
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+// ============================================================================
+// Progress Meter
+// ============================================================================
+
+.progressMeter {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 8px 8px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meterTrack {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+}
+
+.meterFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px currentColor;
+}
+
+.taskCount {
+  font-size: 0.5625rem;
+  font-weight: 500;
+  color: rgba(107, 114, 128, 0.7);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+  
+  .hasCompletions & {
+    color: rgba(255, 255, 255, 0.6);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// ============================================================================
+// Tooltips
+// ============================================================================
+
+.tooltipDate {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  margin-bottom: 4px;
+  color: #1f2937;
+}
+
+.tooltipHint {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.tooltipSummary {
+  font-size: 0.75rem;
+  color: #059669;
+  font-weight: 500;
+}
+
+.emojiTooltip {
+  .tooltipHeader {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  
+  .tooltipEmoji {
+    font-size: 1.125rem;
+  }
+  
+  .tooltipName {
+    font-weight: 500;
+    font-size: 0.8125rem;
+    color: #1f2937;
+  }
+  
+  .goalBadge {
+    font-size: 0.6875rem;
+    color: #059669;
+    background: rgba(5, 150, 105, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  
+  .progressText {
+    font-size: 0.6875rem;
+    color: #6b7280;
+  }
+}
+
+// ============================================================================
+// Animations
+// ============================================================================
+
 @keyframes cellFadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.95);
+    transform: scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: scale(1);
   }
 }
 
-@keyframes backgroundGlow {
-  from {
-    background-color: transparent;
-    box-shadow: none;
+@keyframes gradientShimmer {
+  0%, 100% {
+    background-position: 0% 50%, 100% 50%;
   }
-  to {
-    // Background color is set via inline styles
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  50% {
+    background-position: 100% 50%, 0% 50%;
   }
 }
 
-@keyframes gradientFadeIn {
-  from {
-    opacity: 0;
+@keyframes shimmerCross {
+  0%, 100% {
+    background-position: 50% 0%, 50% 100%;
   }
-  to {
+  50% {
+    background-position: 50% 100%, 50% 0%;
+  }
+}
+
+@keyframes completePulse {
+  0%, 100% { 
+    transform: scale(1); 
     opacity: 1;
+    box-shadow: 
+      0 0 8px rgba(16, 185, 129, 0.8),
+      0 0 16px rgba(16, 185, 129, 0.4),
+      0 0 24px rgba(16, 185, 129, 0.2);
+  }
+  50% { 
+    transform: scale(1.2); 
+    opacity: 0.9;
+    box-shadow: 
+      0 0 12px rgba(16, 185, 129, 1),
+      0 0 24px rgba(16, 185, 129, 0.6),
+      0 0 36px rgba(16, 185, 129, 0.3);
   }
 }
 
-@keyframes emojiPopIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.3) rotateZ(-10deg);
+@keyframes bloomPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
   }
-  60% {
+  50% {
     opacity: 1;
-    transform: scale(1.1) rotateZ(5deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotateZ(0deg);
+    transform: scale(1.05);
   }
 }
 
+@keyframes bounce {
+  0%, 100% {
+    transform: translate(-50%, -50%) translate(0, 0);
+  }
+  25% {
+    transform: translate(-50%, -50%) translate(var(--move-x, 20%), calc(var(--move-y, 20%) * -1));
+  }
+  50% {
+    transform: translate(-50%, -50%) translate(calc(var(--move-x, 20%) * -0.5), var(--move-y, 20%));
+  }
+  75% {
+    transform: translate(-50%, -50%) translate(calc(var(--move-x, 20%) * -1), calc(var(--move-y, 20%) * -0.5));
+  }
+}
 
+// ============================================================================
+// Responsive - Mobile
+// ============================================================================
 
-// Responsive adjustments
 @include mobile {
   .calendarCell {
-    min-height: 100px;
-    padding: 12px 10px;
-  }
-
-  .habitEmoji {
-    font-size: 1.25rem;
+    min-height: 95px;
+    padding: 8px;
     
-    .habitEmojis:has(.habitEmoji:nth-child(2)) & {
-      font-size: 1.125rem;
+    &:hover {
+      transform: none;
+      box-shadow: none;
+      border-radius: 0;
     }
     
-    .habitEmojis:has(.habitEmoji:nth-child(3)) & {
-      font-size: 1rem;
+    &.today {
+      border-radius: 6px;
+      
+      .dayNumber {
+        padding: 3px 6px;
+        font-size: 1rem;
+      }
     }
     
-    .habitEmojis:has(.habitEmoji:nth-child(4)) & {
-      @include text-body;
+    &.allComplete::after {
+      width: 6px;
+      height: 6px;
+      top: 4px;
+      right: 4px;
     }
   }
 
   .dayNumber {
-    @include text-body;
+    font-size: 1rem;
   }
-
-  // Faster animations on mobile for better performance
-  .loadingCell {
-    animation-duration: 0.3s;
-    
-    &.hasCompletions {
-      animation-duration: 0.3s, 0.4s;
-    }
+  
+  .emojiCanvas {
+    inset: 24px 4px 20px;
   }
-
-  .loadingEmojis {
-    .habitEmoji.loadingEmoji {
-      animation-duration: 0.4s;
-    }
+  
+  .floatingEmoji:hover {
+    transform: translate(-50%, -50%) rotate(var(--emoji-rotation, 0deg)) scale(1.1) !important;
   }
-
-  // Optimized rotation on mobile for better performance
-  .animatedGradient::before {
-    animation: 
-      gradientRotateGPU 60s linear infinite,
-      gradientFadeIn 0.4s ease-out var(--gradient-animation-delay, 0.1s) forwards;
+  
+  .meterTrack {
+    height: 3px;
+  }
+  
+  .taskCount {
+    font-size: 0.5rem;
   }
 }
 
 @include mobile-small {
   .calendarCell {
-    min-height: 85px;
-    padding: 10px 8px;
-  }
-
-  .habitEmoji {
-    font-size: 1.125rem;
-    
-    .habitEmojis:has(.habitEmoji:nth-child(2)) & {
-      font-size: 1rem;
-    }
-    
-    .habitEmojis:has(.habitEmoji:nth-child(3)) & {
-      @include text-body;
-    }
-    
-    .habitEmojis:has(.habitEmoji:nth-child(4)) & {
-      @include text-small;
-    }
+    min-height: 80px;
+    padding: 6px;
   }
 
   .dayNumber {
-    font-size: 0.8125rem;
-    margin-bottom: 6px;
+    font-size: 0.875rem;
   }
   
-  .habitEmojis {
+  .emojiCanvas {
+    inset: 20px 3px 16px;
+  }
+  
+  .mobileEmoji {
+    font-size: 0.9rem !important;
+  }
+  
+  .moreCount {
+    font-size: 0.5625rem;
+    padding: 1px 4px;
+  }
+  
+  .meterTrack {
+    height: 2px;
+  }
+  
+  .progressMeter {
+    padding: 0 4px 4px;
     gap: 4px;
   }
-
-  // Even faster animations on very small screens
-  .loadingCell {
-    animation-duration: 0.25s;
-    
-    &.hasCompletions {
-      animation-duration: 0.25s, 0.35s;
-    }
-  }
-
-  .loadingEmojis {
-    .habitEmoji.loadingEmoji {
-      animation-duration: 0.35s;
-    }
-  }
-}
-
-// Today cell with completions gets special treatment
-.calendarCell.today.hasCompletions {
-  outline-color: rgba(255, 255, 255, 0.9);
-  outline-width: 2px;
   
-  .dayNumber {
-    color: #ffffff;
-    font-weight: 700;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  .taskCount {
+    font-size: 0.4375rem;
   }
 }
 
-// Dark mode styles - using nested selectors for proper CSS modules scope
-.calendarCell {
-  :global(html.dark-mode) & {
-    background: rgba(31, 41, 55, 0.4);
+// ============================================================================
+// Dark Mode
+// ============================================================================
+
+:global(html.dark-mode) {
+  .calendarCell {
+    background: var(--cell-bg, #1a1d23);
+    
+    &:hover {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      
+      &::before {
+        background: rgba(255, 255, 255, 0.05);
+      }
+    }
 
     &.otherMonth {
-      background: rgba(17, 24, 39, 0.2);
-
-      .dayNumber {
-        color: #4b5563;
-      }
+      opacity: 0.3;
     }
 
     &.today {
-      background: rgba(96, 165, 250, 0.06);
-
-      outline-color: #60a5fa;
+      box-shadow: inset 0 0 0 2px rgba(96, 165, 250, 0.6);
       
       .dayNumber {
-        color: #60a5fa;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
       }
-
-
+      
+      &:hover {
+        box-shadow: inset 0 0 0 2px rgba(96, 165, 250, 0.8), 0 8px 32px rgba(0, 0, 0, 0.4);
+      }
+      
+      &.hasCompletions .dayNumber {
+        background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%);
+        color: #1e40af;
+      }
     }
 
-    &.hasCompletions {
-      background: transparent !important;
-      
-      .dayNumber {
-        color: white;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    &.hasCompletions .dayNumber {
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    &.allComplete {
+      &::after {
+        background: radial-gradient(circle, #6ee7b7 0%, #34d399 50%, transparent 70%);
+        box-shadow: 
+          0 0 10px rgba(52, 211, 153, 0.9),
+          0 0 20px rgba(52, 211, 153, 0.5),
+          0 0 30px rgba(52, 211, 153, 0.25);
       }
       
-      &.otherMonth {
-        // Remove the dark overlay that's making gradients too dark
-        // &::after {
-        //   background: rgba(0, 0, 0, 0.6); // Dark overlay for dark mode
-        // }
-        
-        .dayNumber {
-          color: rgba(255, 255, 255, 0.8); // Brighter text
-          z-index: 3;
-        }
-        
-        .habitEmoji {
-          opacity: 0.8; // Brighter emojis
-          filter: brightness(0.9) contrast(0.95); // Less filtering
-          z-index: 3;
-        }
-        
-        .habitEmojis {
-          z-index: 3;
-        }
+      .emojiCanvas::after {
+        background: radial-gradient(
+          ellipse at 50% 50%,
+          rgba(255, 255, 255, 0.06) 0%,
+          rgba(255, 255, 255, 0.03) 30%,
+          transparent 60%
+        );
       }
-      
-      &.today {
-        outline-color: rgba(255, 255, 255, 0.9);
-        outline-width: 2px;
-        
-        .dayNumber {
-          color: #ffffff;
-          font-weight: 700;
-          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-        }
-      }
+    }
+    
+    &.hasCompletions .taskCount {
+      color: rgba(255, 255, 255, 0.55);
     }
   }
-}
 
-.dayNumber {
-  :global(html.dark-mode) & {
+  .dayNumber {
     color: #e5e7eb;
   }
-}
-
-.habitEmoji {
-  :global(html.dark-mode) & {
-    // Dark mode uses the same simple transforms as light mode
-    // No additional effects needed
+  
+  .meterTrack {
+    background: rgba(255, 255, 255, 0.15);
   }
-}
-
-// Tooltip styles in dark mode
-.tooltipDate {
-  :global(html.dark-mode) & {
-    border-bottom-color: rgba(255, 255, 255, 0.3);
+  
+  .taskCount {
+    color: rgba(156, 163, 175, 0.6);
   }
-}
-
-.weeklyProgress {
-  :global(html.dark-mode) & {
-    color: #60a5fa;
-    background: rgba(96, 165, 250, 0.15);
-    border-color: rgba(96, 165, 250, 0.3);
+  
+  .moreCount {
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
   }
-}
-
-.loadingCell {
-  :global(html.dark-mode) & {
-    &.hasCompletions {
-      animation: 
-        cellFadeIn 0.4s ease-out var(--loading-delay, 0s) both,
-        backgroundGlow 0.6s ease-out var(--background-delay, 0.1s) both;
+  
+  .tooltipDate {
+    color: #f3f4f6;
+  }
+  
+  .tooltipHint {
+    color: #9ca3af;
+  }
+  
+  .tooltipSummary {
+    color: #34d399;
+  }
+  
+  .emojiTooltip {
+    .tooltipName {
+      color: #f3f4f6;
     }
-  }
-}
-
-// Dark mode loading animation adjustments - keeping as global since it's a keyframe
-:global(html.dark-mode) {
-  @keyframes backgroundGlowDark {
-    from {
-      background-color: transparent;
-      box-shadow: none;
-    }
-    to {
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
-    }
-  }
-}
-
-// Accessibility: Respect reduced motion preference
-@media (prefers-reduced-motion: reduce) {
-  .animatedGradient::before {
-    animation: gradientFadeIn 0.6s ease-out var(--gradient-animation-delay, 0.1s) both !important;
-    transform: translateZ(0) scale(1.5) !important; // Keep GPU acceleration and scale but remove rotation
-  }
-}
-
-// Removed keyframe animations - using simple transforms instead
-
-// Dark mode for mobile stacked components
-.stackedEmoji {
-  :global(html.dark-mode) & {
-    // Dark mode uses the same simple transforms as light mode
-    // No additional effects needed
-  }
-}
-
-.moreIndicator {
-  :global(html.dark-mode) & {
-    background: rgba(156, 163, 175, 0.9);
-    color: #f9fafb;
     
-    .stackedHabits:hover & {
-      background: rgba(156, 163, 175, 1);
+    .goalBadge {
+      color: #34d399;
+      background: rgba(52, 211, 153, 0.15);
+    }
+    
+    .progressText {
+      color: #9ca3af;
     }
   }
 }
 
-.tapHint {
-  :global(html.dark-mode) & {
-    color: rgba(255, 255, 255, 0.8);
+// ============================================================================
+// Accessibility - Reduced Motion
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .calendarCell {
+    animation: none;
+    
+    &:hover {
+      transform: none;
+    }
+    
+    &.hasCompletions::before {
+      animation: none;
+    }
+    
+    &.allComplete::after {
+      animation: none;
+    }
   }
-} 
+  
+  .floatingEmoji:hover {
+    transform: scale(1.1) !important;
+  }
+  
+  .meterFill {
+    transition: none;
+  }
+}

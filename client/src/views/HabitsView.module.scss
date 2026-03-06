@@ -1,0 +1,719 @@
+// HabitsView.module.scss
+@use '../styles/mixins.scss' as *;
+
+.habitsView {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+// Loading and error states
+.loading, .error {
+  @include flex-column-center;
+  min-height: 60vh;
+  color: #6b7280;
+
+  p {
+    margin: 20px 0 0;
+    @include text-large;
+    font-weight: 500;
+  }
+
+  button {
+    @include button-base;
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: #3b82f6;
+    color: white;
+    @include border-radius-md;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
+
+    &:hover {
+      background: #2563eb;
+      @include hover-lift;
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+    }
+  }
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  @include border-radius-full;
+  @include spin-animation;
+}
+
+// Habits container
+.habitsContainer {
+  background: white;
+  border-radius: 20px;
+  padding: 28px;
+  @include card-shadow-hover;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.04);
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.habitsHeader {
+  @include flex-between;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  gap: 16px;
+  flex-wrap: wrap;
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    letter-spacing: -0.025em;
+  }
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.weeklyStats {
+  font-size: 0.9375rem;
+  color: #6b7280;
+  background: #f8fafc;
+  padding: 10px 16px;
+  border-radius: 10px;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.06);
+  font-weight: 500;
+  
+  @media (max-width: 480px) {
+    font-size: 0.875rem;
+    padding: 8px 12px;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
+}
+
+.addHabitButton {
+  @include button-base;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px 10px 12px;
+  background: transparent;
+  border-radius: 50px;
+  border: 2px solid rgba(16, 185, 129, 0.4);
+  color: #10b981;
+  @include transition-slow;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.04) 100%);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+  
+  &:hover {
+    border-color: #10b981;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+    
+    &::before {
+      opacity: 1;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.08) 100%);
+    }
+    
+    .addIcon {
+      transform: rotate(90deg);
+      background: #10b981;
+      color: white;
+    }
+  }
+}
+
+.addIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  @include flex-center;
+  font-size: 1rem;
+  font-weight: 600;
+  @include transition-slow;
+  position: relative;
+  z-index: 1;
+}
+
+.addText {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 1;
+}
+
+.habitsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.habitCard {
+  background: #fafbfc;
+  border: 2px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  padding: 20px;
+  @include transition-slow;
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  cursor: pointer;
+
+  &.completed {
+    border-color: var(--habit-color);
+    border-width: 2px;
+    box-shadow: 0 0 0 1px var(--habit-color, rgba(0, 0, 0, 0.06));
+    
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: var(--habit-color, rgba(0, 0, 0, 0.02));
+      opacity: 0.05;
+      pointer-events: none;
+    }
+  }
+
+  &:hover {
+    background: #f8fafc;
+    transform: translateY(-2px);
+    @include elevated-shadow;
+    
+    &.completed {
+      box-shadow: 0 8px 24px var(--habit-color, rgba(0, 0, 0, 0.1));
+    }
+  }
+}
+
+.habitMainInfo {
+  @include flex-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.habitBasics {
+  @include flex-start;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.habitEmoji {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 14px;
+  @include flex-center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  @include card-shadow;
+}
+
+.habitDetails {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.habitName {
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 6px;
+  font-size: 1.0625rem;
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  .checkmark {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: var(--habit-color, #10b981);
+    font-size: 1.125rem;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    flex-shrink: 0;
+  }
+
+  .completed & .checkmark {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.habitDescription {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.habitStats {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.habitActions {
+  @include flex-start;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.editButton, .deleteButton {
+  @include button-base;
+  background: white;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.08);
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  @include transition-slow;
+  width: 32px;
+  height: 32px;
+  @include flex-center;
+  @include card-shadow;
+  flex-shrink: 0;
+
+  &:hover {
+    background: #f8fafc;
+    border-color: rgba(0, 0, 0, 0.12);
+    @include hover-lift;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Weekly progress section within each habit card
+.weeklyProgressSection {
+  background: white;
+  border-radius: 12px;
+  padding: 14px 16px;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.06);
+  @include card-shadow;
+}
+
+.progressHeader {
+  @include flex-between;
+  margin-bottom: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.progressLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #374151;
+  letter-spacing: -0.01em;
+}
+
+.progressStats {
+  @include flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.progressText {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.goalMetBadge {
+  font-size: 0.6875rem;
+  color: #059669;
+  font-weight: 700;
+  background: #d1fae5;
+  padding: 4px 8px;
+  border-radius: 6px;
+  @include border-subtle;
+  border-color: #a7f3d0;
+  white-space: nowrap;
+}
+
+.habitProgressBar {
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.progressFill {
+  height: 100%;
+  transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-radius: 4px;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+    animation: shimmer 2.5s infinite;
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+// Empty state
+.emptyState {
+  @include flex-column-center;
+  min-height: 400px;
+  text-align: center;
+  background: white;
+  border-radius: 20px;
+  padding: 60px 40px;
+  @include card-shadow-hover;
+  @include border-subtle;
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+.emptyStateContent {
+  max-width: 480px;
+
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 16px;
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    font-size: 1.0625rem;
+    color: #6b7280;
+    margin: 0 0 32px;
+    line-height: 1.6;
+  }
+}
+
+.primaryButton {
+  @include button-base;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  padding: 14px 24px;
+  @include border-radius-md;
+  font-weight: 600;
+  font-size: 1rem;
+  @include transition-slow;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
+
+  &:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    @include hover-lift;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+  }
+}
+
+// Responsive design
+@include mobile {
+  .habitsView {
+    padding: 20px;
+    gap: 24px;
+  }
+  
+  .habitsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .habitCard {
+    padding: 18px;
+  }
+
+  .habitsContainer {
+    padding: 20px;
+  }
+
+  .habitsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .addHabitButton {
+    padding: 8px 14px 8px 10px;
+  }
+  
+  .addIcon {
+    width: 22px;
+    height: 22px;
+    font-size: 0.9375rem;
+  }
+  
+  .addText {
+    font-size: 0.8125rem;
+  }
+}
+
+@include mobile-small {
+  .habitsView {
+    padding: 16px;
+    gap: 20px;
+  }
+
+  .habitsContainer {
+    padding: 16px;
+  }
+
+  .habitCard {
+    padding: 14px;
+  }
+  
+  .progressText {
+    font-size: 0.75rem;
+  }
+  
+  .goalMetBadge {
+    font-size: 0.625rem;
+    padding: 3px 6px;
+  }
+  
+  .addHabitButton {
+    padding: 7px 12px 7px 8px;
+  }
+  
+  .addIcon {
+    width: 20px;
+    height: 20px;
+    font-size: 0.875rem;
+  }
+  
+  .addText {
+    font-size: 0.75rem;
+  }
+}
+
+// Dark mode styles
+.habitsView {
+  :global(html.dark-mode) & {
+    background: #1a1f2e;
+  }
+}
+
+.loading, .error {
+  :global(html.dark-mode) & {
+    color: #9ca3af;
+
+    button {
+      background: #3b82f6;
+      color: white;
+
+      &:hover {
+        background: #2563eb;
+      }
+    }
+  }
+}
+
+.spinner {
+  :global(html.dark-mode) & {
+    border-color: #374151;
+    border-top-color: #3b82f6;
+  }
+}
+
+.habitsContainer, .emptyState {
+  :global(html.dark-mode) & {
+    background: #1a1d23;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.habitsHeader {
+  :global(html.dark-mode) & {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+
+    h3 {
+      color: #f9fafb;
+    }
+  }
+}
+
+.weeklyStats {
+  :global(html.dark-mode) & {
+    background: #232830;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #9ca3af;
+  }
+}
+
+.addHabitButton {
+  :global(html.dark-mode) & {
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #34d399;
+    
+    &::before {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+    }
+    
+    &:hover {
+      border-color: #34d399;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+      
+      &::before {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.1) 100%);
+      }
+      
+      .addIcon {
+        background: #10b981;
+        color: white;
+      }
+    }
+  }
+}
+
+.addIcon {
+  :global(html.dark-mode) & {
+    background: rgba(16, 185, 129, 0.2);
+  }
+}
+
+.habitCard {
+  :global(html.dark-mode) & {
+    background: #1e2328;
+    border-color: rgba(255, 255, 255, 0.08);
+
+    &.completed {
+      border-color: var(--habit-color);
+      box-shadow: 0 0 0 1px var(--habit-color, rgba(255, 255, 255, 0.08));
+      
+      &::before {
+        background: var(--habit-color, rgba(255, 255, 255, 0.02));
+        opacity: 0.1;
+      }
+    }
+
+    &:hover {
+      background: #232830;
+      
+      &.completed {
+        box-shadow: 0 8px 24px var(--habit-color, rgba(0, 0, 0, 0.2));
+      }
+    }
+  }
+}
+
+.habitName {
+  :global(html.dark-mode) & {
+    color: #f9fafb;
+
+    .checkmark {
+      filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.2));
+    }
+  }
+}
+
+.habitDescription, .habitStats, .progressText {
+  :global(html.dark-mode) & {
+    color: #9ca3af;
+  }
+}
+
+.editButton, .deleteButton {
+  :global(html.dark-mode) & {
+    background: #232830;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #d1d5db;
+
+    &:hover {
+      background: #2d343e;
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+}
+
+.weeklyProgressSection {
+  :global(html.dark-mode) & {
+    background: #232830;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.progressLabel {
+  :global(html.dark-mode) & {
+    color: #e5e7eb;
+  }
+}
+
+.habitProgressBar {
+  :global(html.dark-mode) & {
+    background: #374151;
+  }
+}
+
+.emptyStateContent {
+  h2 {
+    :global(html.dark-mode) & {
+      color: #f9fafb;
+    }
+  }
+
+  p {
+    :global(html.dark-mode) & {
+      color: #9ca3af;
+    }
+  }
+}
