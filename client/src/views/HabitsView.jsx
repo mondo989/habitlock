@@ -8,8 +8,8 @@ import HabitModal from '../components/HabitModal';
 import HabitStatsModal from '../components/HabitStatsModal';
 import AchievementCelebrationModal from '../components/AchievementCelebrationModal';
 import analytics from '../services/analytics';
-import { checkAndUpdateAchievements } from '../services/achievements';
-import { getUserInfo } from '../services/firebase';
+import { checkAndUpdateAchievements } from '../services/supabaseAchievements';
+import { getUserInfo } from '../services/supabase';
 import styles from './HabitsView.module.scss';
 
 const HabitsView = () => {

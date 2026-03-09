@@ -1,7 +1,7 @@
 // LandingPageSpotify.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithGoogle, onAuthChange } from '../services/firebase';
+import { signInWithGoogle, onAuthChange } from '../services/supabase';
 import styles from './LandingPageSpotify.module.scss';
 
 const LandingPageSpotify = () => {

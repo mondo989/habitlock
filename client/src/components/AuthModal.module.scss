@@ -28,6 +28,10 @@
 .modalHeader {
   @include modal-header;
   @include gradient-light;
+  
+  h2 {
+    color: #f9fafb;
+  }
 }
 
 .modalLogo {
@@ -76,6 +80,130 @@
   font-size: 1rem;
   line-height: 1.5;
   text-align: center;
+}
+
+.emailForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.emailInput {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  &:disabled {
+    background: #f9fafb;
+    cursor: not-allowed;
+  }
+  
+  &::placeholder {
+    color: #9ca3af;
+  }
+}
+
+.submitButton {
+  width: 100%;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.loadingText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.benefits {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #6b7280;
+  
+  span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.magicLinkSent {
+  text-align: center;
+  padding: 20px 0;
+  
+  h3 {
+    margin: 16px 0 8px;
+    font-size: 1.25rem;
+    color: #1f2937;
+  }
+  
+  p {
+    margin: 0 0 8px;
+    color: #6b7280;
+    
+    strong {
+      color: #1f2937;
+    }
+  }
+}
+
+.mailIcon {
+  font-size: 3rem;
+  display: block;
+}
+
+.subtext {
+  font-size: 0.9rem;
+  color: #9ca3af !important;
+  margin-bottom: 20px !important;
+}
+
+.secondaryButton {
+  background: transparent;
+  border: 2px solid #e5e7eb;
+  color: #6b7280;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: #d1d5db;
+    color: #374151;
+    background: #f9fafb;
+  }
 }
 
 .errorMessage {
@@ -234,6 +362,68 @@
 .description {
   :global(html.dark-mode) & {
     color: #d1d5db;
+  }
+}
+
+.emailInput {
+  :global(html.dark-mode) & {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+    
+    &:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+    }
+    
+    &:disabled {
+      background: #1f2937;
+    }
+    
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+}
+
+.benefits {
+  :global(html.dark-mode) & {
+    color: #9ca3af;
+  }
+}
+
+.magicLinkSent {
+  :global(html.dark-mode) & {
+    h3 {
+      color: #f9fafb;
+    }
+    
+    p {
+      color: #d1d5db;
+      
+      strong {
+        color: #f9fafb;
+      }
+    }
+  }
+}
+
+.subtext {
+  :global(html.dark-mode) & {
+    color: #9ca3af !important;
+  }
+}
+
+.secondaryButton {
+  :global(html.dark-mode) & {
+    border-color: #4b5563;
+    color: #d1d5db;
+    
+    &:hover {
+      border-color: #6b7280;
+      color: #f9fafb;
+      background: #374151;
+    }
   }
 }
 

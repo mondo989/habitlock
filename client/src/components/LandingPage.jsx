@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithGoogle, onAuthChange } from '../services/firebase';
+import { signInWithGoogle, onAuthChange } from '../services/supabase';
 import ThemeToggle from './ThemeToggle';
 import AnimatedCalendar from './AnimatedCalendar';
 import styles from './LandingPage.module.scss';

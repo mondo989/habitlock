@@ -1,7 +1,13 @@
 // AuthContext.jsx
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { initializeAuth, onAuthChange, signOutUser, signInWithGoogle } from '../services/firebase';
-import { saveUserProfile } from '../services/db';
+import { 
+  initializeAuth, 
+  onAuthChange, 
+  signOutUser, 
+  signInWithGoogle,
+  signInWithMagicLink 
+} from '../services/supabase';
+import { saveUserProfile } from '../services/supabaseDb';
 import analytics from '../services/analytics';
 
 const AuthContext = createContext(null);
@@ -11,6 +17,7 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   // Initialize auth and set up listener
   useEffect(() => {
@@ -39,32 +46,40 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthChange(async (authUser) => {
       if (!mounted) return;
       
-      setUser(authUser);
+      // Transform Supabase user to our format
+      const normalizedUser = authUser ? {
+        uid: authUser.id,
+        email: authUser.email,
+        displayName: authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split('@')[0],
+        photoURL: authUser.user_metadata?.avatar_url,
+      } : null;
+      
+      setUser(normalizedUser);
       setIsLoading(false);
 
-      if (authUser) {
+      if (normalizedUser) {
         // Save user profile to database for admin tracking
         try {
-          await saveUserProfile(authUser.uid, {
-            email: authUser.email,
-            displayName: authUser.displayName,
-            photoURL: authUser.photoURL,
+          await saveUserProfile(normalizedUser.uid, {
+            email: normalizedUser.email,
+            displayName: normalizedUser.displayName,
+            photoURL: normalizedUser.photoURL,
           });
         } catch (err) {
           console.warn('Failed to save user profile:', err);
         }
 
-        analytics.identify(authUser.uid, {
-          email: authUser.email,
-          name: authUser.displayName,
-          avatar: authUser.photoURL
+        analytics.identify(normalizedUser.uid, {
+          email: normalizedUser.email,
+          name: normalizedUser.displayName,
+          avatar: normalizedUser.photoURL
         });
         
         analytics.capture('user_authenticated', {
-          user_id: authUser.uid,
-          email: authUser.email,
-          has_photo: !!authUser.photoURL,
-          provider: authUser.providerData?.[0]?.providerId
+          user_id: normalizedUser.uid,
+          email: normalizedUser.email,
+          has_photo: !!normalizedUser.photoURL,
+          provider: authUser.app_metadata?.provider || 'magic_link'
         });
       } else {
         analytics.capture('user_signed_out');
@@ -79,6 +94,23 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  // Magic Link sign in
+  const signInWithEmail = useCallback(async (email) => {
+    try {
+      setError(null);
+      setMagicLinkSent(false);
+      await signInWithMagicLink(email);
+      setMagicLinkSent(true);
+      analytics.capture('magic_link_sent', { email });
+      return true;
+    } catch (err) {
+      setError('Failed to send magic link. Please try again.');
+      analytics.capture('magic_link_failed', { error: err.message });
+      throw err;
+    }
+  }, []);
+
+  // Google sign in (kept for backwards compatibility)
   const signIn = useCallback(async () => {
     try {
       setError(null);
@@ -108,7 +140,9 @@ export function AuthProvider({ children }) {
     isLoading,
     isInitialized,
     error,
+    magicLinkSent,
     signIn,
+    signInWithEmail,
     signOut,
     userInfo: user ? {
       uid: user.uid,
@@ -116,7 +150,7 @@ export function AuthProvider({ children }) {
       displayName: user.displayName,
       photoURL: user.photoURL,
     } : null,
-  }), [user, isLoading, isInitialized, error, signIn, signOut]);
+  }), [user, isLoading, isInitialized, error, magicLinkSent, signIn, signInWithEmail, signOut]);
 
   return (
     <AuthContext.Provider value={value}>

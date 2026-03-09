@@ -1,10 +1,17 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPEN_AI_KEY,
-  dangerouslyAllowBrowser: true // Required for client-side usage
-});
+// Lazy-initialize OpenAI client (only when needed, and only if API key exists)
+let openai = null;
+
+const getOpenAIClient = () => {
+  if (!openai && import.meta.env.VITE_OPENAI_API_KEY) {
+    openai = new OpenAI({
+      apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+      dangerouslyAllowBrowser: true
+    });
+  }
+  return openai;
+};
 
 /**
  * Generate AI-powered habit insights based on user's habit data
@@ -13,14 +20,15 @@ const openai = new OpenAI({
  */
 export const generateHabitInsights = async (data) => {
   try {
-    if (!import.meta.env.VITE_OPEN_AI_KEY) {
-      throw new Error('OpenAI API key not configured. Please add VITE_OPEN_AI_KEY to your .env file.');
+    const client = getOpenAIClient();
+    if (!client) {
+      throw new Error('OpenAI API key not configured. Please add VITE_OPENAI_API_KEY to your .env file.');
     }
 
     // Prepare the data for OpenAI
     const prompt = createInsightPrompt(data);
 
-    const completion = await openai.chat.completions.create({
+    const completion = await client.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {

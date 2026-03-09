@@ -15,6 +15,7 @@ import LandingPageConversion from './components/LandingPageConversion';
 import LandingPageAnimated from './components/LandingPageAnimated';
 import BlogPage from './components/BlogPage';
 import OnboardingGuide from './components/OnboardingGuide';
+import AuthCallback from './components/AuthCallback';
 import { CalendarIcon, HabitsIcon, StatsIcon } from './components/Icons'
 import styles from './App.module.scss';
 
@@ -372,6 +373,9 @@ function App() {
               
               {/* Blog page */}
               <Route path="/blog" element={<BlogPage />} />
+
+              {/* Auth callback for magic link and OAuth */}
+              <Route path="/auth/callback" element={<AuthCallback />} />
 
               {/* Backup landing page designs */}
               <Route path="/landing/original" element={<LandingPage />} />

@@ -14,9 +14,9 @@ import {
   checkAndUpdateAchievements, 
   getUserAchievements, 
   backfillUserAchievements,
-  mergeAchievementsWithBadgeData 
-} from '../services/achievements';
-import { getUserInfo } from '../services/firebase';
+  mergeAchievementsWithBadgeData
+} from '../services/supabaseAchievements';
+import { getUserInfo } from '../services/supabase';
 import { generateHabitInsights } from '../services/openai';
 import styles from './StatsView.module.scss';
 

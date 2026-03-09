@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { auth } from '../services/firebase';
+import { authSync } from '../services/supabase';
 import {
   updateCalendarEntry,
   subscribeToCalendarEntries,
-} from '../services/db';
+} from '../services/supabaseDb';
 import {
   generateCalendarMatrix,
   getMonthDisplayName,
@@ -24,7 +24,7 @@ export const useCalendar = (habits = []) => {
   const [error, setError] = useState(null);
 
   // Use stable userId instead of auth.currentUser object reference
-  const userId = auth.currentUser?.uid ?? null;
+  const userId = authSync.currentUser?.uid ?? null;
   const prevUserIdRef = useRef(userId);
 
   // Subscribe to calendar entries
@@ -92,37 +92,46 @@ export const useCalendar = (habits = []) => {
 
   // Toggle habit completion for a specific date
   const toggleHabitCompletion = async (date, habitId) => {
-    if (!auth.currentUser) {
+    if (!authSync.currentUser) {
       setError('User not authenticated');
       return false;
     }
 
+    const entry = calendarEntries[date] || { date, completedHabits: [], habits: {} };
+    const { completedHabits, habits: habitDetails = {} } = entry;
+    
+    let updatedHabits;
+    let updatedHabitDetails = { ...habitDetails };
+    
+    if (completedHabits.includes(habitId)) {
+      updatedHabits = completedHabits.filter(id => id !== habitId);
+      delete updatedHabitDetails[habitId];
+    } else {
+      updatedHabits = [...completedHabits, habitId];
+      updatedHabitDetails[habitId] = {
+        completedAt: new Date().toISOString(),
+        habitId: habitId,
+      };
+    }
+
+    // Optimistic update: update UI immediately for instant feedback
+    const previousEntries = { ...calendarEntries };
+    setCalendarEntries(prev => ({
+      ...prev,
+      [date]: {
+        date,
+        completedHabits: updatedHabits,
+        habits: updatedHabitDetails,
+      },
+    }));
+
     try {
       setError(null);
-      const entry = calendarEntries[date] || { date, completedHabits: [], habits: {} };
-      const { completedHabits, habits: habitDetails = {} } = entry;
-      
-      let updatedHabits;
-      let updatedHabitDetails = { ...habitDetails };
-      
-      if (completedHabits.includes(habitId)) {
-        // Remove habit from completed list
-        updatedHabits = completedHabits.filter(id => id !== habitId);
-        // Remove habit details
-        delete updatedHabitDetails[habitId];
-      } else {
-        // Add habit to completed list
-        updatedHabits = [...completedHabits, habitId];
-        // Add habit completion details with timestamp
-        updatedHabitDetails[habitId] = {
-          completedAt: new Date().toISOString(),
-          habitId: habitId,
-        };
-      }
-
-      await updateCalendarEntry(auth.currentUser.uid, date, updatedHabits, updatedHabitDetails);
+      await updateCalendarEntry(authSync.currentUser.uid, date, updatedHabits, updatedHabitDetails);
       return true;
     } catch (err) {
+      // Rollback on error
+      setCalendarEntries(previousEntries);
       setError('Failed to update calendar entry');
       console.error('Error updating calendar entry:', err);
       return false;
@@ -131,31 +140,43 @@ export const useCalendar = (habits = []) => {
 
   // Set all completed habits for a specific date in a single operation
   const setDayHabits = async (date, habitIds) => {
-    if (!auth.currentUser) {
+    if (!authSync.currentUser) {
       setError('User not authenticated');
       return false;
     }
 
+    // Filter out any invalid habit IDs
+    const validHabitIds = habitIds.filter(habitId => habitId != null && habitId !== '');
+    
+    // Create habit details for all completed habits
+    const habitDetails = {};
+    const timestamp = new Date().toISOString();
+    
+    validHabitIds.forEach(habitId => {
+      habitDetails[habitId] = {
+        completedAt: timestamp,
+        habitId: habitId,
+      };
+    });
+
+    // Optimistic update: update UI immediately for instant feedback
+    const previousEntries = { ...calendarEntries };
+    setCalendarEntries(prev => ({
+      ...prev,
+      [date]: {
+        date,
+        completedHabits: validHabitIds,
+        habits: habitDetails,
+      },
+    }));
+
     try {
       setError(null);
-      
-      // Filter out any invalid habit IDs
-      const validHabitIds = habitIds.filter(habitId => habitId != null && habitId !== '');
-      
-      // Create habit details for all completed habits
-      const habitDetails = {};
-      const timestamp = new Date().toISOString();
-      
-      validHabitIds.forEach(habitId => {
-        habitDetails[habitId] = {
-          completedAt: timestamp,
-          habitId: habitId,
-        };
-      });
-
-      await updateCalendarEntry(auth.currentUser.uid, date, validHabitIds, habitDetails);
+      await updateCalendarEntry(authSync.currentUser.uid, date, validHabitIds, habitDetails);
       return true;
     } catch (err) {
+      // Rollback on error
+      setCalendarEntries(previousEntries);
       setError('Failed to update calendar entry');
       console.error('Error updating calendar entry:', err);
       return false;
@@ -203,46 +224,71 @@ export const useCalendar = (habits = []) => {
 
   // Bulk operations for selected date range
   const bulkToggleHabit = async (startDate, endDate, habitId, completed) => {
-    if (!auth.currentUser) {
+    if (!authSync.currentUser) {
       setError('User not authenticated');
       return false;
     }
 
+    // Build optimistic updates for all dates in range
+    const previousEntries = { ...calendarEntries };
+    const optimisticUpdates = {};
+    const serverUpdates = [];
+    
+    let current = dayjs(startDate);
+    const end = dayjs(endDate);
+
+    while (current.isBefore(end) || current.isSame(end, 'day')) {
+      const dateStr = current.format('YYYY-MM-DD');
+      const entry = calendarEntries[dateStr] || { date: dateStr, completedHabits: [], habits: {} };
+      const { completedHabits, habits: habitDetails = {} } = entry;
+      
+      let updatedHabits;
+      let updatedHabitDetails = { ...habitDetails };
+      
+      if (completed && !completedHabits.includes(habitId)) {
+        updatedHabits = [...completedHabits, habitId];
+        updatedHabitDetails[habitId] = {
+          completedAt: new Date().toISOString(),
+          habitId: habitId,
+        };
+      } else if (!completed && completedHabits.includes(habitId)) {
+        updatedHabits = completedHabits.filter(id => id !== habitId);
+        delete updatedHabitDetails[habitId];
+      } else {
+        updatedHabits = completedHabits;
+      }
+
+      if (JSON.stringify(updatedHabits) !== JSON.stringify(completedHabits)) {
+        optimisticUpdates[dateStr] = {
+          date: dateStr,
+          completedHabits: updatedHabits,
+          habits: updatedHabitDetails,
+        };
+        serverUpdates.push({ dateStr, updatedHabits, updatedHabitDetails });
+      }
+
+      current = current.add(1, 'day');
+    }
+
+    // Optimistic update: apply all changes immediately
+    if (Object.keys(optimisticUpdates).length > 0) {
+      setCalendarEntries(prev => ({ ...prev, ...optimisticUpdates }));
+    }
+
     try {
       setError(null);
-      let current = dayjs(startDate);
-      const end = dayjs(endDate);
-
-      while (current.isBefore(end) || current.isSame(end, 'day')) {
-        const dateStr = current.format('YYYY-MM-DD');
-        const entry = calendarEntries[dateStr] || { date: dateStr, completedHabits: [], habits: {} };
-        const { completedHabits, habits: habitDetails = {} } = entry;
-        
-        let updatedHabits;
-        let updatedHabitDetails = { ...habitDetails };
-        
-        if (completed && !completedHabits.includes(habitId)) {
-          updatedHabits = [...completedHabits, habitId];
-          updatedHabitDetails[habitId] = {
-            completedAt: new Date().toISOString(),
-            habitId: habitId,
-          };
-        } else if (!completed && completedHabits.includes(habitId)) {
-          updatedHabits = completedHabits.filter(id => id !== habitId);
-          delete updatedHabitDetails[habitId];
-        } else {
-          updatedHabits = completedHabits;
-        }
-
-        if (JSON.stringify(updatedHabits) !== JSON.stringify(completedHabits)) {
-          await updateCalendarEntry(auth.currentUser.uid, dateStr, updatedHabits, updatedHabitDetails);
-        }
-
-        current = current.add(1, 'day');
-      }
+      
+      // Send all server updates
+      await Promise.all(
+        serverUpdates.map(({ dateStr, updatedHabits, updatedHabitDetails }) =>
+          updateCalendarEntry(authSync.currentUser.uid, dateStr, updatedHabits, updatedHabitDetails)
+        )
+      );
       
       return true;
     } catch (err) {
+      // Rollback on error
+      setCalendarEntries(previousEntries);
       setError('Failed to bulk update calendar entries');
       console.error('Error bulk updating calendar entries:', err);
       return false;

@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { auth } from '../services/firebase';
+import { authSync } from '../services/supabase';
 import {
   createHabit,
   updateHabit,
   deleteHabit,
   subscribeToHabits,
-} from '../services/db';
+} from '../services/supabaseDb';
 import analytics from '../services/analytics';
 
 export const useHabits = () => {
@@ -14,7 +14,7 @@ export const useHabits = () => {
   const [error, setError] = useState(null);
   
   // Use stable userId instead of auth.currentUser object reference
-  const userId = auth.currentUser?.uid ?? null;
+  const userId = authSync.currentUser?.uid ?? null;
   const prevUserIdRef = useRef(userId);
 
   useEffect(() => {
@@ -46,32 +46,52 @@ export const useHabits = () => {
   }, [userId]);
 
   const addHabit = async (habitData) => {
-    if (!auth.currentUser) {
+    if (!authSync.currentUser) {
       setError('User not authenticated');
       return null;
     }
 
+    // Create temporary ID for optimistic update
+    const tempId = `temp_${Date.now()}`;
+    const tempHabit = {
+      id: tempId,
+      ...habitData,
+      emoji: habitData.emoji || '✅',
+      color: habitData.color || '#4CAF50',
+      weeklyGoal: habitData.weeklyGoal || 7,
+      createdAt: Date.now(),
+    };
+
+    // Optimistic update: add to UI immediately
+    const previousHabits = [...habits];
+    setHabits(prevHabits => [...prevHabits, tempHabit]);
+
     try {
       setError(null);
-      const newHabit = await createHabit(auth.currentUser.uid, habitData);
+      const newHabit = await createHabit(authSync.currentUser.uid, habitData);
       
-      // Track habit creation
+      // Replace temp habit with real one from server
+      setHabits(prevHabits => 
+        prevHabits.map(h => h.id === tempId ? newHabit : h)
+      );
+      
       analytics.capture('habit_created', {
         habit_name: habitData.name,
         habit_category: habitData.category,
         frequency: habitData.frequency,
-        user_id: auth.currentUser.uid
+        user_id: authSync.currentUser.uid
       });
       
       return newHabit;
     } catch (err) {
+      // Rollback on error
+      setHabits(previousHabits);
       setError('Failed to create habit');
       console.error('Error creating habit:', err);
       
-      // Track error
       analytics.capture('habit_creation_failed', {
         error: err.message,
-        user_id: auth.currentUser.uid
+        user_id: authSync.currentUser.uid
       });
       
       return null;
@@ -79,32 +99,40 @@ export const useHabits = () => {
   };
 
   const editHabit = async (habitId, updates) => {
-    if (!auth.currentUser) {
+    if (!authSync.currentUser) {
       setError('User not authenticated');
       return false;
     }
 
+    // Optimistic update: apply changes immediately
+    const previousHabits = [...habits];
+    setHabits(prevHabits => 
+      prevHabits.map(habit => 
+        habit.id === habitId ? { ...habit, ...updates } : habit
+      )
+    );
+
     try {
       setError(null);
-      await updateHabit(auth.currentUser.uid, habitId, updates);
+      await updateHabit(authSync.currentUser.uid, habitId, updates);
       
-      // Track habit update
       analytics.capture('habit_updated', {
         habit_id: habitId,
         updated_fields: Object.keys(updates),
-        user_id: auth.currentUser.uid
+        user_id: authSync.currentUser.uid
       });
       
       return true;
     } catch (err) {
+      // Rollback on error
+      setHabits(previousHabits);
       setError('Failed to update habit');
       console.error('Error updating habit:', err);
       
-      // Track error
       analytics.capture('habit_update_failed', {
         habit_id: habitId,
         error: err.message,
-        user_id: auth.currentUser.uid
+        user_id: authSync.currentUser.uid
       });
       
       return false;
@@ -112,35 +140,39 @@ export const useHabits = () => {
   };
 
   const removeHabit = async (habitId) => {
-    if (!auth.currentUser) {
+    if (!authSync.currentUser) {
       setError('User not authenticated');
       return false;
     }
 
     const habitToDelete = habits.find(h => h.id === habitId);
 
+    // Optimistic update: remove from UI immediately
+    const previousHabits = [...habits];
+    setHabits(prevHabits => prevHabits.filter(habit => habit.id !== habitId));
+
     try {
       setError(null);
-      await deleteHabit(auth.currentUser.uid, habitId);
+      await deleteHabit(authSync.currentUser.uid, habitId);
       
-      // Track habit deletion
       analytics.capture('habit_deleted', {
         habit_id: habitId,
         habit_name: habitToDelete?.name,
         days_tracked: habitToDelete?.completions?.length || 0,
-        user_id: auth.currentUser.uid
+        user_id: authSync.currentUser.uid
       });
       
       return true;
     } catch (err) {
+      // Rollback on error
+      setHabits(previousHabits);
       setError('Failed to delete habit');
       console.error('Error deleting habit:', err);
       
-      // Track error
       analytics.capture('habit_deletion_failed', {
         habit_id: habitId,
         error: err.message,
-        user_id: auth.currentUser.uid
+        user_id: authSync.currentUser.uid
       });
       
       return false;

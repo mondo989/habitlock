@@ -1,11 +1,12 @@
 // LandingPageConversion.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithGoogle, onAuthChange } from '../services/firebase';
+import { onAuthChange } from '../services/supabase';
+import AuthModal from './AuthModal';
 import styles from './LandingPageConversion.module.scss';
 
 const LandingPageConversion = () => {
-  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showExitIntent, setShowExitIntent] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const navigate = useNavigate();
@@ -31,14 +32,9 @@ const LandingPageConversion = () => {
     return () => document.removeEventListener('mouseleave', handleMouseLeave);
   }, []);
 
-  const handleGetStarted = async () => {
-    setIsSigningIn(true);
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      console.error('Sign-in failed:', error);
-      setIsSigningIn(false);
-    }
+  const openAuthModal = () => {
+    setShowExitIntent(false);
+    setShowAuthModal(true);
   };
 
   const whyHabitLock = [
@@ -88,7 +84,7 @@ const LandingPageConversion = () => {
 
   const faqs = [
     { q: 'Is it really free?', a: 'Yes! HabitLock is completely free to use. No hidden fees, no premium tiers.' },
-    { q: 'Do I need to create an account?', a: 'Just sign in with Google - takes 2 seconds. Your data syncs across devices automatically.' },
+    { q: 'Do I need to create an account?', a: 'Just enter your email and click the magic link we send you - no password needed! Your data syncs across devices automatically.' },
     { q: 'Can I track multiple habits?', a: 'Absolutely! Create unlimited habits with custom emojis, colors, and weekly goals.' }
   ];
 
@@ -105,8 +101,8 @@ const LandingPageConversion = () => {
             <a href="#proof">Reviews</a>
             <a href="#faq">FAQ</a>
           </div>
-          <button className={styles.navCta} onClick={handleGetStarted} disabled={isSigningIn}>
-            {isSigningIn ? 'Signing in...' : 'Try Free →'}
+          <button className={styles.navCta} onClick={openAuthModal}>
+            Try Free →
           </button>
         </div>
       </nav>
@@ -132,28 +128,13 @@ const LandingPageConversion = () => {
           </p>
 
           <div className={styles.heroCta}>
-            <button className={styles.primaryCta} onClick={handleGetStarted} disabled={isSigningIn}>
-              {isSigningIn ? (
-                <span className={styles.loading}>
-                  <span className={styles.spinner} />
-                  Connecting...
-                </span>
-              ) : (
-                <>
-                  <svg viewBox="0 0 24 24" className={styles.googleIcon}>
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                  </svg>
-                  Start Free with Google
-                </>
-              )}
+            <button className={styles.primaryCta} onClick={openAuthModal}>
+              Start Free Today →
             </button>
             <div className={styles.ctaBenefits}>
               <span>✓ Free forever</span>
-              <span>✓ No credit card</span>
-              <span>✓ 2-second setup</span>
+              <span>✓ No password needed</span>
+              <span>✓ Instant access</span>
             </div>
           </div>
         </div>
@@ -333,8 +314,8 @@ const LandingPageConversion = () => {
         <div className={styles.midCtaContent}>
           <h2>Ready to build better habits?</h2>
           <p>Join 1,000+ people who've transformed their routines</p>
-          <button className={styles.midCtaButton} onClick={handleGetStarted} disabled={isSigningIn}>
-            {isSigningIn ? 'Connecting...' : 'Start Free Today →'}
+          <button className={styles.midCtaButton} onClick={openAuthModal}>
+            Start Free Today →
           </button>
         </div>
       </section>
@@ -378,27 +359,12 @@ const LandingPageConversion = () => {
         <div className={styles.finalContent}>
           <h2>Start building habits today</h2>
           <p>It takes less than 30 seconds to get started. No credit card required.</p>
-          <button className={styles.finalCta} onClick={handleGetStarted} disabled={isSigningIn}>
-            {isSigningIn ? (
-              <span className={styles.loading}>
-                <span className={styles.spinner} />
-                Connecting...
-              </span>
-            ) : (
-              <>
-                <svg viewBox="0 0 24 24" className={styles.googleIcon}>
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                Continue with Google — It's Free
-              </>
-            )}
+          <button className={styles.finalCta} onClick={openAuthModal}>
+            Get Started Free →
           </button>
           <div className={styles.guarantee}>
             <span>🔒</span>
-            <span>Secure sign-in with Google. We never store your password.</span>
+            <span>Secure magic link sign-in. No password needed.</span>
           </div>
         </div>
       </section>
@@ -478,12 +444,17 @@ const LandingPageConversion = () => {
             <span className={styles.exitEmoji}>👋</span>
             <h2>Wait! Before you go...</h2>
             <p>Join 1,000+ people who are building better habits with HabitLock.</p>
-            <button className={styles.exitCta} onClick={handleGetStarted} disabled={isSigningIn}>
-              {isSigningIn ? 'Connecting...' : 'Try Free Now →'}
+            <button className={styles.exitCta} onClick={openAuthModal}>
+              Try Free Now →
             </button>
           </div>
         </div>
       )}
+
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+      />
     </div>
   );
 };

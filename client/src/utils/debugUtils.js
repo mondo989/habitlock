@@ -2,7 +2,7 @@
 // Utility functions for populating debug/demo data in local development
 
 import dayjs from 'dayjs';
-import { updateCalendarEntry } from '../services/db';
+import { updateCalendarEntry } from '../services/supabaseDb';
 
 /**
  * Generate random habit completions for a given month

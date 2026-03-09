@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
-import { mergeAchievementsWithBadgeData, getUserAchievements } from '../services/achievements';
-import { getUserInfo } from '../services/firebase';
+import { mergeAchievementsWithBadgeData, getUserAchievements } from '../services/supabaseAchievements';
+import { getUserInfo } from '../services/supabase';
 import analytics from '../services/analytics';
 import ShareModal from './ShareModal';
 import useScrollLock from '../hooks/useScrollLock';

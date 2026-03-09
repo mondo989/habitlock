@@ -12,8 +12,8 @@ import HabitStatsModal from '../components/HabitStatsModal';
 import AchievementCelebrationModal from '../components/AchievementCelebrationModal';
 import DayHabitsModal from '../components/DayHabitsModal';
 import analytics from '../services/analytics';
-import { checkAndUpdateAchievements } from '../services/achievements';
-import { getUserInfo } from '../services/firebase';
+import { checkAndUpdateAchievements } from '../services/supabaseAchievements';
+import { getUserInfo } from '../services/supabase';
 import { populateDebugData, clearMonthData, isDevMode } from '../utils/debugUtils';
 import styles from './CalendarView.module.scss';
 

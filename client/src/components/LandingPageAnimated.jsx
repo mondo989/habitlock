@@ -1,7 +1,7 @@
 // LandingPageAnimated.jsx
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithGoogle, onAuthChange } from '../services/firebase';
+import { signInWithGoogle, onAuthChange } from '../services/supabase';
 import styles from './LandingPageAnimated.module.scss';
 
 const LandingPageAnimated = () => {

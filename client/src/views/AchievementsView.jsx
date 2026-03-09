@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import BadgesModal from '../components/BadgesModal';
-import { getUserAchievements, BADGE_DEFINITIONS } from '../services/achievements';
-import { auth } from '../services/firebase';
+import { getUserAchievements, BADGE_DEFINITIONS } from '../services/supabaseAchievements';
+import { authSync } from '../services/supabase';
 import { useHabits } from '../hooks/useHabits';
 import { useCalendar } from '../hooks/useCalendar';
 import { 
@@ -83,9 +83,9 @@ const AchievementsView = () => {
     let cancelled = false;
     
     const loadUserAchievements = async () => {
-      if (auth.currentUser && !loading) {
+      if (authSync.currentUser && !loading) {
         try {
-          const userAchievements = await getUserAchievements(auth.currentUser.uid);
+          const userAchievements = await getUserAchievements(authSync.currentUser.uid);
           if (!cancelled) {
             setAchievements(userAchievements);
           }
