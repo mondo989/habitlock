@@ -24,7 +24,7 @@ const StatsView = () => {
   const { habits, loading: habitsLoading } = useHabits();
   const { calendarEntries, streaks, loading: calendarLoading } = useCalendar(habits);
   const [activeTooltip, setActiveTooltip] = useState(null);
-  const [firebaseAchievements, setFirebaseAchievements] = useState({});
+  const [userAchievements, setUserAchievements] = useState({});
   const [achievementsLoading, setAchievementsLoading] = useState(true);
   const [celebrationAchievement, setCelebrationAchievement] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -418,15 +418,15 @@ const StatsView = () => {
     // Take top 8 for desktop, 9 for mobile (responsive handled via CSS)
     const featured = sortedBadges.slice(0, 9);
 
-    // Merge with Firebase achievement data
-    const featuredWithAchievements = mergeAchievementsWithBadgeData(featured, firebaseAchievements);
-    const allWithAchievements = mergeAchievementsWithBadgeData(allBadges, firebaseAchievements);
+    // Merge with stored achievement data
+    const featuredWithAchievements = mergeAchievementsWithBadgeData(featured, userAchievements);
+    const allWithAchievements = mergeAchievementsWithBadgeData(allBadges, userAchievements);
 
     return { 
       featured: featuredWithAchievements, 
       all: allWithAchievements 
     };
-  }, [statsData, firebaseAchievements]);
+  }, [statsData, userAchievements]);
 
   // Load and update achievements when stats data changes
   useEffect(() => {
@@ -469,7 +469,7 @@ const StatsView = () => {
           setShowCelebration(true);
         }
         
-        setFirebaseAchievements(allAchievements);
+        setUserAchievements(allAchievements);
       } catch (error) {
         console.error('Error loading achievements:', error);
       } finally {
@@ -1105,7 +1105,7 @@ const StatsView = () => {
               isOpen={true} 
               onClose={() => {}}
               badgeData={badgeSystem.all}
-              achievements={firebaseAchievements}
+              achievements={userAchievements}
               isFullPage={true}
             />
           </div>

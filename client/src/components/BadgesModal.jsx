@@ -44,7 +44,7 @@ const AnimatedCounter = ({ value, duration = 1500, className = '' }) => {
 
 const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false, achievements = {} }) => {
   const [hoveredBadge, setHoveredBadge] = useState(null);
-  const [firebaseAchievements, setFirebaseAchievements] = useState({});
+  const [userAchievements, setUserAchievements] = useState({});
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareAchievement, setShareAchievement] = useState(null);
 
@@ -237,7 +237,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
     },
   ];
 
-  // Load Firebase achievements
+  // Load user achievements
   useEffect(() => {
     const loadAchievements = async () => {
       if (!isOpen && !isFullPage) return;
@@ -250,7 +250,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
       
       // If achievements are passed as props (for full page), use them directly
       if (isFullPage && achievements) {
-        setFirebaseAchievements(achievements);
+        setUserAchievements(achievements);
         return;
       }
       
@@ -258,7 +258,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
       if (userInfo?.uid) {
         try {
           const userAchievements = await getUserAchievements(userInfo.uid);
-          setFirebaseAchievements(userAchievements);
+          setUserAchievements(userAchievements);
         } catch (error) {
           console.error('Error loading achievements in modal:', error);
         }
@@ -272,7 +272,7 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
   const badges = useMemo(() => {
     // If badgeData is provided, use it directly
     if (badgeData && badgeData.length > 0) {
-      return mergeAchievementsWithBadgeData(badgeData, firebaseAchievements);
+      return mergeAchievementsWithBadgeData(badgeData, userAchievements);
     }
     
     // Fallback to old calculation method
@@ -284,8 +284,8 @@ const BadgesModal = ({ isOpen, onClose, statsData, badgeData, isFullPage = false
       progress: badge.earned ? 100 : 0 // Could add more sophisticated progress calculation
     }));
 
-    return mergeAchievementsWithBadgeData(calculatedBadges, firebaseAchievements);
-  }, [statsData, badgeData, firebaseAchievements]);
+    return mergeAchievementsWithBadgeData(calculatedBadges, userAchievements);
+  }, [statsData, badgeData, userAchievements]);
 
   // Group badges by category
   const badgesByCategory = useMemo(() => {

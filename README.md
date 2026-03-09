@@ -10,7 +10,7 @@ HabitLock is a minimal, modular habit-tracking web application built around a ca
 - 💫 **Multiple Habits per Day**: Each day cell can show stacked emojis with tooltips
 - 🔄 **Weekly Goal Tracking**: Habits glow when goal is reached within a week
 - 📊 **Stats View**: View per-habit streaks, weekly completion %, and calendar heatmaps
-- 🔐 **Anonymous Firebase Auth**: Seamless user session (skip login for MVP)
+- 🔐 **Magic Link Auth**: Secure email-based authentication via Supabase
 - 🎨 **SCSS Module Styling**: Fully modular design
 - 🧠 **MVP-First Architecture**: Clean, extensible file structure made for scale and LLMs
 
@@ -22,9 +22,9 @@ HabitLock is a minimal, modular habit-tracking web application built around a ca
 |------------|-----------------|----------------------------------|
 | Frontend   | React (Vite)    | Core SPA rendering               |
 | Styling    | SCSS Modules    | Component-scoped CSS             |
-| Auth/DB    | Firebase        | Anonymous auth + Realtime DB     |
+| Auth/DB    | Supabase        | Auth + PostgreSQL Database       |
 | Date Utils | Day.js          | Fast date manipulation           |
-| Hosting    | Firebase Hosting| Easy MVP deployment              |
+| Analytics  | PostHog         | Product analytics                |
 
 ---
 
@@ -48,8 +48,9 @@ HabitLock/
 │   │   │   ├── useCalendar.js
 │   │   │   └── useHabits.js
 │   │   ├── services/
-│   │   │   ├── firebase.js
-│   │   │   └── db.js
+│   │   │   ├── supabase.js
+│   │   │   ├── supabaseDb.js
+│   │   │   └── supabaseAchievements.js
 │   │   ├── utils/
 │   │   │   ├── dateUtils.js
 │   │   │   └── streakUtils.js
@@ -104,7 +105,7 @@ Stored under `calendarEntries/{userId}/{date}`
 ## 🧠 LLM Task Delegation Suggestions
 
 - `useCalendar.js`: Generate full matrix of days in a month, handle streaks and glow logic
-- `useHabits.js`: Manage create/edit/delete logic with Firebase sync
+- `useHabits.js`: Manage create/edit/delete logic with Supabase sync
 - `HabitModal.jsx`: Modal for setting emoji, color, name, description, goal
 - `CalendarCell.jsx`: Handle stacked emojis, glow effect, tooltip per habit
 - `StatsView.jsx`: Show per-habit streak line chart, weekly goal completion bar, calendar heatmap
@@ -120,14 +121,13 @@ npm install
 npm run dev
 ```
 
-Setup your Firebase config in `.env`:
+Setup your Supabase config in `.env`:
 ```env
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_AUTH_DOMAIN=
-VITE_FIREBASE_PROJECT_ID=
-VITE_FIREBASE_DATABASE_URL=
-VITE_FIREBASE_STORAGE_BUCKET=
-VITE_FIREBASE_APP_ID=
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+VITE_POSTHOG_KEY=your-posthog-key
+VITE_POSTHOG_HOST=https://app.posthog.com
+VITE_OPENAI_API_KEY=your-openai-key
 ```
 
 ---

@@ -1,6 +1,6 @@
 // achievements.js
-// Badge definitions and helper functions (no Firebase dependencies)
-// Firebase-specific operations have been moved to supabaseAchievements.js
+// Badge definitions and helper functions
+// Database operations are in supabaseAchievements.js
 
 // Badge definitions with completion tracking type
 export const BADGE_DEFINITIONS = [
@@ -645,11 +645,11 @@ export const getAchievementDisplayText = (achievement) => {
 };
 
 /**
- * Merge Firebase achievements with calculated badge data
+ * Merge stored achievements with calculated badge data
  */
-export const mergeAchievementsWithBadgeData = (badgeData, firebaseAchievements) => {
+export const mergeAchievementsWithBadgeData = (badgeData, storedAchievements) => {
   return badgeData.map(badge => {
-    const achievement = firebaseAchievements[badge.id];
+    const achievement = storedAchievements[badge.id];
     
     return {
       ...badge,
@@ -662,5 +662,3 @@ export const mergeAchievementsWithBadgeData = (badgeData, firebaseAchievements) 
     };
   });
 };
-
-// testAchievements function removed - was Firebase-dependent 

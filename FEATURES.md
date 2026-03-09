@@ -19,7 +19,7 @@
 - ✅ **Habit Customization** - Name, description, emoji, color, weekly goal
 - ✅ **Habit Modal** - Polished creation/editing interface
 - ✅ **Habit Validation** - Form validation and error handling
-- ✅ **Real-time Sync** - Firebase Realtime Database integration
+- ✅ **Real-time Sync** - Supabase PostgreSQL integration
 
 ### 📊 **Progress Tracking**
 - ✅ **Daily Completion Toggle** - Click emojis to mark complete/incomplete
@@ -29,9 +29,9 @@
 - ✅ **Weekly Progress Bars** - Visual progress indicators per habit
 
 ### 🔐 **Authentication & Data**
-- ✅ **Anonymous Firebase Auth** - Seamless user sessions
+- ✅ **Supabase Auth** - Magic link + Google OAuth authentication
 - ✅ **Local Persistence** - Data persists across browser sessions
-- ✅ **Real-time Database** - Firebase Realtime Database integration
+- ✅ **Real-time Database** - Supabase PostgreSQL with real-time subscriptions
 - ✅ **Data Structure** - Optimized habit and calendar entry schemas
 
 ---
@@ -79,7 +79,7 @@
 - ✅ **Domain-Scoped Logic** - Clean separation of concerns
 - ✅ **Atomic Components** - Reusable, composable components
 - ✅ **Custom Hooks** - `useHabits`, `useCalendar` hooks
-- ✅ **Service Layer** - Firebase and database services
+- ✅ **Service Layer** - Supabase auth and database services
 - ✅ **Utility Functions** - Date utils, streak calculations
 
 ### ⚡ **Performance & Reliability**
@@ -94,7 +94,7 @@
 
 ### 📚 **Documentation**
 - ✅ **Comprehensive README** - Full project documentation
-- ✅ **Setup Guide** - Step-by-step Firebase configuration
+- ✅ **Setup Guide** - Step-by-step Supabase configuration
 - ✅ **Tech Stack Documentation** - Clear architecture overview
 - ✅ **Feature Documentation** - Complete feature list
 
