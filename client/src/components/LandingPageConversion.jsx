@@ -148,8 +148,7 @@ const LandingPageConversion = () => {
               muted 
               playsInline
             >
-              <source src="/background.mov" type="video/quicktime" />
-              <source src="/background.mov" type="video/mp4" />
+              <source src="/background.mp4" type="video/mp4" />
             </video>
           </div>
           <div className={styles.floatingBadge}>
