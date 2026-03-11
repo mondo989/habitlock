@@ -366,7 +366,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <OnboardingProvider>
-          <Router basename={process.env.NODE_ENV === 'production' ? '/habitlock' : ''}>
+          <Router>
             <Routes>
               {/* Landing page for unauthenticated users */}
               <Route path="/" element={<LandingPageConversion />} />
