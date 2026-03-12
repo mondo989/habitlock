@@ -142,119 +142,62 @@ const CalendarGrid = ({
         }
       });
 
-      // Sort chronologically by date (earliest first, most recent last)
-      allCompletedCells.sort((a, b) => new Date(a.date) - new Date(b.date));
-
       // Set emoji positions for mask and overlay
       setAllEmojiPositions(allCompletedCells);
       
-      // Debug: Log calculated positions
-      if (allCompletedCells.length > 0) {
-        console.log('Streak line positions:', allCompletedCells.map(c => ({ date: c.date, x: Math.round(c.x), y: Math.round(c.y) })));
-      }
-
-      // Create path with horizontal week transitions
-      if (allCompletedCells.length >= 2) {
-        const enhancedPath = [];
-        
-        for (let i = 0; i < allCompletedCells.length; i++) {
-          const currentCell = allCompletedCells[i];
-          const nextCell = allCompletedCells[i + 1];
-          
-          // Add the current cell
-          enhancedPath.push(currentCell);
-          
-          if (nextCell) {
-            const currentDate = new Date(currentCell.date);
-            const nextDate = new Date(nextCell.date);
-            
-            // Get week start (Sunday) for both dates
-            const currentWeekStart = new Date(currentDate);
-            currentWeekStart.setDate(currentDate.getDate() - currentDate.getDay());
-            
-            const nextWeekStart = new Date(nextDate);
-            nextWeekStart.setDate(nextDate.getDate() - nextDate.getDay());
-            
-            // Check if we're crossing into a new week
-            if (currentWeekStart.getTime() !== nextWeekStart.getTime()) {
-              // Find Saturday's position in the current week
-              const saturdayDate = new Date(currentWeekStart);
-              saturdayDate.setDate(currentWeekStart.getDate() + 6); // Saturday
-              
-              const saturdayCell = cells.find(cell => {
-                const cellDateStr = cell.getAttribute('data-date');
-                return cellDateStr === saturdayDate.toISOString().split('T')[0];
-              });
-              
-              if (saturdayCell) {
-                const rect = saturdayCell.getBoundingClientRect();
-                const gridRect = grid.getBoundingClientRect();
-                const canvasTop = 28;
-                const canvasLeft = 8;
-                const canvasRight = 8;
-                const canvasWidth = rect.width - canvasLeft - canvasRight;
-                
-                const saturdayX = rect.left - gridRect.left + canvasLeft + (canvasWidth * 0.5);
-                const saturdayY = currentCell.y; // Same Y as current cell
-                
-                // Add Saturday transition point
-                enhancedPath.push({
-                  date: currentCell.date + '-saturday-transition',
-                  x: saturdayX,
-                  y: saturdayY,
-                  originalX: saturdayX,
-                  originalY: saturdayY
-                });
-              }
-              
-              // Find Monday's position in the next week  
-              const mondayDate = new Date(nextWeekStart);
-              mondayDate.setDate(nextWeekStart.getDate() + 1); // Monday
-              
-              const mondayCell = cells.find(cell => {
-                const cellDateStr = cell.getAttribute('data-date');
-                return cellDateStr === mondayDate.toISOString().split('T')[0];
-              });
-              
-              if (mondayCell) {
-                const rect = mondayCell.getBoundingClientRect();
-                const gridRect = grid.getBoundingClientRect();
-                const canvasTop = 28;
-                const canvasLeft = 8;
-                const canvasRight = 8;
-                const canvasWidth = rect.width - canvasLeft - canvasRight;
-                
-                const mondayX = rect.left - gridRect.left + canvasLeft + (canvasWidth * 0.5);
-                const mondayY = nextCell.y; // Same Y as next cell
-                
-                // Add Monday starting point
-                enhancedPath.push({
-                  date: nextCell.date + '-monday-transition',
-                  x: mondayX,
-                  y: mondayY,
-                  originalX: mondayX,
-                  originalY: mondayY
-                });
-              }
+      // Group completed cells by week (based on calendar matrix structure)
+      const weekGroups = {};
+      
+      // Map each date to its week index using calendar matrix
+      calendarMatrix.forEach((week, weekIndex) => {
+        week.forEach(day => {
+          const completedInThisDay = allCompletedCells.find(cell => cell.date === day.date);
+          if (completedInThisDay) {
+            if (!weekGroups[weekIndex]) {
+              weekGroups[weekIndex] = [];
             }
+            weekGroups[weekIndex].push(completedInThisDay);
           }
+        });
+      });
+
+      // Create separate line segments for each week with 2+ completions
+      const weeklyStreakLines = [];
+      Object.entries(weekGroups).forEach(([weekIndex, weekCells]) => {
+        if (weekCells.length >= 2) {
+          // Sort cells within the week by day (left to right)
+          weekCells.sort((a, b) => {
+            const aDay = calendarMatrix[parseInt(weekIndex)].findIndex(day => day.date === a.date);
+            const bDay = calendarMatrix[parseInt(weekIndex)].findIndex(day => day.date === b.date);
+            return aDay - bDay;
+          });
+          
+          // Calculate path length for this week
+          let weekLength = 0;
+          for (let i = 0; i < weekCells.length - 1; i++) {
+            const dx = weekCells[i + 1].x - weekCells[i].x;
+            const dy = weekCells[i + 1].y - weekCells[i].y;
+            weekLength += Math.sqrt(dx * dx + dy * dy);
+          }
+          
+          weeklyStreakLines.push({
+            points: weekCells,
+            length: weekLength,
+            weekIndex: parseInt(weekIndex)
+          });
         }
-        
-        // Calculate total path length
-        let totalLength = 0;
-        for (let i = 0; i < enhancedPath.length - 1; i++) {
-          const dx = enhancedPath[i + 1].x - enhancedPath[i].x;
-          const dy = enhancedPath[i + 1].y - enhancedPath[i].y;
-          totalLength += Math.sqrt(dx * dx + dy * dy);
-        }
-        
-        setStreakLines([{
-          points: enhancedPath,
-          length: totalLength
-        }]);
-      } else {
-        setStreakLines([]);
+      });
+
+      // Debug: Log weekly line segments
+      if (weeklyStreakLines.length > 0) {
+        console.log('Weekly streak lines:', weeklyStreakLines.map(line => ({
+          week: line.weekIndex,
+          points: line.points.length,
+          dates: line.points.map(p => p.date)
+        })));
       }
+      
+      setStreakLines(weeklyStreakLines);
     }, 50);
 
     return () => clearTimeout(timer);
