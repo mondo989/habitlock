@@ -163,8 +163,6 @@ const CalendarGrid = ({
 
       // Create separate line segments for each week with 2+ completions
       const weeklyStreakLines = [];
-      const bridgeLines = []; // For Saturday → Sunday connections
-      
       Object.entries(weekGroups).forEach(([weekIndex, weekCells]) => {
         if (weekCells.length >= 2) {
           // Sort cells within the week by day (left to right)
@@ -174,146 +172,32 @@ const CalendarGrid = ({
             return aDay - bDay;
           });
           
-          const weekIdx = parseInt(weekIndex);
-          let adjustedPoints = [...weekCells];
-          
-          // Check for Saturday completion in this week
-          const saturdayCompletion = weekCells.find(cell => {
-            const dayIndex = calendarMatrix[weekIdx].findIndex(day => day.date === cell.date);
-            return dayIndex === 6; // Saturday is index 6
-          });
-          
-          // Check for Sunday completion in next week
-          const nextWeekCells = weekGroups[weekIdx + 1];
-          const sundayCompletion = nextWeekCells?.find(cell => {
-            const dayIndex = calendarMatrix[weekIdx + 1]?.findIndex(day => day.date === cell.date);
-            return dayIndex === 0; // Sunday is index 0
-          });
-          
-          // If both Saturday and Sunday have completions, extend Saturday line to right edge
-          if (saturdayCompletion && sundayCompletion) {
-            const saturdayCell = cells.find(cell => cell.getAttribute('data-date') === saturdayCompletion.date);
-            if (saturdayCell) {
-              const rect = saturdayCell.getBoundingClientRect();
-              const gridRect = grid.getBoundingClientRect();
-              
-              // Extend to right edge of Saturday cell
-              const rightEdgeX = rect.right - gridRect.left - 8; // Account for canvas inset
-              const rightEdgeY = saturdayCompletion.y;
-              
-              // Replace Saturday point with right edge point
-              const saturdayIndex = adjustedPoints.findIndex(p => p.date === saturdayCompletion.date);
-              if (saturdayIndex !== -1) {
-                adjustedPoints[saturdayIndex] = {
-                  ...saturdayCompletion,
-                  x: rightEdgeX,
-                  y: rightEdgeY
-                };
-              }
-              
-              // Create bridge line from Saturday right edge to Sunday left edge
-              const sundayCell = cells.find(cell => cell.getAttribute('data-date') === sundayCompletion.date);
-              if (sundayCell) {
-                const sundayRect = sundayCell.getBoundingClientRect();
-                const leftEdgeX = sundayRect.left - gridRect.left + 8; // Account for canvas inset
-                const leftEdgeY = sundayCompletion.y;
-                
-                bridgeLines.push({
-                  points: [
-                    { x: rightEdgeX, y: rightEdgeY },
-                    { x: leftEdgeX, y: leftEdgeY }
-                  ],
-                  length: Math.sqrt((leftEdgeX - rightEdgeX) ** 2 + (leftEdgeY - rightEdgeY) ** 2),
-                  weekIndex: weekIdx,
-                  type: 'bridge'
-                });
-              }
-            }
-          }
-          
           // Calculate path length for this week
           let weekLength = 0;
-          for (let i = 0; i < adjustedPoints.length - 1; i++) {
-            const dx = adjustedPoints[i + 1].x - adjustedPoints[i].x;
-            const dy = adjustedPoints[i + 1].y - adjustedPoints[i].y;
+          for (let i = 0; i < weekCells.length - 1; i++) {
+            const dx = weekCells[i + 1].x - weekCells[i].x;
+            const dy = weekCells[i + 1].y - weekCells[i].y;
             weekLength += Math.sqrt(dx * dx + dy * dy);
           }
           
           weeklyStreakLines.push({
-            points: adjustedPoints,
+            points: weekCells,
             length: weekLength,
-            weekIndex: weekIdx
+            weekIndex: parseInt(weekIndex)
           });
-        }
-      });
-      
-      // Handle Sunday lines that should start from left edge
-      Object.entries(weekGroups).forEach(([weekIndex, weekCells]) => {
-        if (weekCells.length >= 2) {
-          const weekIdx = parseInt(weekIndex);
-          
-          // Check if this week starts with Sunday and previous week ended with Saturday
-          const sundayCompletion = weekCells.find(cell => {
-            const dayIndex = calendarMatrix[weekIdx].findIndex(day => day.date === cell.date);
-            return dayIndex === 0; // Sunday is index 0
-          });
-          
-          const prevWeekCells = weekGroups[weekIdx - 1];
-          const prevSaturdayCompletion = prevWeekCells?.find(cell => {
-            const dayIndex = calendarMatrix[weekIdx - 1]?.findIndex(day => day.date === cell.date);
-            return dayIndex === 6; // Saturday is index 6
-          });
-          
-          if (sundayCompletion && prevSaturdayCompletion) {
-            // Find the line for this week and adjust Sunday point to left edge
-            const weekLine = weeklyStreakLines.find(line => line.weekIndex === weekIdx);
-            if (weekLine) {
-              const sundayCell = cells.find(cell => cell.getAttribute('data-date') === sundayCompletion.date);
-              if (sundayCell) {
-                const rect = sundayCell.getBoundingClientRect();
-                const gridRect = grid.getBoundingClientRect();
-                
-                const leftEdgeX = rect.left - gridRect.left + 8; // Account for canvas inset
-                const leftEdgeY = sundayCompletion.y;
-                
-                // Replace Sunday point with left edge point
-                const sundayIndex = weekLine.points.findIndex(p => p.date === sundayCompletion.date);
-                if (sundayIndex !== -1) {
-                  weekLine.points[sundayIndex] = {
-                    ...sundayCompletion,
-                    x: leftEdgeX,
-                    y: leftEdgeY
-                  };
-                  
-                  // Recalculate length
-                  let newLength = 0;
-                  for (let i = 0; i < weekLine.points.length - 1; i++) {
-                    const dx = weekLine.points[i + 1].x - weekLine.points[i].x;
-                    const dy = weekLine.points[i + 1].y - weekLine.points[i].y;
-                    newLength += Math.sqrt(dx * dx + dy * dy);
-                  }
-                  weekLine.length = newLength;
-                }
-              }
-            }
-          }
         }
       });
 
-      // Combine weekly lines and bridge lines
-      const allStreakLines = [...weeklyStreakLines, ...bridgeLines];
-      
       // Debug: Log weekly line segments
-      if (allStreakLines.length > 0) {
-        console.log('Streak lines:', allStreakLines.map(line => ({
+      if (weeklyStreakLines.length > 0) {
+        console.log('Weekly streak lines:', weeklyStreakLines.map(line => ({
           week: line.weekIndex,
-          type: line.type || 'weekly',
           points: line.points.length,
-          dates: line.points.map(p => p.date || 'bridge')
+          dates: line.points.map(p => p.date)
         })));
       }
       
-      setStreakLines(allStreakLines);
+      setStreakLines(weeklyStreakLines);
     }, 50);
 
     return () => clearTimeout(timer);
@@ -350,20 +234,15 @@ const CalendarGrid = ({
             // Min 0.3s, max 0.8s for quicker feel since we're staggering
             const animDuration = Math.min(0.8, Math.max(0.3, path.length / 800));
             
-            // Calculate stagger delay - each line starts after previous ones complete
+            // Calculate stagger delay - each week starts after previous ones complete
             let staggerDelay = 0;
             for (let i = 0; i < index; i++) {
               const prevDuration = Math.min(0.8, Math.max(0.3, streakLines[i].length / 800));
               staggerDelay += prevDuration;
             }
             
-            // For bridge lines, add slight additional delay for visual separation
-            if (path.type === 'bridge') {
-              staggerDelay += 0.1;
-            }
-            
             return (
-              <g key={`${hoveredHabitId}-${path.type || 'week'}-${path.weekIndex}-${index}`}>
+              <g key={`${hoveredHabitId}-${path.weekIndex}`}>
                 {/* Background line for contrast */}
                 <polyline
                   points={pointsStr}
