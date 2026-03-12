@@ -223,6 +223,20 @@
   border-radius: inherit;
 }
 
+.p5Background {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  overflow: hidden;
+  
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+}
+
 // ============================================================================
 // Child Elements
 // ============================================================================

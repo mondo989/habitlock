@@ -25,6 +25,11 @@ const AdminView = import.meta.env.DEV
   ? lazy(() => import('./views/AdminView'))
   : null;
 
+// DEV-ONLY: P5 Pattern demo for testing
+const P5PatternDemo = import.meta.env.DEV
+  ? lazy(() => import('./components/P5PatternDemo'))
+  : null;
+
 // Main App Layout component (for authenticated users)
 function AppLayout({ children }) {
   const location = useLocation();
@@ -414,6 +419,20 @@ function App() {
                       <AdminView />
                     </Suspense>
                   </ProtectedRoute>
+                } />
+              )}
+              
+              {/* DEV-ONLY: P5 Pattern demo page */}
+              {import.meta.env.DEV && P5PatternDemo && (
+                <Route path="/dev/p5-demo" element={
+                  <Suspense fallback={
+                    <div className={styles.loadingScreen}>
+                      <div className={styles.spinner}></div>
+                      <p>Loading P5 demo...</p>
+                    </div>
+                  }>
+                    <P5PatternDemo />
+                  </Suspense>
                 } />
               )}
               

@@ -173,6 +173,76 @@
   }
 }
 
+// Pattern Type Toggle
+.patternToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.patternLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.patternButtons {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #f1f5f9;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.patternButton {
+  @include button-base;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  @include transition-slow;
+  white-space: nowrap;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.7);
+    color: #334155;
+  }
+  
+  &.active {
+    background: white;
+    color: #1e293b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+  }
+}
+
+.patternIcon {
+  font-size: 1rem;
+  line-height: 1;
+  
+  .patternButton:hover & {
+    transform: scale(1.15);
+  }
+  
+  .patternButton.active & {
+    transform: scale(1.1);
+  }
+}
+
+.patternName {
+  @media (max-width: 500px) {
+    display: none;
+  }
+}
 
 // Debug controls (dev mode only)
 .debugControls {
@@ -1303,6 +1373,38 @@
 }
 
 .typeButton {
+  :global(html.dark-mode) & {
+    color: #9ca3af;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e5e7eb;
+    }
+    
+    &.active {
+      background: #374151;
+      color: #f9fafb;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+.patternToggle {
+  :global(html.dark-mode) & {
+    .patternLabel {
+      color: #9ca3af;
+    }
+  }
+}
+
+.patternButtons {
+  :global(html.dark-mode) & {
+    background: #232830;
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.patternButton {
   :global(html.dark-mode) & {
     color: #9ca3af;
     

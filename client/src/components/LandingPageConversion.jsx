@@ -100,6 +100,7 @@ const LandingPageConversion = () => {
           </div>
           <div className={styles.navLinks}>
             <a href="/what-is-habitlock.html">What is HabitLock?</a>
+            <a href="/how-habitlock-works.html">How It Works</a>
             <a href="#features">Features</a>
             <a href="#proof">Reviews</a>
             <a href="#faq">FAQ</a>
@@ -412,6 +413,7 @@ const LandingPageConversion = () => {
               <div className={styles.footerColumn}>
                 <h4>Product</h4>
                 <a href="/what-is-habitlock.html">What is HabitLock?</a>
+                <a href="/how-habitlock-works.html">How It Works</a>
                 <a href="#features">Features</a>
                 <a href="#proof">Reviews</a>
                 <a href="#faq">FAQ</a>

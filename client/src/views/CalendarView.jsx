@@ -6,6 +6,7 @@ import { getWeekStatsForDate, getBestStreak, getHabitStatsForRange } from '../ut
 import CalendarGrid from '../components/CalendarGrid';
 import CalendarGridSavant from '../components/CalendarGridSavant';
 import CalendarGridCupFill from '../components/CalendarGridCupFill';
+import { PATTERN_TYPES } from '../components/P5PatternBackground';
 import HabitModal from '../components/HabitModal';
 import HabitDayModal from '../components/HabitDayModal';
 import HabitStatsModal from '../components/HabitStatsModal';
@@ -54,6 +55,9 @@ const CalendarView = () => {
 
   // Calendar type toggle state
   const [calendarType, setCalendarType] = useState('original');
+
+  // Pattern type for P5 backgrounds
+  const [patternType, setPatternType] = useState('bokeh');
 
   // Hovered habit for calendar highlight
   const [hoveredHabitId, setHoveredHabitId] = useState(null);
@@ -443,6 +447,24 @@ const CalendarView = () => {
         </div>
       </div>
 
+      {/* Pattern Type Toggle */}
+      <div className={styles.patternToggle}>
+        <span className={styles.patternLabel}>Pattern:</span>
+        <div className={styles.patternButtons}>
+          {Object.values(PATTERN_TYPES).map((type) => (
+            <button
+              key={type.id}
+              className={`${styles.patternButton} ${patternType === type.id ? styles.active : ''}`}
+              onClick={() => setPatternType(type.id)}
+              title={type.name}
+            >
+              <span className={styles.patternIcon}>{type.icon}</span>
+              <span className={styles.patternName}>{type.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Calendar Grid */}
       <div className={styles.calendarSection} data-onboarding="calendar">
         {/* Subtle Month Navigation - Inside Calendar */}
@@ -496,6 +518,7 @@ const CalendarView = () => {
                 hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
                 calendarEntries={calendarEntries}
                 hoveredHabitId={hoveredHabitId}
+                patternType={patternType}
               />
             )}
             {calendarType === 'savant' && (

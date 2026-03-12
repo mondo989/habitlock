@@ -1,12 +1,81 @@
 // supabaseDb.js
 // Database operations using Supabase (replaces Firebase Realtime Database)
 import { supabase } from './supabase';
+import { isDevUserEnabled } from '../utils/devAuth';
+import * as localDevDb from './localDevDb';
 
 // ============================================
-// USER PROFILE OPERATIONS
+// DEV MODE ROUTING
+// All exports route to localStorage in dev mode
 // ============================================
+
+export const createHabit = async (userId, habitData) => {
+  if (isDevUserEnabled()) return localDevDb.createHabit(userId, habitData);
+  return _createHabit(userId, habitData);
+};
+
+export const updateHabit = async (userId, habitId, updates) => {
+  if (isDevUserEnabled()) return localDevDb.updateHabit(userId, habitId, updates);
+  return _updateHabit(userId, habitId, updates);
+};
+
+export const deleteHabit = async (userId, habitId) => {
+  if (isDevUserEnabled()) return localDevDb.deleteHabit(userId, habitId);
+  return _deleteHabit(userId, habitId);
+};
+
+export const getHabits = async (userId) => {
+  if (isDevUserEnabled()) return localDevDb.getHabits(userId);
+  return _getHabits(userId);
+};
+
+export const subscribeToHabits = (userId, callback) => {
+  if (isDevUserEnabled()) return localDevDb.subscribeToHabits(userId, callback);
+  return _subscribeToHabits(userId, callback);
+};
+
+export const updateCalendarEntry = async (userId, date, completedHabitIds, habitDetails) => {
+  if (isDevUserEnabled()) return localDevDb.updateCalendarEntry(userId, date, completedHabitIds, habitDetails);
+  return _updateCalendarEntry(userId, date, completedHabitIds, habitDetails);
+};
+
+export const getCalendarEntry = async (userId, date) => {
+  if (isDevUserEnabled()) return localDevDb.getCalendarEntry(userId, date);
+  return _getCalendarEntry(userId, date);
+};
+
+export const getAllCalendarEntries = async (userId) => {
+  if (isDevUserEnabled()) return localDevDb.getAllCalendarEntries(userId);
+  return _getAllCalendarEntries(userId);
+};
+
+export const subscribeToCalendarEntries = (userId, callback) => {
+  if (isDevUserEnabled()) return localDevDb.subscribeToCalendarEntries(userId, callback);
+  return _subscribeToCalendarEntries(userId, callback);
+};
+
+export const getCalendarEntriesForRange = async (userId, startDate, endDate) => {
+  if (isDevUserEnabled()) return localDevDb.getCalendarEntriesForRange(userId, startDate, endDate);
+  return _getCalendarEntriesForRange(userId, startDate, endDate);
+};
 
 export const saveUserProfile = async (userId, profileData) => {
+  if (isDevUserEnabled()) return localDevDb.saveUserProfile(userId, profileData);
+  return _saveUserProfile(userId, profileData);
+};
+
+export const getUserProfiles = async () => {
+  if (isDevUserEnabled()) return localDevDb.getUserProfiles();
+  return _getUserProfiles();
+};
+
+// ============================================
+// SUPABASE IMPLEMENTATIONS (prefixed with _)
+// ============================================
+
+// USER PROFILE OPERATIONS
+
+const _saveUserProfile = async (userId, profileData) => {
   const { error } = await supabase
     .from('user_profiles')
     .upsert({
@@ -21,25 +90,22 @@ export const saveUserProfile = async (userId, profileData) => {
   if (error) throw error;
 };
 
-export const getUserProfiles = async () => {
+const _getUserProfiles = async () => {
   const { data, error } = await supabase
     .from('user_profiles')
     .select('*');
   
   if (error) throw error;
   
-  // Return as object keyed by user ID (Firebase format compatibility)
   return data.reduce((acc, profile) => {
     acc[profile.id] = profile;
     return acc;
   }, {});
 };
 
-// ============================================
 // HABIT CRUD OPERATIONS
-// ============================================
 
-export const createHabit = async (userId, habitData) => {
+const _createHabit = async (userId, habitData) => {
   const { data, error } = await supabase
     .from('habits')
     .insert({
@@ -57,7 +123,6 @@ export const createHabit = async (userId, habitData) => {
   
   if (error) throw error;
   
-  // Return in Firebase-compatible format
   return {
     id: data.id,
     name: data.name,
@@ -71,8 +136,7 @@ export const createHabit = async (userId, habitData) => {
   };
 };
 
-export const updateHabit = async (userId, habitId, updates) => {
-  // Map camelCase to snake_case
+const _updateHabit = async (userId, habitId, updates) => {
   const dbUpdates = {};
   if (updates.name !== undefined) dbUpdates.name = updates.name;
   if (updates.description !== undefined) dbUpdates.description = updates.description;
@@ -86,13 +150,12 @@ export const updateHabit = async (userId, habitId, updates) => {
     .from('habits')
     .update(dbUpdates)
     .eq('id', habitId)
-    .eq('user_id', userId); // Ensure user owns the habit
+    .eq('user_id', userId);
   
   if (error) throw error;
 };
 
-export const deleteHabit = async (userId, habitId) => {
-  // Delete habit (cascade will handle habit_completions)
+const _deleteHabit = async (userId, habitId) => {
   const { error } = await supabase
     .from('habits')
     .delete()
@@ -102,7 +165,7 @@ export const deleteHabit = async (userId, habitId) => {
   if (error) throw error;
 };
 
-export const getHabits = async (userId) => {
+const _getHabits = async (userId) => {
   const { data, error } = await supabase
     .from('habits')
     .select('*')
@@ -111,7 +174,6 @@ export const getHabits = async (userId) => {
   
   if (error) throw error;
   
-  // Transform to Firebase-compatible format
   return data.map(habit => ({
     id: habit.id,
     name: habit.name,
@@ -125,11 +187,9 @@ export const getHabits = async (userId) => {
   }));
 };
 
-export const subscribeToHabits = (userId, callback) => {
-  // Initial fetch
-  getHabits(userId).then(callback).catch(console.error);
+const _subscribeToHabits = (userId, callback) => {
+  _getHabits(userId).then(callback).catch(console.error);
   
-  // Subscribe to changes
   const channel = supabase
     .channel(`habits:${userId}`)
     .on(
@@ -141,26 +201,21 @@ export const subscribeToHabits = (userId, callback) => {
         filter: `user_id=eq.${userId}`,
       },
       async () => {
-        // Refetch all habits on any change
-        const habits = await getHabits(userId);
+        const habits = await _getHabits(userId);
         callback(habits);
       }
     )
     .subscribe();
   
-  // Return unsubscribe function
   return () => {
     supabase.removeChannel(channel);
   };
 };
 
-// ============================================
 // CALENDAR ENTRY OPERATIONS
-// ============================================
 
-export const updateCalendarEntry = async (userId, date, completedHabitIds, habitDetails = {}) => {
+const _updateCalendarEntry = async (userId, date, completedHabitIds, habitDetails = {}) => {
   if (completedHabitIds.length === 0) {
-    // Delete the entry if no habits completed
     const { data: existingEntry } = await supabase
       .from('calendar_entries')
       .select('id')
@@ -177,7 +232,6 @@ export const updateCalendarEntry = async (userId, date, completedHabitIds, habit
     return;
   }
   
-  // Upsert calendar entry
   const { data: entry, error: entryError } = await supabase
     .from('calendar_entries')
     .upsert(
@@ -189,7 +243,6 @@ export const updateCalendarEntry = async (userId, date, completedHabitIds, habit
   
   if (entryError) throw entryError;
   
-  // Get existing completions
   const { data: existingCompletions } = await supabase
     .from('habit_completions')
     .select('habit_id')
@@ -197,11 +250,9 @@ export const updateCalendarEntry = async (userId, date, completedHabitIds, habit
   
   const existingHabitIds = existingCompletions?.map(c => c.habit_id) || [];
   
-  // Determine what to add/remove
   const toAdd = completedHabitIds.filter(id => !existingHabitIds.includes(id));
   const toRemove = existingHabitIds.filter(id => !completedHabitIds.includes(id));
   
-  // Remove completions
   if (toRemove.length > 0) {
     await supabase
       .from('habit_completions')
@@ -210,7 +261,6 @@ export const updateCalendarEntry = async (userId, date, completedHabitIds, habit
       .in('habit_id', toRemove);
   }
   
-  // Add completions
   if (toAdd.length > 0) {
     const completions = toAdd.map(habitId => ({
       calendar_entry_id: entry.id,
@@ -226,7 +276,7 @@ export const updateCalendarEntry = async (userId, date, completedHabitIds, habit
   }
 };
 
-export const getCalendarEntry = async (userId, date) => {
+const _getCalendarEntry = async (userId, date) => {
   const { data, error } = await supabase
     .from('calendar_entries')
     .select(`
@@ -241,10 +291,9 @@ export const getCalendarEntry = async (userId, date) => {
     .eq('date', date)
     .single();
   
-  if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+  if (error && error.code !== 'PGRST116') throw error;
   if (!data) return null;
   
-  // Transform to Firebase-compatible format
   const completedHabits = data.habit_completions.map(c => c.habit_id);
   const habits = {};
   data.habit_completions.forEach(c => {
@@ -261,7 +310,7 @@ export const getCalendarEntry = async (userId, date) => {
   };
 };
 
-export const getAllCalendarEntries = async (userId) => {
+const _getAllCalendarEntries = async (userId) => {
   const { data, error } = await supabase
     .from('calendar_entries')
     .select(`
@@ -276,7 +325,6 @@ export const getAllCalendarEntries = async (userId) => {
   
   if (error) throw error;
   
-  // Transform to Firebase-compatible format (object keyed by date)
   const entries = {};
   data.forEach(entry => {
     const completedHabits = entry.habit_completions.map(c => c.habit_id);
@@ -298,11 +346,9 @@ export const getAllCalendarEntries = async (userId) => {
   return entries;
 };
 
-export const subscribeToCalendarEntries = (userId, callback) => {
-  // Initial fetch
-  getAllCalendarEntries(userId).then(callback).catch(console.error);
+const _subscribeToCalendarEntries = (userId, callback) => {
+  _getAllCalendarEntries(userId).then(callback).catch(console.error);
   
-  // Subscribe to calendar_entries changes
   const entriesChannel = supabase
     .channel(`calendar_entries:${userId}`)
     .on(
@@ -314,13 +360,12 @@ export const subscribeToCalendarEntries = (userId, callback) => {
         filter: `user_id=eq.${userId}`,
       },
       async () => {
-        const entries = await getAllCalendarEntries(userId);
+        const entries = await _getAllCalendarEntries(userId);
         callback(entries);
       }
     )
     .subscribe();
   
-  // Subscribe to habit_completions changes
   const completionsChannel = supabase
     .channel(`habit_completions:${userId}`)
     .on(
@@ -331,20 +376,19 @@ export const subscribeToCalendarEntries = (userId, callback) => {
         table: 'habit_completions',
       },
       async () => {
-        const entries = await getAllCalendarEntries(userId);
+        const entries = await _getAllCalendarEntries(userId);
         callback(entries);
       }
     )
     .subscribe();
   
-  // Return unsubscribe function
   return () => {
     supabase.removeChannel(entriesChannel);
     supabase.removeChannel(completionsChannel);
   };
 };
 
-export const getCalendarEntriesForRange = async (userId, startDate, endDate) => {
+const _getCalendarEntriesForRange = async (userId, startDate, endDate) => {
   const { data, error } = await supabase
     .from('calendar_entries')
     .select(`
@@ -361,7 +405,6 @@ export const getCalendarEntriesForRange = async (userId, startDate, endDate) => 
   
   if (error) throw error;
   
-  // Transform to Firebase-compatible format
   const entries = {};
   data.forEach(entry => {
     const completedHabits = entry.habit_completions.map(c => c.habit_id);

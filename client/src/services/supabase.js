@@ -1,5 +1,6 @@
 // supabase.js
 import { createClient } from '@supabase/supabase-js';
+import { DEV_USER, isDevUserEnabled } from '../utils/devAuth';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -166,6 +167,16 @@ supabase.auth.onAuthStateChange((event, session) => {
 // Synchronous auth object using cached state
 export const authSync = {
   get currentUser() {
+    // Return dev user if dev mode is enabled
+    if (isDevUserEnabled()) {
+      return {
+        uid: DEV_USER.uid,
+        email: DEV_USER.email,
+        displayName: DEV_USER.displayName,
+        photoURL: DEV_USER.photoURL,
+      };
+    }
+    
     return cachedUser ? {
       uid: cachedUser.id,
       email: cachedUser.email,

@@ -9,6 +9,7 @@ import {
 } from '../services/supabase';
 import { saveUserProfile } from '../services/supabaseDb';
 import analytics from '../services/analytics';
+import { DEV_USER, isDevUserEnabled, disableDevUser } from '../utils/devAuth';
 
 const AuthContext = createContext(null);
 
@@ -18,6 +19,7 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [isDevAuth, setIsDevAuth] = useState(false);
 
   // Initialize auth and set up listener
   useEffect(() => {
@@ -26,6 +28,25 @@ export function AuthProvider({ children }) {
     const init = async () => {
       try {
         setError(null);
+        
+        // Check for dev user first (only in development)
+        if (isDevUserEnabled()) {
+          console.log('🔧 Using dev user for authentication');
+          const devUser = {
+            uid: DEV_USER.uid,
+            email: DEV_USER.email,
+            displayName: DEV_USER.displayName,
+            photoURL: DEV_USER.photoURL,
+          };
+          setUser(devUser);
+          setIsDevAuth(true);
+          setIsLoading(false);
+          setIsInitialized(true);
+          analytics.initializeClarity();
+          analytics.capture('app_initialized', { dev_mode: true });
+          return;
+        }
+        
         await initializeAuth();
         
         if (mounted) {
@@ -42,8 +63,8 @@ export function AuthProvider({ children }) {
       }
     };
 
-    // Set up auth state listener
-    const unsubscribe = onAuthChange(async (authUser) => {
+    // Set up auth state listener (skip if using dev user)
+    const unsubscribe = isDevUserEnabled() ? () => {} : onAuthChange(async (authUser) => {
       if (!mounted) return;
       
       // Transform Supabase user to our format
@@ -124,14 +145,24 @@ export function AuthProvider({ children }) {
 
   const signOut = useCallback(async () => {
     try {
-      analytics.capture('sign_out_initiated', { user_id: user?.uid });
+      analytics.capture('sign_out_initiated', { user_id: user?.uid, dev_mode: isDevAuth });
+      
+      // Handle dev user logout
+      if (isDevAuth) {
+        disableDevUser();
+        setUser(null);
+        setIsDevAuth(false);
+        window.location.reload();
+        return;
+      }
+      
       await signOutUser();
     } catch (err) {
       console.error('Sign out failed:', err);
       analytics.capture('sign_out_failed', { error: err.message, user_id: user?.uid });
       throw err;
     }
-  }, [user?.uid]);
+  }, [user?.uid, isDevAuth]);
 
   const value = useMemo(() => ({
     user,
@@ -141,6 +172,7 @@ export function AuthProvider({ children }) {
     isInitialized,
     error,
     magicLinkSent,
+    isDevAuth,
     signIn,
     signInWithEmail,
     signOut,
@@ -150,7 +182,7 @@ export function AuthProvider({ children }) {
       displayName: user.displayName,
       photoURL: user.photoURL,
     } : null,
-  }), [user, isLoading, isInitialized, error, magicLinkSent, signIn, signInWithEmail, signOut]);
+  }), [user, isLoading, isInitialized, error, magicLinkSent, isDevAuth, signIn, signInWithEmail, signOut]);
 
   return (
     <AuthContext.Provider value={value}>

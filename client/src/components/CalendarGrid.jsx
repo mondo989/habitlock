@@ -21,7 +21,8 @@ const CalendarGrid = ({
   hasHabitMetWeeklyGoal,
   currentDate,
   calendarEntries,
-  hoveredHabitId
+  hoveredHabitId,
+  patternType = 'bokeh'
 }) => {
   const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const gridRef = useRef(null);
@@ -411,6 +412,7 @@ const CalendarGrid = ({
                   animationIndex={animationIndex}
                   calendarEntries={calendarEntries}
                   hoveredHabitId={hoveredHabitId}
+                  patternType={patternType}
                   data-date={day.date}
                 />
               );

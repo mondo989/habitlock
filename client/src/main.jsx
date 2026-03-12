@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'
 import App from './App.jsx'
 import { PostHogProvider } from 'posthog-js/react'
+import './utils/devAuth' // Initialize dev auth helpers (dev mode only)
 
 const options = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,

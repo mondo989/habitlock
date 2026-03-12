@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import Tooltip from './Tooltip';
 import { calculateWeeklyCompletions } from '../utils/streakUtils';
+import P5PatternBackground from './P5PatternBackground';
 import styles from './CalendarCell.module.scss';
 
 const useIsMobile = () => {
@@ -94,7 +95,8 @@ const CalendarCell = ({
   isToday = false,
   animationIndex = 0,
   calendarEntries = {},
-  hoveredHabitId = null
+  hoveredHabitId = null,
+  patternType = 'bokeh'
 }) => {
   const { date } = day;
   const isMobile = useIsMobile();
@@ -114,6 +116,11 @@ const CalendarCell = ({
 
   const canvasRef = useRef(null);
   const dateSeed = useMemo(() => date.split('-').reduce((acc, num) => acc + parseInt(num), 0), [date]);
+
+  const habitColors = useMemo(() => {
+    const defaultColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
+    return completedHabitDetails.map((h, i) => h.color || defaultColors[i % defaultColors.length]);
+  }, [completedHabitDetails]);
   
   const emojiData = useMemo(() => {
     if (completedHabitDetails.length === 0) return [];
@@ -319,6 +326,17 @@ const CalendarCell = ({
     >
       {/* Overlay for habit hover effect */}
       <div className={styles.habitOverlay} />
+      
+      {/* P5.js generated geometric pattern background */}
+      {completedHabitDetails.length > 0 && (
+        <P5PatternBackground
+          key={`${date}-${patternType}`}
+          colors={habitColors}
+          seed={dateSeed}
+          patternType={patternType}
+          className={styles.p5Background}
+        />
+      )}
       
       <Tooltip content={dayNumberTooltipContent} position="top">
         <div className={styles.dayNumber}>

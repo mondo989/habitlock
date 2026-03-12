@@ -16,6 +16,14 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- How HabitLock Works -->
+  <url>
+    <loc>https://habitlock.org/how-habitlock-works</loc>
+    <lastmod>2026-03-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- Blog Index -->
   <url>
     <loc>https://habitlock.org/blog</loc>
