@@ -231,11 +231,18 @@ const CalendarGrid = ({
           {streakLines.map((path, index) => {
             const pointsStr = path.points.map(p => `${p.x},${p.y}`).join(' ');
             // Scale animation duration based on path length (longer path = slightly longer animation)
-            // Min 0.5s, max 1.5s for smoother feel
-            const animDuration = Math.min(1.5, Math.max(0.5, path.length / 600));
+            // Min 0.3s, max 0.8s for quicker feel since we're staggering
+            const animDuration = Math.min(0.8, Math.max(0.3, path.length / 800));
+            
+            // Calculate stagger delay - each week starts after previous ones complete
+            let staggerDelay = 0;
+            for (let i = 0; i < index; i++) {
+              const prevDuration = Math.min(0.8, Math.max(0.3, streakLines[i].length / 800));
+              staggerDelay += prevDuration;
+            }
             
             return (
-              <g key={`${hoveredHabitId}-${index}`}>
+              <g key={`${hoveredHabitId}-${path.weekIndex}`}>
                 {/* Background line for contrast */}
                 <polyline
                   points={pointsStr}
@@ -245,7 +252,11 @@ const CalendarGrid = ({
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   className={styles.streakLineBg}
-                  style={{ '--line-length': path.length, '--anim-duration': `${animDuration}s` }}
+                  style={{ 
+                    '--line-length': path.length, 
+                    '--anim-duration': `${animDuration}s`,
+                    '--anim-delay': `${staggerDelay}s`
+                  }}
                 />
                 {/* Outer glow effect */}
                 <polyline
@@ -258,7 +269,11 @@ const CalendarGrid = ({
                   opacity="0.4"
                   filter="url(#glow)"
                   className={styles.streakLineGlow}
-                  style={{ '--line-length': path.length, '--anim-duration': `${animDuration}s` }}
+                  style={{ 
+                    '--line-length': path.length, 
+                    '--anim-duration': `${animDuration}s`,
+                    '--anim-delay': `${staggerDelay}s`
+                  }}
                 />
                 {/* Main line */}
                 <polyline
@@ -269,7 +284,11 @@ const CalendarGrid = ({
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   className={styles.streakLine}
-                  style={{ '--line-length': path.length, '--anim-duration': `${animDuration}s` }}
+                  style={{ 
+                    '--line-length': path.length, 
+                    '--anim-duration': `${animDuration}s`,
+                    '--anim-delay': `${staggerDelay}s`
+                  }}
                 />
               </g>
             );

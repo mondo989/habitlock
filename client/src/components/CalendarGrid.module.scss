@@ -24,19 +24,19 @@
 .streakLine {
   stroke-dasharray: var(--line-length, 2000);
   stroke-dashoffset: var(--line-length, 2000);
-  animation: drawLine var(--anim-duration, 0.8s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: drawLine var(--anim-duration, 0.8s) cubic-bezier(0.22, 1, 0.36, 1) var(--anim-delay, 0s) forwards;
 }
 
 .streakLineGlow {
   stroke-dasharray: var(--line-length, 2000);
   stroke-dashoffset: var(--line-length, 2000);
-  animation: drawLineGlow var(--anim-duration, 0.8s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: drawLineGlow var(--anim-duration, 0.8s) cubic-bezier(0.22, 1, 0.36, 1) var(--anim-delay, 0s) forwards;
 }
 
 .streakLineBg {
   stroke-dasharray: var(--line-length, 2000);
   stroke-dashoffset: var(--line-length, 2000);
-  animation: drawLine var(--anim-duration, 0.8s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: drawLine var(--anim-duration, 0.8s) cubic-bezier(0.22, 1, 0.36, 1) var(--anim-delay, 0s) forwards;
 }
 
 @keyframes drawLine {
