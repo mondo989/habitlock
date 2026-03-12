@@ -153,18 +153,103 @@ const CalendarGrid = ({
         console.log('Streak line positions:', allCompletedCells.map(c => ({ date: c.date, x: Math.round(c.x), y: Math.round(c.y) })));
       }
 
-      // Only create a path if there are 2+ points
+      // Create path with horizontal week transitions
       if (allCompletedCells.length >= 2) {
-        // Calculate total path length for animation timing
+        const enhancedPath = [];
+        
+        for (let i = 0; i < allCompletedCells.length; i++) {
+          const currentCell = allCompletedCells[i];
+          const nextCell = allCompletedCells[i + 1];
+          
+          // Add the current cell
+          enhancedPath.push(currentCell);
+          
+          if (nextCell) {
+            const currentDate = new Date(currentCell.date);
+            const nextDate = new Date(nextCell.date);
+            
+            // Get week start (Sunday) for both dates
+            const currentWeekStart = new Date(currentDate);
+            currentWeekStart.setDate(currentDate.getDate() - currentDate.getDay());
+            
+            const nextWeekStart = new Date(nextDate);
+            nextWeekStart.setDate(nextDate.getDate() - nextDate.getDay());
+            
+            // Check if we're crossing into a new week
+            if (currentWeekStart.getTime() !== nextWeekStart.getTime()) {
+              // Find Saturday's position in the current week
+              const saturdayDate = new Date(currentWeekStart);
+              saturdayDate.setDate(currentWeekStart.getDate() + 6); // Saturday
+              
+              const saturdayCell = cells.find(cell => {
+                const cellDateStr = cell.getAttribute('data-date');
+                return cellDateStr === saturdayDate.toISOString().split('T')[0];
+              });
+              
+              if (saturdayCell) {
+                const rect = saturdayCell.getBoundingClientRect();
+                const gridRect = grid.getBoundingClientRect();
+                const canvasTop = 28;
+                const canvasLeft = 8;
+                const canvasRight = 8;
+                const canvasWidth = rect.width - canvasLeft - canvasRight;
+                
+                const saturdayX = rect.left - gridRect.left + canvasLeft + (canvasWidth * 0.5);
+                const saturdayY = currentCell.y; // Same Y as current cell
+                
+                // Add Saturday transition point
+                enhancedPath.push({
+                  date: currentCell.date + '-saturday-transition',
+                  x: saturdayX,
+                  y: saturdayY,
+                  originalX: saturdayX,
+                  originalY: saturdayY
+                });
+              }
+              
+              // Find Monday's position in the next week  
+              const mondayDate = new Date(nextWeekStart);
+              mondayDate.setDate(nextWeekStart.getDate() + 1); // Monday
+              
+              const mondayCell = cells.find(cell => {
+                const cellDateStr = cell.getAttribute('data-date');
+                return cellDateStr === mondayDate.toISOString().split('T')[0];
+              });
+              
+              if (mondayCell) {
+                const rect = mondayCell.getBoundingClientRect();
+                const gridRect = grid.getBoundingClientRect();
+                const canvasTop = 28;
+                const canvasLeft = 8;
+                const canvasRight = 8;
+                const canvasWidth = rect.width - canvasLeft - canvasRight;
+                
+                const mondayX = rect.left - gridRect.left + canvasLeft + (canvasWidth * 0.5);
+                const mondayY = nextCell.y; // Same Y as next cell
+                
+                // Add Monday starting point
+                enhancedPath.push({
+                  date: nextCell.date + '-monday-transition',
+                  x: mondayX,
+                  y: mondayY,
+                  originalX: mondayX,
+                  originalY: mondayY
+                });
+              }
+            }
+          }
+        }
+        
+        // Calculate total path length
         let totalLength = 0;
-        for (let i = 0; i < allCompletedCells.length - 1; i++) {
-          const dx = allCompletedCells[i + 1].x - allCompletedCells[i].x;
-          const dy = allCompletedCells[i + 1].y - allCompletedCells[i].y;
+        for (let i = 0; i < enhancedPath.length - 1; i++) {
+          const dx = enhancedPath[i + 1].x - enhancedPath[i].x;
+          const dy = enhancedPath[i + 1].y - enhancedPath[i].y;
           totalLength += Math.sqrt(dx * dx + dy * dy);
         }
         
         setStreakLines([{
-          points: allCompletedCells,
+          points: enhancedPath,
           length: totalLength
         }]);
       } else {
