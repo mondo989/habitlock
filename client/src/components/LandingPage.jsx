@@ -84,24 +84,19 @@ const LandingPage = () => {
 
   const features = [
     {
-      icon: '🎯',
-      title: 'Smart Habit Tracking',
-      description: 'Effortlessly track daily habits with intelligent insights that adapt to your lifestyle and goals.'
+      icon: '👁️',
+      title: 'See Your Discipline',
+      description: 'Instead of spreadsheets and numbers, your progress becomes a visual landscape. Each day adds to a larger picture of your habits.'
     },
     {
-      icon: '📊',
-      title: 'Beautiful Analytics',
-      description: 'Visualize your progress with stunning charts and streaks that motivate you to keep going.'
+      icon: '🔥',
+      title: 'Build Streaks That Matter',
+      description: "Streaks aren't just numbers. They shape the patterns that form across your calendar, making consistency visible."
     },
     {
-      icon: '🔐',
-      title: 'Lock Your Focus',
-      description: 'Stay committed with our unique locking mechanism that helps you build unbreakable habits.'
-    },
-    {
-      icon: '☁️',
-      title: 'Seamless Sync',
-      description: 'Your data follows you everywhere with real-time sync across all your devices.'
+      icon: '📖',
+      title: 'Your Month Becomes a Story',
+      description: 'Over time your habits form a unique composition — a visual record of your discipline.'
     }
   ];
 
@@ -150,12 +145,13 @@ const LandingPage = () => {
         <div className={styles.heroContent}>
           <div className={styles.heroText}>
             <h1 className={styles.heroTitle}>
-              Build habits that
-              <span className={styles.gradient}> stick</span>
+              Build habits.
+              <span className={styles.gradient}> Watch your discipline take shape.</span>
             </h1>
             <p className={styles.heroSubtitle}>
-              The beautifully simple habit tracker that helps you build consistency, 
-              visualize progress, and achieve your goals with intelligent insights.
+              HabitLock turns daily consistency into something you can see. 
+              Every completed habit adds to a living calendar that evolves 
+              into patterns, colors, and visual progress over time.
             </p>
             <div className={styles.heroActions}>
               <button 
@@ -269,8 +265,8 @@ const LandingPage = () => {
       <section className={styles.features}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
-            <h2>Everything you need to succeed</h2>
-            <p>Powerful features designed to make habit building effortless and enjoyable</p>
+            <h2>Watch your discipline turn into art</h2>
+            <p>Your progress becomes visible, meaningful, and uniquely yours</p>
           </div>
           <div className={styles.featuresGrid}>
             {features.map((feature, index) => (
@@ -339,8 +335,8 @@ const LandingPage = () => {
       <section className={styles.finalCta}>
         <div className={styles.container}>
           <div className={styles.ctaContent}>
-            <h2>Ready to build lasting habits?</h2>
-            <p>Join thousands of people who've transformed their lives with HabitLock</p>
+            <h2>Start Building Your Habit Landscape</h2>
+            <p>Turn your daily discipline into something you can see</p>
             <button 
               className={styles.ctaButton}
               onClick={handleGetStarted}

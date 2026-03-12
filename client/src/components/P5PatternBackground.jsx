@@ -40,6 +40,9 @@ export const PATTERN_TYPES = {
   rings: { id: 'rings', name: 'Rings', icon: '◎' },
   mosaic: { id: 'mosaic', name: 'Mosaic', icon: '◆' },
   geometric: { id: 'geometric', name: 'Geometric', icon: '△' },
+  confetti: { id: 'confetti', name: 'Confetti', icon: '🎊' },
+  starburst: { id: 'starburst', name: 'Starburst', icon: '✴' },
+  waves: { id: 'waves', name: 'Waves', icon: '〰' },
 };
 
 const P5PatternBackground = ({ 
@@ -61,7 +64,7 @@ const P5PatternBackground = ({
 
     // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const animatablePatterns = ['geometric', 'bokeh', 'rings'];
+    const animatablePatterns = ['geometric', 'bokeh', 'rings', 'confetti', 'starburst', 'waves'];
     const shouldAnimate = animated && !prefersReducedMotion && animatablePatterns.includes(patternType);
 
     const rect = containerRef.current.getBoundingClientRect();
@@ -105,6 +108,15 @@ const P5PatternBackground = ({
             case 'rings':
               shapes = generateRingsShapes(rand, rgbColors, width, height, colors, entranceTimes, now);
               break;
+            case 'confetti':
+              shapes = generateConfettiShapes(rand, rgbColors, width, height, colors, entranceTimes, now);
+              break;
+            case 'starburst':
+              shapes = generateStarburstShapes(rand, rgbColors, width, height, colors, entranceTimes, now);
+              break;
+            case 'waves':
+              shapes = generateWavesShapes(rand, rgbColors, width, height, colors, entranceTimes, now);
+              break;
             case 'geometric':
             default:
               shapes = generateGeometricShapes(rand, rgbColors, width, height, colors, entranceTimes, now);
@@ -125,6 +137,15 @@ const P5PatternBackground = ({
               break;
             case 'mosaic':
               drawMosaicPattern(p, rand, rgbColors, width, height);
+              break;
+            case 'confetti':
+              drawConfettiPattern(p, rand, rgbColors, width, height);
+              break;
+            case 'starburst':
+              drawStarburstPattern(p, rand, rgbColors, width, height);
+              break;
+            case 'waves':
+              drawWavesPattern(p, rand, rgbColors, width, height);
               break;
             case 'geometric':
             default:
@@ -275,6 +296,43 @@ const P5PatternBackground = ({
               }
               p.endShape(p.CLOSE);
               break;
+            case 'confetti-piece': {
+              p.noStroke();
+              p.fill(shape.color.r, shape.color.g, shape.color.b, effectiveAlpha);
+              if (shape.shapeVariant === 0) {
+                p.rect(-shape.size/2, -shape.size/4, shape.size, shape.size/2);
+              } else if (shape.shapeVariant === 1) {
+                p.circle(0, 0, shape.size);
+              } else {
+                p.beginShape();
+                p.vertex(0, -shape.size/2);
+                p.vertex(shape.size/2, shape.size/2);
+                p.vertex(-shape.size/2, shape.size/2);
+                p.endShape(p.CLOSE);
+              }
+              break;
+            }
+            case 'ray': {
+              p.stroke(shape.color.r, shape.color.g, shape.color.b, effectiveAlpha);
+              p.strokeWeight(shape.strokeWeight || 1.5);
+              p.line(0, 0, shape.length, 0);
+              break;
+            }
+            case 'wave-line': {
+              p.noFill();
+              p.stroke(shape.color.r, shape.color.g, shape.color.b, effectiveAlpha);
+              p.strokeWeight(shape.strokeWeight || 2);
+              p.beginShape();
+              const waveTime = time * shape.waveSpeed;
+              for (let i = 0; i <= shape.segments; i++) {
+                const t = i / shape.segments;
+                const wx = t * shape.length - shape.length / 2;
+                const wy = Math.sin((t * shape.frequency + waveTime) * Math.PI * 2) * shape.amplitude;
+                p.vertex(wx, wy);
+              }
+              p.endShape();
+              break;
+            }
           }
           p.pop();
         });
@@ -534,6 +592,220 @@ function generateRingsShapes(rand, colors, width, height, hexColors = [], entran
       scaleSpeed: 0.18 + rand() * 0.2,
       scalePhase: rand() * Math.PI * 2,
       scaleAmount: 0.08 + rand() * 0.08,
+      entranceTime: null,
+    });
+  }
+  
+  return shapes;
+}
+
+// ============================================================================
+// ANIMATED CONFETTI - Generate confetti shapes with animation parameters
+// ============================================================================
+function generateConfettiShapes(rand, colors, width, height, hexColors = [], entranceTimes = new Map(), now = Date.now()) {
+  const shapes = [];
+  
+  // Create confetti pieces for each color
+  for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
+    const color = colors[colorIndex];
+    const hexColor = hexColors[colorIndex];
+    const entranceTime = hexColor && entranceTimes.get(hexColor);
+    const isNew = entranceTime && (now - entranceTime < ENTRANCE_DELAY_MS + ENTRANCE_DURATION_MS + 100);
+    
+    // Several pieces per color
+    for (let i = 0; i < 4; i++) {
+      shapes.push({
+        type: 'confetti-piece',
+        shapeVariant: Math.floor(rand() * 3), // 0=rect, 1=circle, 2=triangle
+        x: rand() * width,
+        y: rand() * height,
+        size: 6 + rand() * 10,
+        rotation: rand() * Math.PI * 2,
+        color: lightenColor(color, 0.3 + rand() * 0.3),
+        alpha: 100 + rand() * 100,
+        speedX: 0.5 + rand() * 0.8,
+        speedY: 0.4 + rand() * 0.7,
+        phaseX: rand() * Math.PI * 2,
+        phaseY: rand() * Math.PI * 2,
+        driftX: 3 + rand() * 6,
+        driftY: 3 + rand() * 6,
+        rotSpeed: 0.3 + rand() * 0.5,
+        rotPhase: rand() * Math.PI * 2,
+        rotAmount: 0.3 + rand() * 0.4,
+        scaleSpeed: 0.3 + rand() * 0.4,
+        scalePhase: rand() * Math.PI * 2,
+        scaleAmount: 0.1 + rand() * 0.15,
+        entranceTime: isNew ? entranceTime + (i * 50) : null,
+      });
+    }
+  }
+  
+  // Extra white sparkles
+  for (let i = 0; i < 5; i++) {
+    shapes.push({
+      type: 'confetti-piece',
+      shapeVariant: 1,
+      x: rand() * width,
+      y: rand() * height,
+      size: 3 + rand() * 5,
+      rotation: 0,
+      color: { r: 255, g: 255, b: 255 },
+      alpha: 80 + rand() * 80,
+      speedX: 0.6 + rand() * 0.8,
+      speedY: 0.5 + rand() * 0.7,
+      phaseX: rand() * Math.PI * 2,
+      phaseY: rand() * Math.PI * 2,
+      driftX: 2 + rand() * 4,
+      driftY: 2 + rand() * 4,
+      scaleSpeed: 0.5 + rand() * 0.5,
+      scalePhase: rand() * Math.PI * 2,
+      scaleAmount: 0.2 + rand() * 0.2,
+      entranceTime: null,
+    });
+  }
+  
+  return shapes;
+}
+
+// ============================================================================
+// ANIMATED STARBURST - Generate ray shapes radiating from points
+// ============================================================================
+function generateStarburstShapes(rand, colors, width, height, hexColors = [], entranceTimes = new Map(), now = Date.now()) {
+  const shapes = [];
+  
+  // Create starburst center per color
+  for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
+    const color = colors[colorIndex];
+    const hexColor = hexColors[colorIndex];
+    const lightColor = lightenColor(color, 0.4);
+    const entranceTime = hexColor && entranceTimes.get(hexColor);
+    const isNew = entranceTime && (now - entranceTime < ENTRANCE_DELAY_MS + ENTRANCE_DURATION_MS + 100);
+    
+    const cx = 20 + rand() * (width - 40);
+    const cy = 20 + rand() * (height - 40);
+    const numRays = 6 + Math.floor(rand() * 6);
+    const baseAngle = rand() * Math.PI * 2;
+    
+    // Rays radiating from center
+    for (let i = 0; i < numRays; i++) {
+      const angle = baseAngle + (i / numRays) * Math.PI * 2;
+      shapes.push({
+        type: 'ray',
+        x: cx,
+        y: cy,
+        rotation: angle,
+        length: 20 + rand() * 35,
+        color: lightColor,
+        alpha: 60 + rand() * 80,
+        strokeWeight: 1 + rand() * 2,
+        speedX: 0.1 + rand() * 0.15,
+        speedY: 0.1 + rand() * 0.15,
+        phaseX: rand() * Math.PI * 2,
+        phaseY: rand() * Math.PI * 2,
+        driftX: 1 + rand() * 2,
+        driftY: 1 + rand() * 2,
+        rotSpeed: 0.05 + rand() * 0.1,
+        rotPhase: rand() * Math.PI * 2,
+        rotAmount: 0.1 + rand() * 0.15,
+        scaleSpeed: 0.15 + rand() * 0.2,
+        scalePhase: rand() * Math.PI * 2,
+        scaleAmount: 0.08 + rand() * 0.1,
+        entranceTime: isNew ? entranceTime + (i * 30) : null,
+      });
+    }
+    
+    // Center glow
+    shapes.push({
+      type: 'bokeh',
+      x: cx,
+      y: cy,
+      size: 12 + rand() * 15,
+      color: color,
+      alpha: 100 + rand() * 80,
+      layers: 3,
+      speedX: 0.1,
+      speedY: 0.1,
+      phaseX: rand() * Math.PI * 2,
+      phaseY: rand() * Math.PI * 2,
+      driftX: 1,
+      driftY: 1,
+      scaleSpeed: 0.2 + rand() * 0.2,
+      scalePhase: rand() * Math.PI * 2,
+      scaleAmount: 0.1 + rand() * 0.1,
+      entranceTime: isNew ? entranceTime : null,
+    });
+  }
+  
+  return shapes;
+}
+
+// ============================================================================
+// ANIMATED WAVES - Generate flowing wave lines
+// ============================================================================
+function generateWavesShapes(rand, colors, width, height, hexColors = [], entranceTimes = new Map(), now = Date.now()) {
+  const shapes = [];
+  
+  // Create wave lines per color
+  for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
+    const color = colors[colorIndex];
+    const hexColor = hexColors[colorIndex];
+    const lightColor = lightenColor(color, 0.4);
+    const entranceTime = hexColor && entranceTimes.get(hexColor);
+    const isNew = entranceTime && (now - entranceTime < ENTRANCE_DELAY_MS + ENTRANCE_DURATION_MS + 100);
+    
+    // Multiple wave lines per color at different heights
+    for (let i = 0; i < 2; i++) {
+      shapes.push({
+        type: 'wave-line',
+        x: width / 2,
+        y: height * (0.25 + rand() * 0.5),
+        rotation: (rand() - 0.5) * 0.3,
+        length: width * 0.9,
+        amplitude: 8 + rand() * 15,
+        frequency: 1 + rand() * 1.5,
+        segments: 20,
+        waveSpeed: 0.3 + rand() * 0.4,
+        color: lightColor,
+        alpha: 60 + rand() * 70,
+        strokeWeight: 1.5 + rand() * 2,
+        speedX: 0.05 + rand() * 0.1,
+        speedY: 0.08 + rand() * 0.12,
+        phaseX: rand() * Math.PI * 2,
+        phaseY: rand() * Math.PI * 2,
+        driftX: 2 + rand() * 4,
+        driftY: 3 + rand() * 5,
+        scaleSpeed: 0.1 + rand() * 0.15,
+        scalePhase: rand() * Math.PI * 2,
+        scaleAmount: 0.03 + rand() * 0.05,
+        entranceTime: isNew ? entranceTime + (i * 100) : null,
+      });
+    }
+  }
+  
+  // Accent wave lines
+  for (let i = 0; i < 2; i++) {
+    shapes.push({
+      type: 'wave-line',
+      x: width / 2,
+      y: height * (0.2 + rand() * 0.6),
+      rotation: (rand() - 0.5) * 0.2,
+      length: width * 0.7,
+      amplitude: 5 + rand() * 10,
+      frequency: 1.5 + rand() * 1.5,
+      segments: 15,
+      waveSpeed: 0.4 + rand() * 0.3,
+      color: { r: 255, g: 255, b: 255 },
+      alpha: 40 + rand() * 50,
+      strokeWeight: 1 + rand(),
+      speedX: 0.08 + rand() * 0.1,
+      speedY: 0.1 + rand() * 0.15,
+      phaseX: rand() * Math.PI * 2,
+      phaseY: rand() * Math.PI * 2,
+      driftX: 3 + rand() * 5,
+      driftY: 4 + rand() * 6,
+      scaleSpeed: 0.12 + rand() * 0.15,
+      scalePhase: rand() * Math.PI * 2,
+      scaleAmount: 0.04 + rand() * 0.05,
       entranceTime: null,
     });
   }
@@ -924,6 +1196,171 @@ function drawGeometricShape(p, shapeType, size) {
       
     default:
       p.circle(0, 0, size);
+  }
+}
+
+// ============================================================================
+// CONFETTI PATTERN - Scattered colorful shapes for a celebratory feel
+// ============================================================================
+function drawConfettiPattern(p, rand, colors, width, height) {
+  // Draw confetti pieces for each color
+  for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
+    const color = colors[colorIndex];
+    const lightColor = lightenColor(color, 0.3 + rand() * 0.3);
+    
+    // Several pieces per color
+    for (let i = 0; i < 6; i++) {
+      const x = rand() * width;
+      const y = rand() * height;
+      const size = 6 + rand() * 12;
+      const rotation = rand() * Math.PI * 2;
+      const alpha = 100 + rand() * 100;
+      const shapeVariant = Math.floor(rand() * 3);
+      
+      p.push();
+      p.translate(x, y);
+      p.rotate(rotation);
+      p.noStroke();
+      p.fill(lightColor.r, lightColor.g, lightColor.b, alpha);
+      
+      if (shapeVariant === 0) {
+        // Rectangle
+        p.rect(-size/2, -size/4, size, size/2);
+      } else if (shapeVariant === 1) {
+        // Circle
+        p.circle(0, 0, size);
+      } else {
+        // Triangle
+        p.beginShape();
+        p.vertex(0, -size/2);
+        p.vertex(size/2, size/2);
+        p.vertex(-size/2, size/2);
+        p.endShape(p.CLOSE);
+      }
+      
+      p.pop();
+    }
+  }
+  
+  // Extra white sparkles
+  for (let i = 0; i < 8; i++) {
+    const x = rand() * width;
+    const y = rand() * height;
+    const size = 3 + rand() * 5;
+    p.noStroke();
+    p.fill(255, 255, 255, 80 + rand() * 80);
+    p.circle(x, y, size);
+  }
+}
+
+// ============================================================================
+// STARBURST PATTERN - Rays radiating from points
+// ============================================================================
+function drawStarburstPattern(p, rand, colors, width, height) {
+  // Create starburst centers per color
+  for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
+    const color = colors[colorIndex];
+    const lightColor = lightenColor(color, 0.4);
+    
+    const cx = 20 + rand() * (width - 40);
+    const cy = 20 + rand() * (height - 40);
+    const numRays = 6 + Math.floor(rand() * 6);
+    const baseAngle = rand() * Math.PI * 2;
+    
+    // Rays radiating from center
+    for (let i = 0; i < numRays; i++) {
+      const angle = baseAngle + (i / numRays) * Math.PI * 2;
+      const length = 20 + rand() * 35;
+      const alpha = 60 + rand() * 80;
+      
+      p.push();
+      p.translate(cx, cy);
+      p.rotate(angle);
+      p.stroke(lightColor.r, lightColor.g, lightColor.b, alpha);
+      p.strokeWeight(1 + rand() * 2);
+      p.line(0, 0, length, 0);
+      p.pop();
+    }
+    
+    // Center glow
+    const glowSize = 12 + rand() * 15;
+    for (let j = 3; j >= 0; j--) {
+      const glowColor = lightenColor(color, j * 0.1);
+      const alpha = (80 + rand() * 60) * (j / 3);
+      const currentSize = glowSize * (1 + (3 - j) * 0.2);
+      p.noStroke();
+      p.fill(glowColor.r, glowColor.g, glowColor.b, alpha);
+      p.circle(cx, cy, currentSize);
+    }
+    p.fill(color.r, color.g, color.b, 100 + rand() * 80);
+    p.circle(cx, cy, glowSize * 0.4);
+  }
+}
+
+// ============================================================================
+// WAVES PATTERN - Flowing wave lines
+// ============================================================================
+function drawWavesPattern(p, rand, colors, width, height) {
+  // Draw wave lines per color
+  for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
+    const color = colors[colorIndex];
+    const lightColor = lightenColor(color, 0.4);
+    
+    // Multiple wave lines per color at different heights
+    for (let i = 0; i < 2; i++) {
+      const baseY = height * (0.25 + rand() * 0.5);
+      const amplitude = 8 + rand() * 15;
+      const frequency = 1 + rand() * 1.5;
+      const segments = 20;
+      const alpha = 60 + rand() * 70;
+      const rotation = (rand() - 0.5) * 0.3;
+      
+      p.push();
+      p.translate(width / 2, baseY);
+      p.rotate(rotation);
+      p.noFill();
+      p.stroke(lightColor.r, lightColor.g, lightColor.b, alpha);
+      p.strokeWeight(1.5 + rand() * 2);
+      
+      p.beginShape();
+      for (let j = 0; j <= segments; j++) {
+        const t = j / segments;
+        const x = t * width * 0.9 - width * 0.45;
+        const y = Math.sin(t * frequency * Math.PI * 2) * amplitude;
+        p.vertex(x, y);
+      }
+      p.endShape();
+      
+      p.pop();
+    }
+  }
+  
+  // Accent wave lines in white
+  for (let i = 0; i < 2; i++) {
+    const baseY = height * (0.2 + rand() * 0.6);
+    const amplitude = 5 + rand() * 10;
+    const frequency = 1.5 + rand() * 1.5;
+    const segments = 15;
+    const alpha = 40 + rand() * 50;
+    const rotation = (rand() - 0.5) * 0.2;
+    
+    p.push();
+    p.translate(width / 2, baseY);
+    p.rotate(rotation);
+    p.noFill();
+    p.stroke(255, 255, 255, alpha);
+    p.strokeWeight(1 + rand());
+    
+    p.beginShape();
+    for (let j = 0; j <= segments; j++) {
+      const t = j / segments;
+      const x = t * width * 0.7 - width * 0.35;
+      const y = Math.sin(t * frequency * Math.PI * 2) * amplitude;
+      p.vertex(x, y);
+    }
+    p.endShape();
+    
+    p.pop();
   }
 }
 

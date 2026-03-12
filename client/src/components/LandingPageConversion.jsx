@@ -61,18 +61,18 @@ const LandingPageConversion = () => {
 
   const features = [
     {
-      title: 'Visual Calendar',
-      description: 'See your entire month at a glance with beautiful emoji-based tracking',
+      title: 'See Your Discipline',
+      description: 'Instead of spreadsheets and numbers, your progress becomes a visual landscape. Each day adds to a larger picture of your habits.',
       image: 'calendar'
     },
     {
-      title: 'Smart Analytics',
-      description: 'Understand your patterns with insights that help you improve',
+      title: 'Build Streaks That Matter',
+      description: "Streaks aren't just numbers. They shape the patterns that form across your calendar, making consistency visible.",
       image: 'stats'
     },
     {
-      title: 'Achievements',
-      description: 'Unlock rewards and celebrate milestones as you build consistency',
+      title: 'Your Month Becomes a Story',
+      description: 'Over time your habits form a unique composition — a visual record of your discipline.',
       image: 'achievements'
     }
   ];
@@ -123,17 +123,18 @@ const LandingPageConversion = () => {
           </div>
           
           <h1>
-            Build habits that <span className={styles.highlight}>actually stick</span>
+            Build habits. <span className={styles.highlight}>Watch your discipline take shape.</span>
           </h1>
           
           <p className={styles.heroSub}>
-            The simple, beautiful habit tracker that helps you stay consistent. 
-            Track daily, see your progress, achieve your goals.
+            HabitLock turns daily consistency into something you can see. 
+            Every completed habit adds to a living calendar that evolves 
+            into patterns, colors, and visual progress over time.
           </p>
 
           <div className={styles.heroCta}>
             <button className={styles.primaryCta} onClick={openAuthModal}>
-              Start Free Today →
+              Start Building Your Habit Landscape →
             </button>
             <div className={styles.ctaBenefits}>
               <span>✓ Free forever</span>
@@ -211,9 +212,9 @@ const LandingPageConversion = () => {
 
       <section className={styles.features} id="features">
         <div className={styles.featuresContent}>
-          <h2>Everything you need to succeed</h2>
+          <h2>Watch your discipline turn into art</h2>
           <p className={styles.featuresIntro}>
-            No complexity. No subscriptions. Just the tools that work.
+            Your progress becomes visible, meaningful, and uniquely yours.
           </p>
           
           <div className={styles.featureTabs}>
@@ -360,8 +361,8 @@ const LandingPageConversion = () => {
 
       <section className={styles.final}>
         <div className={styles.finalContent}>
-          <h2>Start building habits today</h2>
-          <p>It takes less than 30 seconds to get started. No credit card required.</p>
+          <h2>Start Building Your Habit Landscape</h2>
+          <p>Turn your daily discipline into something you can see. No credit card required.</p>
           <button className={styles.finalCta} onClick={openAuthModal}>
             Get Started Free →
           </button>
@@ -381,7 +382,7 @@ const LandingPageConversion = () => {
                 <span>HabitLock</span>
               </div>
               <p className={styles.footerTagline}>
-                Build habits that stick. Track progress beautifully.
+                Watch your discipline turn into art.
               </p>
               <div className={styles.footerSocial}>
                 <a 
