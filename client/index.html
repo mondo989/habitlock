@@ -16,10 +16,10 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://workouttracker-5169a.web.app/" />
+    <meta property="og:url" content="https://habitlock.org/" />
     <meta property="og:title" content="HabitLock - Build habits that stick" />
     <meta property="og:description" content="The beautifully simple habit tracker that helps you build consistency, visualize progress, and achieve your goals with intelligent insights." />
-    <meta property="og:image" content="https://workouttracker-5169a.web.app/cover-thumbnail.png" />
+    <meta property="og:image" content="https://habitlock.org/cover-thumbnail.png" />
     <meta property="og:image:alt" content="HabitLock - Beautiful habit tracking calendar interface" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -28,10 +28,10 @@
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://workouttracker-5169a.web.app/" />
+    <meta property="twitter:url" content="https://habitlock.org/" />
     <meta property="twitter:title" content="HabitLock - Build habits that stick" />
     <meta property="twitter:description" content="The beautifully simple habit tracker that helps you build consistency, visualize progress, and achieve your goals." />
-    <meta property="twitter:image" content="https://workouttracker-5169a.web.app/cover-thumbnail.png" />
+    <meta property="twitter:image" content="https://habitlock.org/cover-thumbnail.png" />
     <meta property="twitter:image:alt" content="HabitLock - Beautiful habit tracking calendar interface" />
     <meta property="twitter:creator" content="@habitlock" />
     <meta property="twitter:site" content="@habitlock" />
@@ -55,11 +55,75 @@
   
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://workouttracker-5169a.web.app/" />
+    <link rel="canonical" href="https://habitlock.org/" />
     
     <!-- Preconnect to external domains for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Structured Data / JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "HabitLock",
+      "url": "https://habitlock.org",
+      "description": "The beautifully simple habit tracker that helps you build consistency, visualize progress, and achieve your goals.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://habitlock.org/blog?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "HabitLock",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "A beautifully simple habit tracker that helps you build consistency, visualize progress, and achieve your goals with intelligent insights and beautiful calendar views.",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5",
+        "ratingCount": "127"
+      },
+      "featureList": [
+        "Visual calendar tracking",
+        "Streak tracking",
+        "Smart analytics",
+        "Achievements and gamification",
+        "Cross-device sync"
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "HabitLock",
+      "url": "https://habitlock.org",
+      "logo": "https://habitlock.org/habit-lock-logo.svg",
+      "sameAs": [
+        "https://x.com/habitlock_",
+        "https://www.facebook.com/habitlock"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "url": "https://habitlock.org"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

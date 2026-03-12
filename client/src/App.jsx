@@ -123,7 +123,7 @@ function AppLayout({ children }) {
             onClick={() => handleNavigation('/', 'homepage')}
           >
             <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
-            <h1>HabitLock</h1>
+            <span className={styles.logoText}>HabitLock</span>
           </div>
           
           {/* Desktop Navigation Tabs */}
@@ -312,7 +312,7 @@ function ProtectedRoute({ children }) {
         <div className={styles.loadingScreen}>
           <div className={styles.logo}>
             <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
-            <h1>HabitLock</h1>
+            <span className={styles.logoText}>HabitLock</span>
           </div>
           <div className={styles.spinner}></div>
           <p>Loading your habit tracker...</p>
@@ -327,10 +327,10 @@ function ProtectedRoute({ children }) {
         <div className={styles.errorScreen}>
           <div className={styles.logo}>
             <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
-            <h1>HabitLock</h1>
+            <span className={styles.logoText}>HabitLock</span>
           </div>
           <div className={styles.errorContent}>
-            <h2>Oops! Something went wrong</h2>
+            <h1>Oops! Something went wrong</h1>
             <p>{error}</p>
             <button 
               className={styles.retryButton}

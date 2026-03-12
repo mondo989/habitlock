@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { onAuthChange } from '../services/supabase';
 import AuthModal from './AuthModal';
+import SEO from './SEO';
 import styles from './LandingPageConversion.module.scss';
 
 const LandingPageConversion = () => {
@@ -90,6 +91,7 @@ const LandingPageConversion = () => {
 
   return (
     <div className={styles.landing}>
+      <SEO faqs={faqs} />
       <nav className={styles.nav}>
         <div className={styles.navContent}>
           <div className={styles.logo}>
@@ -97,6 +99,7 @@ const LandingPageConversion = () => {
             <span>HabitLock</span>
           </div>
           <div className={styles.navLinks}>
+            <a href="/what-is-habitlock.html">What is HabitLock?</a>
             <a href="#features">Features</a>
             <a href="#proof">Reviews</a>
             <a href="#faq">FAQ</a>
@@ -408,6 +411,7 @@ const LandingPageConversion = () => {
             <div className={styles.footerLinks}>
               <div className={styles.footerColumn}>
                 <h4>Product</h4>
+                <a href="/what-is-habitlock.html">What is HabitLock?</a>
                 <a href="#features">Features</a>
                 <a href="#proof">Reviews</a>
                 <a href="#faq">FAQ</a>

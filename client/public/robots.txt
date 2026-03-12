@@ -1,0 +1,25 @@
+# robots.txt for HabitLock
+# https://habitlock.org
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://habitlock.org/sitemap.xml
+
+# Disallow private/authenticated areas
+Disallow: /auth/callback
+Disallow: /api/
+
+# Allow all major crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /

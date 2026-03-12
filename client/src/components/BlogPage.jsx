@@ -1,5 +1,6 @@
 // BlogPage.jsx
 import { Link } from 'react-router-dom';
+import SEO from './SEO';
 import styles from './BlogPage.module.scss';
 
 const blogArticles = [
@@ -24,6 +25,11 @@ const blogArticles = [
 const BlogPage = () => {
   return (
     <div className={styles.blogPage}>
+      <SEO 
+        title="Blog"
+        description="Research-backed insights and practical strategies to help you build habits that actually stick. Learn from habit science and psychology."
+        url="https://habitlock.org/blog"
+      />
       <nav className={styles.nav}>
         <div className={styles.navContent}>
           <Link to="/" className={styles.logo}>

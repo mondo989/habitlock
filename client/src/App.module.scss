@@ -36,7 +36,7 @@
   @include flex-start;
   gap: 12px;
   
-  h1 {
+  h1, .logoText {
     margin: 0;
     font-size: 2rem;
     font-weight: 700;
@@ -102,14 +102,14 @@
     background: #f3f4f6;
   }
 
-  h1 {
+  h1, .logoText {
     font-size: 1.5rem;
     color: #1f2937;
     margin: 0;
     @include transition-standard;
   }
   
-  &:hover h1 {
+  &:hover h1, &:hover .logoText {
     color: #3b82f6;
   }
 }
@@ -451,7 +451,7 @@
     height: 56px;
   }
 
-  .nav .logo h1 {
+  .nav .logo h1, .nav .logo .logoText {
     font-size: 1.25rem;
   }
 
@@ -545,7 +545,7 @@
   .loadingScreen, .errorScreen, .authScreen {
     padding: 12px;
 
-    .logo h1 {
+    .logo h1, .logo .logoText {
       font-size: 1.5rem;
     }
 
@@ -571,7 +571,7 @@
     min-height: 48px;
   }
 
-  .nav .logo h1 {
+  .nav .logo h1, .nav .logo .logoText {
     font-size: 1.125rem;
   }
 
@@ -652,7 +652,7 @@
     min-height: 44px;
   }
 
-  .nav .logo h1 {
+  .nav .logo h1, .nav .logo .logoText {
     font-size: 1rem;
   }
 
@@ -763,11 +763,11 @@
         background: #374151;
       }
       
-      h1 {
+      h1, .logoText {
         color: #f9fafb;
       }
       
-      &:hover h1 {
+      &:hover h1, &:hover .logoText {
         color: #60a5fa;
       }
     }

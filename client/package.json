@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:seo": "node scripts/test-structured-data.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
@@ -16,6 +17,7 @@
     "posthog-js": "^1.256.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-helmet-async": "^3.0.0",
     "react-router-dom": "^7.6.3",
     "sass": "^1.89.1"
   },
