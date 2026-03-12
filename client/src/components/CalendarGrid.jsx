@@ -93,7 +93,8 @@ const CalendarGrid = ({
       const habit = habits.find(h => h.id === hoveredHabitId);
       if (!habit) return;
 
-      const cells = grid.querySelectorAll('[data-date]');
+      const cellsNodeList = grid.querySelectorAll('[data-date]');
+      const cells = Array.from(cellsNodeList); // Convert to array for .find() method
       const allCompletedCells = [];
 
       // Collect ALL completed cells across the entire calendar
@@ -195,11 +196,15 @@ const CalendarGrid = ({
           
           // If Saturday and next week has Sunday, extend to right edge
           if (lastDayIdx === 6 && nextWeekHasSunday) {
-            const saturdayCell = cells.find(cell => cell.getAttribute('data-date') === lastPoint.date);
-            if (saturdayCell) {
-              const rect = saturdayCell.getBoundingClientRect();
-              const gridRect = grid.getBoundingClientRect();
-              lastPoint.x = rect.right - gridRect.left - 12; // Right edge with small padding
+            try {
+              const saturdayCell = cells.find(cell => cell.getAttribute('data-date') === lastPoint.date);
+              if (saturdayCell) {
+                const rect = saturdayCell.getBoundingClientRect();
+                const gridRect = grid.getBoundingClientRect();
+                lastPoint.x = rect.right - gridRect.left - 12; // Right edge with small padding
+              }
+            } catch (e) {
+              console.warn('Could not extend Saturday line:', e);
             }
           }
           
@@ -215,11 +220,15 @@ const CalendarGrid = ({
           
           // If Sunday and previous week has Saturday, start from left edge
           if (firstDayIdx === 0 && prevWeekHasSaturday) {
-            const sundayCell = cells.find(cell => cell.getAttribute('data-date') === firstPoint.date);
-            if (sundayCell) {
-              const rect = sundayCell.getBoundingClientRect();
-              const gridRect = grid.getBoundingClientRect();
-              firstPoint.x = rect.left - gridRect.left + 12; // Left edge with small padding
+            try {
+              const sundayCell = cells.find(cell => cell.getAttribute('data-date') === firstPoint.date);
+              if (sundayCell) {
+                const rect = sundayCell.getBoundingClientRect();
+                const gridRect = grid.getBoundingClientRect();
+                firstPoint.x = rect.left - gridRect.left + 12; // Left edge with small padding
+              }
+            } catch (e) {
+              console.warn('Could not extend Sunday line:', e);
             }
           }
           
