@@ -120,7 +120,7 @@ function AppLayout({ children }) {
         <div className={styles.navContent}>
           <div 
             className={styles.logo}
-            onClick={() => handleNavigation('/calendar', 'calendar')}
+            onClick={() => handleNavigation('/', 'homepage')}
           >
             <img src="/habit-lock-logo.svg" alt="HabitLock Logo" className={styles.logoIcon} />
             <h1>HabitLock</h1>
