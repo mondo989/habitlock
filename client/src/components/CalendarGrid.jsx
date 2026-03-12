@@ -161,29 +161,80 @@ const CalendarGrid = ({
         });
       });
 
+      // Helper to get day index within a week (0=Sun, 6=Sat)
+      const getDayIndexInWeek = (date, weekIdx) => {
+        return calendarMatrix[weekIdx]?.findIndex(day => day.date === date) ?? -1;
+      };
+
       // Create separate line segments for each week with 2+ completions
       const weeklyStreakLines = [];
-      Object.entries(weekGroups).forEach(([weekIndex, weekCells]) => {
+      const weekIndices = Object.keys(weekGroups).map(Number).sort((a, b) => a - b);
+      
+      weekIndices.forEach((weekIdx) => {
+        const weekCells = weekGroups[weekIdx];
         if (weekCells.length >= 2) {
           // Sort cells within the week by day (left to right)
           weekCells.sort((a, b) => {
-            const aDay = calendarMatrix[parseInt(weekIndex)].findIndex(day => day.date === a.date);
-            const bDay = calendarMatrix[parseInt(weekIndex)].findIndex(day => day.date === b.date);
+            const aDay = getDayIndexInWeek(a.date, weekIdx);
+            const bDay = getDayIndexInWeek(b.date, weekIdx);
             return aDay - bDay;
           });
           
+          // Clone points so we can modify them
+          const adjustedPoints = weekCells.map(p => ({ ...p }));
+          
+          // Check if last point is Saturday (index 6)
+          const lastPoint = adjustedPoints[adjustedPoints.length - 1];
+          const lastDayIdx = getDayIndexInWeek(lastPoint.date, weekIdx);
+          
+          // Check if next week exists and starts with Sunday
+          const nextWeekCells = weekGroups[weekIdx + 1];
+          const nextWeekHasSunday = nextWeekCells?.some(cell => {
+            return getDayIndexInWeek(cell.date, weekIdx + 1) === 0;
+          });
+          
+          // If Saturday and next week has Sunday, extend to right edge
+          if (lastDayIdx === 6 && nextWeekHasSunday) {
+            const saturdayCell = cells.find(cell => cell.getAttribute('data-date') === lastPoint.date);
+            if (saturdayCell) {
+              const rect = saturdayCell.getBoundingClientRect();
+              const gridRect = grid.getBoundingClientRect();
+              lastPoint.x = rect.right - gridRect.left - 12; // Right edge with small padding
+            }
+          }
+          
+          // Check if first point is Sunday (index 0)
+          const firstPoint = adjustedPoints[0];
+          const firstDayIdx = getDayIndexInWeek(firstPoint.date, weekIdx);
+          
+          // Check if previous week exists and ends with Saturday
+          const prevWeekCells = weekGroups[weekIdx - 1];
+          const prevWeekHasSaturday = prevWeekCells?.some(cell => {
+            return getDayIndexInWeek(cell.date, weekIdx - 1) === 6;
+          });
+          
+          // If Sunday and previous week has Saturday, start from left edge
+          if (firstDayIdx === 0 && prevWeekHasSaturday) {
+            const sundayCell = cells.find(cell => cell.getAttribute('data-date') === firstPoint.date);
+            if (sundayCell) {
+              const rect = sundayCell.getBoundingClientRect();
+              const gridRect = grid.getBoundingClientRect();
+              firstPoint.x = rect.left - gridRect.left + 12; // Left edge with small padding
+            }
+          }
+          
           // Calculate path length for this week
           let weekLength = 0;
-          for (let i = 0; i < weekCells.length - 1; i++) {
-            const dx = weekCells[i + 1].x - weekCells[i].x;
-            const dy = weekCells[i + 1].y - weekCells[i].y;
+          for (let i = 0; i < adjustedPoints.length - 1; i++) {
+            const dx = adjustedPoints[i + 1].x - adjustedPoints[i].x;
+            const dy = adjustedPoints[i + 1].y - adjustedPoints[i].y;
             weekLength += Math.sqrt(dx * dx + dy * dy);
           }
           
           weeklyStreakLines.push({
-            points: weekCells,
+            points: adjustedPoints,
             length: weekLength,
-            weekIndex: parseInt(weekIndex)
+            weekIndex: weekIdx
           });
         }
       });
