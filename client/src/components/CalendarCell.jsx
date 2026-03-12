@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import Tooltip from './Tooltip';
 import { calculateWeeklyCompletions } from '../utils/streakUtils';
-import P5PatternBackground from './P5PatternBackground';
+import P5PatternBackground, { getPatternForHabit, getHabitSeedOffset } from './P5PatternBackground';
 import styles from './CalendarCell.module.scss';
 
 const useIsMobile = () => {
@@ -329,13 +329,39 @@ const CalendarCell = ({
       
       {/* P5.js generated geometric pattern background */}
       {completedHabitDetails.length > 0 && (
-        <P5PatternBackground
-          key={`${date}-${patternType}`}
-          colors={habitColors}
-          seed={dateSeed}
-          patternType={patternType}
-          className={styles.p5Background}
-        />
+        patternType === 'mixed' ? (
+          <>
+            {/* Mixed mode: render each habit with its own pattern type and unique seed */}
+            {completedHabitDetails.map((habit, idx) => (
+              <P5PatternBackground
+                key={`${date}-mixed-${habit.id}`}
+                colors={[habit.color || habitColors[idx]]}
+                seed={dateSeed + getHabitSeedOffset(habit.id)}
+                patternType={getPatternForHabit(habit.id)}
+                className={styles.p5Background}
+              />
+            ))}
+            {/* Subtle mosaic celebration overlay when all habits complete */}
+            {completedHabitDetails.length === habits.length && habits.length > 0 && (
+              <P5PatternBackground
+                key={`${date}-mixed-celebration`}
+                colors={habitColors}
+                seed={dateSeed + 777}
+                patternType="mosaic"
+                className={`${styles.p5Background} ${styles.celebrationPattern}`}
+              />
+            )}
+          </>
+        ) : (
+          // Single pattern mode: all habits share one pattern
+          <P5PatternBackground
+            key={`${date}-${patternType}`}
+            colors={habitColors}
+            seed={dateSeed}
+            patternType={patternType}
+            className={styles.p5Background}
+          />
+        )
       )}
       
       <Tooltip content={dayNumberTooltipContent} position="top">

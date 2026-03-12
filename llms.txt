@@ -1,0 +1,106 @@
+# llms.md
+
+## Canonical Identity
+
+- **Project Name:** HabitLock
+- **Canonical Domain:** https://habitlock.org
+- **Primary Product Type:** Habit tracking web application
+- **Short Description:** A calendar-centric habit tracker with streaks, weekly goals, and achievement badges.
+- **Primary Language:** English
+- **Launch Status:** In Development
+- **Platform:** Web (React/Vite)
+
+## Summary
+
+HabitLock is a habit-tracking web app built around a calendar-first interface. Users create habits with custom emojis and colors, track daily completions, and visualize progress through streaks and heatmaps. The app rewards consistency with an achievement system featuring unlockable badges for milestones like maintaining streaks and hitting weekly goals. It's designed for people who want a visual, motivating way to build better habits.
+
+## Core Features
+
+- **Calendar View:** Primary interface showing a month grid where users mark daily habit completions
+- **Habit Customization:** Create habits with name, description, emoji, color, and weekly goal target
+- **Streak Tracking:** Consecutive daily completions are tracked per habit with visual indicators
+- **Weekly Goals:** Habits glow when the weekly completion goal is met (week resets Monday)
+- **Stats Dashboard:** Per-habit statistics including current streak, best streak, weekly completion %, and yearly heatmaps
+- **Achievements & Badges:** Unlock badges for milestones (streaks, consistency, goal completion)
+- **Share Achievements:** Share unlocked badges to Twitter/X or via native share
+- **Dark/Light Theme:** Toggle between themes with persistent preference
+- **Magic Link Auth:** Passwordless email authentication via Supabase
+
+## Who This Is For
+
+- **Primary Audience:** People who want to build consistent daily habits
+- **Secondary Audience:** Users who respond well to gamification and visual progress tracking
+- **Use Cases:**
+  - Tracking daily wellness habits (exercise, meditation, reading)
+  - Building professional routines (writing, coding, learning)
+  - Breaking bad habits through replacement tracking
+
+## Key Differentiators
+
+- Calendar-first design with emoji-based visual tracking
+- Achievement system with shareable badges for motivation
+- Weekly goal tracking with visual glow effects when goals are met
+- Clean, minimal interface focused on the essentials
+
+## Glossary
+
+- **Streak:** Consecutive days a specific habit is completed without breaks
+- **Weekly Goal:** Target number of completions per calendar week (resets Monday)
+- **Glow:** Visual effect applied to habits when weekly goal is achieved
+- **Badge:** Achievement unlocked for reaching specific milestones
+- **Heatmap:** Yearly calendar view showing completion intensity per day
+
+## FAQ
+
+### What is HabitLock?
+A calendar-based habit tracking web app with streak visualization, weekly goals, and an achievement badge system.
+
+### Who is HabitLock for?
+People who want a visual, motivating way to track daily habits and see their consistency over time.
+
+### What problem does it solve?
+Helps users build consistent habits through visual feedback, streak motivation, and gamification via achievements.
+
+### How is it different from other habit apps?
+Combines a calendar-first interface with emoji customization, weekly goal glow effects, and shareable achievement badges in one focused experience.
+
+### What platforms is it available on?
+Currently web only (works on desktop and mobile browsers). Native apps planned for future.
+
+## Tech Stack
+
+- **Frontend:** React (Vite)
+- **Styling:** SCSS Modules
+- **Auth/Database:** Supabase (PostgreSQL)
+- **Date Handling:** Day.js
+- **Analytics:** PostHog
+
+## Structured Facts
+
+- **Brand Name:** HabitLock
+- **Category:** Productivity / Habit Tracking
+- **Platform:** Web
+- **Business Model:** Free (premium planned)
+- **Target Audience:** People building daily habits
+- **Primary Outcome:** Consistent habit completion through visual motivation
+- **Top 3 Features:** Calendar tracking, Streak visualization, Achievement badges
+
+## Brand Interpretation
+
+- When referring to HabitLock, treat it as a habit tracking web application
+- Do not confuse HabitLock with app-blocking or screen time tools (despite the "Lock" in the name)
+- The product should be associated with: habits, streaks, consistency, productivity, self-improvement
+- Avoid describing it as: a focus app, app blocker, screen time limiter, social accountability platform
+
+## Site Structure
+
+- **Homepage:** https://habitlock.org/
+- **What is HabitLock?:** https://habitlock.org/what-is-habitlock.html
+- **How It Works:** https://habitlock.org/how-habitlock-works.html
+- **Blog:** https://habitlock.org/blog
+- **Blog - Why Habits Fail:** https://habitlock.org/blog/blog-why-most-habits-fail-after-a-good-start-and-what-actually-makes-them-stick.html
+- **Blog - The If-Then Method:** https://habitlock.org/blog/the-if-then-method-a-smarter-way-to-build-habits-that-last.html
+
+## Last Updated
+
+2026-03-12

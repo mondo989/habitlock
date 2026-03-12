@@ -366,17 +366,7 @@ const CalendarView = () => {
 
       {/* Habits Legend - Above Calendar */}
       <div className={styles.habitsLegend}>
-        <div className={styles.legendHeader}>
-          <h2 className={styles.legendTitle}>My Habits</h2>
-          <button 
-            className={styles.legendAddButton}
-            onClick={handleCreateHabit}
-            data-onboarding="add-habit"
-          >
-            <span className={styles.legendAddIcon}>+</span>
-            <span className={styles.legendAddText}>New Habit</span>
-          </button>
-        </div>
+        <h2 className={styles.legendTitle}>My Habits</h2>
         
         <div className={styles.legendItems}>
           {habits.map((habit, index) => {
@@ -445,6 +435,15 @@ const CalendarView = () => {
             );
           })}
         </div>
+        
+        <button 
+          className={styles.legendAddButton}
+          onClick={handleCreateHabit}
+          data-onboarding="add-habit"
+        >
+          <span className={styles.legendAddIcon}>+</span>
+          <span className={styles.legendAddText}>New Habit</span>
+        </button>
       </div>
 
       {/* Pattern Type Toggle */}

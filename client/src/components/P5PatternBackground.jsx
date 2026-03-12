@@ -43,6 +43,32 @@ export const PATTERN_TYPES = {
   confetti: { id: 'confetti', name: 'Confetti', icon: '🎊' },
   starburst: { id: 'starburst', name: 'Starburst', icon: '✴' },
   waves: { id: 'waves', name: 'Waves', icon: '〰' },
+  mixed: { id: 'mixed', name: 'Mixed', icon: '🎨' },
+};
+
+// Base patterns (excludes 'mixed' itself)
+export const BASE_PATTERN_IDS = ['bokeh', 'rings', 'mosaic', 'geometric', 'confetti', 'starburst', 'waves'];
+
+// Better hash function for more even distribution
+const hashString = (str) => {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+  }
+  return Math.abs(hash);
+};
+
+// Get a deterministic pattern for a habit based on its ID
+export const getPatternForHabit = (habitId) => {
+  if (!habitId) return 'bokeh';
+  const hash = hashString(habitId);
+  return BASE_PATTERN_IDS[hash % BASE_PATTERN_IDS.length];
+};
+
+// Get a unique seed offset for a habit (for visual variety even with same pattern type)
+export const getHabitSeedOffset = (habitId) => {
+  if (!habitId) return 0;
+  return hashString(habitId + '_seed') % 10000;
 };
 
 const P5PatternBackground = ({ 
@@ -817,65 +843,65 @@ function generateWavesShapes(rand, colors, width, height, hexColors = [], entran
 // BOKEH PATTERN - Soft glowing orbs like out-of-focus lights
 // ============================================================================
 function drawBokehPattern(p, rand, colors, width, height) {
-  const numOrbs = 5 + Math.floor(rand() * 6);
-  
+  const numOrbs = 4 + Math.floor(rand() * 4);
+
   // Large soft background orbs - using actual habit colors
   for (let i = 0; i < numOrbs; i++) {
     const color = colors[Math.floor(rand() * colors.length)];
     const x = rand() * width;
     const y = rand() * height;
-    const size = 30 + rand() * 50;
-    
+    const size = 25 + rand() * 40;
+
     // Draw multiple concentric circles for soft glow effect
     // Outer glow uses slightly lighter color, inner uses actual color
     for (let j = 5; j >= 0; j--) {
-      const glowAmount = (5 - j) * 0.1; // Less lightening for inner circles
+      const glowAmount = (5 - j) * 0.12; // Lighter colors
       const glowColor = lightenColor(color, glowAmount);
-      const alpha = (30 + rand() * 40) * (j / 5);
+      const alpha = (15 + rand() * 25) * (j / 5);
       const currentSize = size * (1 + (5 - j) * 0.15);
       p.noStroke();
       p.fill(glowColor.r, glowColor.g, glowColor.b, alpha);
       p.circle(x, y, currentSize);
     }
-    
-    // Solid color core
-    p.fill(color.r, color.g, color.b, 100 + rand() * 50);
+
+    // Softer color core
+    p.fill(color.r, color.g, color.b, 50 + rand() * 35);
     p.circle(x, y, size * 0.5);
   }
-  
-  // Smaller bright accent orbs - using actual habit colors
-  for (let i = 0; i < 4; i++) {
+
+  // Smaller accent orbs - using actual habit colors
+  for (let i = 0; i < 3; i++) {
     const color = colors[Math.floor(rand() * colors.length)];
     const x = rand() * width;
     const y = rand() * height;
-    const size = 15 + rand() * 25;
-    
+    const size = 12 + rand() * 20;
+
     // Outer glow
-    const lightColor = lightenColor(color, 0.3);
+    const lightColor = lightenColor(color, 0.4);
     for (let j = 3; j >= 0; j--) {
-      const alpha = (50 + rand() * 50) * (j / 3);
+      const alpha = (25 + rand() * 30) * (j / 3);
       const currentSize = size * (0.6 + j * 0.2);
       p.noStroke();
       p.fill(lightColor.r, lightColor.g, lightColor.b, alpha);
       p.circle(x, y, currentSize);
     }
-    
-    // Solid habit color center
-    p.fill(color.r, color.g, color.b, 150 + rand() * 80);
+
+    // Softer habit color center
+    p.fill(color.r, color.g, color.b, 70 + rand() * 50);
     p.circle(x, y, size * 0.4);
-    
-    // Small bright highlight
-    p.fill(255, 255, 255, 40 + rand() * 30);
+
+    // Small subtle highlight
+    p.fill(255, 255, 255, 20 + rand() * 20);
     p.circle(x - size * 0.1, y - size * 0.1, size * 0.15);
   }
-  
+
   // Tiny sparkle dots
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 4; i++) {
     const color = colors[Math.floor(rand() * colors.length)];
     const x = rand() * width;
     const y = rand() * height;
-    const size = 3 + rand() * 5;
-    p.fill(color.r, color.g, color.b, 120 + rand() * 100);
+    const size = 2 + rand() * 4;
+    p.fill(color.r, color.g, color.b, 60 + rand() * 50);
     p.noStroke();
     p.circle(x, y, size);
   }
@@ -939,13 +965,6 @@ function drawMosaicPattern(p, rand, colors, width, height) {
   const rows = Math.ceil(height / (tileSize * 0.866)) + 1;
   const cols = Math.ceil(width / tileSize) + 1;
   
-  // Shape types - each habit gets assigned one
-  const shapeTypes = ['circle', 'hexagon', 'diamond', 'triangle', 'square', 'star'];
-  const colorShapeMap = colors.map((_, i) => shapeTypes[i % shapeTypes.length]);
-  
-  // Store triangle data for drawing icons after
-  const triangles = [];
-  
   // Draw triangular mosaic base
   for (let row = -1; row < rows; row++) {
     for (let col = -1; col < cols; col++) {
@@ -963,35 +982,19 @@ function drawMosaicPattern(p, rand, colors, width, height) {
         p.noStroke();
         p.fill(lightColor.r, lightColor.g, lightColor.b, alpha);
         
-        let cx, cy;
         p.beginShape();
         if (tri === 0) {
           // Upward pointing triangle
           p.vertex(x, y + tileSize * 0.866);
           p.vertex(x + tileSize / 2, y);
           p.vertex(x + tileSize, y + tileSize * 0.866);
-          // Center of upward triangle
-          cx = x + tileSize / 2;
-          cy = y + tileSize * 0.866 * 0.66;
         } else {
           // Downward pointing triangle
           p.vertex(x + tileSize / 2, y);
           p.vertex(x + tileSize, y + tileSize * 0.866);
           p.vertex(x + tileSize * 1.5, y);
-          // Center of downward triangle
-          cx = x + tileSize;
-          cy = y + tileSize * 0.866 * 0.33;
         }
         p.endShape(p.CLOSE);
-        
-        // Store for icon drawing
-        triangles.push({
-          cx,
-          cy,
-          colorIndex,
-          color,
-          size: tileSize * 0.3,
-        });
       }
     }
   }
@@ -1014,23 +1017,6 @@ function drawMosaicPattern(p, rand, colors, width, height) {
     }
   }
   
-  // Draw decorative shape icons inside each triangle
-  for (const tri of triangles) {
-    const shapeType = colorShapeMap[tri.colorIndex];
-    const iconAlpha = 80 + rand() * 70;
-    
-    p.push();
-    p.translate(tri.cx, tri.cy);
-    p.rotate(rand() * Math.PI * 0.25); // Slight rotation for variety
-    
-    // Draw icon with white/light fill for contrast
-    p.noStroke();
-    p.fill(255, 255, 255, iconAlpha);
-    drawMosaicIcon(p, shapeType, tri.size);
-    
-    p.pop();
-  }
-  
   // Add a few highlight spots
   for (let i = 0; i < 4; i++) {
     const x = rand() * width;
@@ -1038,62 +1024,6 @@ function drawMosaicPattern(p, rand, colors, width, height) {
     p.noStroke();
     p.fill(255, 255, 255, 40 + rand() * 40);
     p.circle(x, y, 8 + rand() * 12);
-  }
-}
-
-// Helper function to draw small decorative icons inside tiles
-function drawMosaicIcon(p, shapeType, size) {
-  const halfSize = size / 2;
-  
-  switch (shapeType) {
-    case 'circle':
-      p.circle(0, 0, size);
-      break;
-      
-    case 'hexagon':
-      p.beginShape();
-      for (let i = 0; i < 6; i++) {
-        const angle = (i * p.TWO_PI / 6) - p.HALF_PI;
-        p.vertex(Math.cos(angle) * halfSize, Math.sin(angle) * halfSize);
-      }
-      p.endShape(p.CLOSE);
-      break;
-      
-    case 'diamond':
-      p.beginShape();
-      p.vertex(0, -halfSize);
-      p.vertex(halfSize * 0.7, 0);
-      p.vertex(0, halfSize);
-      p.vertex(-halfSize * 0.7, 0);
-      p.endShape(p.CLOSE);
-      break;
-      
-    case 'triangle':
-      p.beginShape();
-      for (let i = 0; i < 3; i++) {
-        const angle = (i * p.TWO_PI / 3) - p.HALF_PI;
-        p.vertex(Math.cos(angle) * halfSize, Math.sin(angle) * halfSize);
-      }
-      p.endShape(p.CLOSE);
-      break;
-      
-    case 'square':
-      p.rectMode(p.CENTER);
-      p.rect(0, 0, size * 0.7, size * 0.7);
-      break;
-      
-    case 'star':
-      p.beginShape();
-      for (let i = 0; i < 10; i++) {
-        const angle = (i * p.TWO_PI / 10) - p.HALF_PI;
-        const r = i % 2 === 0 ? halfSize : halfSize * 0.45;
-        p.vertex(Math.cos(angle) * r, Math.sin(angle) * r);
-      }
-      p.endShape(p.CLOSE);
-      break;
-      
-    default:
-      p.circle(0, 0, size);
   }
 }
 

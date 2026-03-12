@@ -9,10 +9,7 @@ import CalendarView from './views/CalendarView';
 import HabitsView from './views/HabitsView';
 import StatsView from './views/StatsView';
 import ThemeToggle from './components/ThemeToggle';
-import LandingPage from './components/LandingPage';
-import LandingPageSpotify from './components/LandingPageSpotify';
 import LandingPageConversion from './components/LandingPageConversion';
-import LandingPageAnimated from './components/LandingPageAnimated';
 import BlogPage from './components/BlogPage';
 import OnboardingGuide from './components/OnboardingGuide';
 import AuthCallback from './components/AuthCallback';
@@ -381,11 +378,6 @@ function App() {
 
               {/* Auth callback for magic link and OAuth */}
               <Route path="/auth/callback" element={<AuthCallback />} />
-
-              {/* Backup landing page designs */}
-              <Route path="/landing/original" element={<LandingPage />} />
-              <Route path="/landing/spotify" element={<LandingPageSpotify />} />
-              <Route path="/landing/animated" element={<LandingPageAnimated />} />
               
               {/* Protected routes for authenticated users */}
               <Route path="/calendar" element={
