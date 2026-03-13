@@ -1,25 +1,14 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { memo, useMemo } from 'react';
 import Tooltip from './Tooltip';
+import { getPatternOverrideForHabit } from '../hooks/usePatternConfig';
 import { calculateWeeklyCompletions } from '../utils/streakUtils';
-import P5PatternBackground, { getPatternForHabit, getHabitSeedOffset } from './P5PatternBackground';
+import P5PatternBackground, {
+  getPatternIdentityForHabit,
+  getCrowdedPatternVariant,
+  getHabitSeedOffset,
+  getPatternIntensityForDay,
+} from './P5PatternBackground';
 import styles from './CalendarCell.module.scss';
-
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-  
-  return isMobile;
-};
 
 const seededRandom = (seed) => {
   // Better seeded random using mulberry32 algorithm
@@ -29,64 +18,21 @@ const seededRandom = (seed) => {
   return ((t ^ t >>> 14) >>> 0) / 4294967296;
 };
 
-const usePrefersReducedMotion = () => {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
-    
-    const handler = (e) => setPrefersReducedMotion(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
-  
-  return prefersReducedMotion;
-};
-
-const BouncingEmoji = ({ habit, initialPosPercent, size, hasMetGoal, onHabitClick, tooltipContent, dateSeed, index, isHighlighted }) => {
-  // Generate unique animation parameters based on seed
-  const habitIdHash = habit.id.split('').reduce((acc, char, i) => acc + char.charCodeAt(0) * (i + 1) * 7, 0);
-  const seed = dateSeed * 1000 + index * 10000 + habitIdHash;
-  
-  // Random animation duration between 3-6 seconds
-  const duration = 3 + seededRandom(seed) * 3;
-  // Random delay so emojis don't all sync up
-  const delay = seededRandom(seed + 1) * -duration;
-  // Random starting position
-  const startX = 10 + seededRandom(seed + 2) * 80;
-  const startY = 10 + seededRandom(seed + 3) * 80;
-  // Random movement range
-  const moveX = 15 + seededRandom(seed + 4) * 25;
-  const moveY = 15 + seededRandom(seed + 5) * 25;
-  
-  return (
-    <Tooltip content={tooltipContent} position="top">
-      <span
-        className={`${styles.floatingEmoji} ${styles.bouncing} ${hasMetGoal ? styles.goalMet : ''} ${isHighlighted ? styles.highlighted : ''}`}
-        style={{
-          fontSize: `${size}rem`,
-          position: 'absolute',
-          left: `${startX}%`,
-          top: `${startY}%`,
-          '--move-x': `${moveX}%`,
-          '--move-y': `${moveY}%`,
-          '--duration': `${duration}s`,
-          '--delay': `${delay}s`,
-        }}
-        onClick={(e) => onHabitClick(e, habit.id)}
-      >
-        {habit.emoji}
-      </span>
-    </Tooltip>
-  );
+const hashString = (str) => {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+  }
+  return Math.abs(hash);
 };
 
 const CalendarCell = ({ 
   day, 
+  gridRow = 0,
+  gridCol = 0,
   habits, 
+  patternConfig,
   completedHabits, 
-  onHabitToggle,
   onHabitDetailClick,
   onDayClick,
   onDayHabitsClick,
@@ -96,10 +42,14 @@ const CalendarCell = ({
   animationIndex = 0,
   calendarEntries = {},
   hoveredHabitId = null,
-  patternType = 'bokeh'
+  patternType = 'bokeh',
+  isPreview = false,
+  previewOverrides = null,
+  isMobile = false,
+  patternOnly = false,
+  animatePatterns = true,
 }) => {
   const { date } = day;
-  const isMobile = useIsMobile();
 
   const completedHabitDetails = useMemo(() => {
     return habits.filter(habit => 
@@ -114,8 +64,17 @@ const CalendarCell = ({
     return (completedHabitDetails.length / habits.length) * 100;
   }, [habits.length, completedHabitDetails.length]);
 
-  const canvasRef = useRef(null);
   const dateSeed = useMemo(() => date.split('-').reduce((acc, num) => acc + parseInt(num), 0), [date]);
+  const mixedPatternSeed = useMemo(() => {
+    if (completedHabitDetails.length === 0) return 0;
+
+    const habitSetKey = completedHabitDetails
+      .map((habit) => habit.id)
+      .sort()
+      .join('|');
+
+    return hashString(habitSetKey);
+  }, [completedHabitDetails]);
 
   const habitColors = useMemo(() => {
     const defaultColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
@@ -146,6 +105,91 @@ const CalendarCell = ({
       return { size };
     });
   }, [completedHabitDetails, dateSeed]);
+
+  const mixedPatternLayers = useMemo(() => {
+    const intensity = getPatternIntensityForDay(completedHabitDetails.length, habits.length);
+    const entranceStepMs = completedHabitDetails.length >= 5 ? 120 : 160;
+    const familyCounts = completedHabitDetails.reduce((counts, habit) => {
+      const { family } = getPatternIdentityForHabit(habit.id);
+      counts[family] = (counts[family] || 0) + 1;
+      return counts;
+    }, {});
+    const familyIndexes = {};
+
+    return completedHabitDetails.map((habit, idx) => {
+      const override = previewOverrides?.[habit.id] || getPatternOverrideForHabit(habit, patternConfig);
+      const identity = override || getPatternIdentityForHabit(habit.id);
+      const collisionIndex = familyIndexes[identity.family] || 0;
+      familyIndexes[identity.family] = collisionIndex + 1;
+      const continuity = typeof identity.continuity === 'boolean'
+        ? identity.continuity
+        : identity.family === 'mosaic' && identity.variant === 'triangles';
+      const continuitySeed = getHabitSeedOffset(`${habit.id}:${identity.family}:${identity.variant}`);
+      const intensityValue = override?.intensity ?? intensity;
+      const resolvedVariant = override
+        ? identity.variant
+        : getCrowdedPatternVariant(
+            identity.family,
+            identity.variant,
+            collisionIndex,
+            familyCounts[identity.family]
+          );
+
+      return {
+        color: habit.color || habitColors[idx],
+        habitId: habit.id,
+        intensity: intensityValue,
+        seed: continuity ? continuitySeed : mixedPatternSeed + getHabitSeedOffset(habit.id),
+        patternType: identity.family,
+        patternVariant: resolvedVariant,
+        continuity,
+        worldOffsetX: gridCol,
+        worldOffsetY: gridRow,
+        entranceDelayMs: idx * (override?.entranceStaggerMs ?? entranceStepMs),
+        settings: override ? {
+          density: override.density,
+          scale: override.scale,
+          opacity: override.opacity,
+          accentOpacity: override.accentOpacity,
+          strokeWeight: override.strokeWeight,
+          driftAmount: override.driftAmount,
+          animationMode: override.animationMode,
+          tileSize: override.tileSize,
+          shapeCount: override.shapeCount,
+          ringCount: override.ringCount,
+          amplitude: override.amplitude,
+          lineCount: override.lineCount,
+          orbCount: override.orbCount,
+          rayCount: override.rayCount,
+          pieceCount: override.pieceCount,
+          translateX: override.translateX,
+          translateY: override.translateY,
+          translateZ: override.translateZ,
+          rotationDeg: override.rotationDeg,
+        } : null,
+      };
+    });
+  }, [completedHabitDetails, habitColors, habits.length, mixedPatternSeed, gridCol, gridRow, patternConfig, previewOverrides]);
+
+  const mixedPatternRenderLayers = useMemo(() => {
+    if (mixedPatternLayers.length === 0) return [];
+
+    const layers = mixedPatternLayers.map((layer) => ({ ...layer }));
+
+    if (completedHabitDetails.length === habits.length && habits.length > 0) {
+      layers.push({
+        habitId: `${date}-celebration`,
+        color: habitColors[0] || '#ffffff',
+        intensity: 3,
+        seed: mixedPatternSeed + 777,
+        patternType: 'mosaic',
+        patternVariant: 'shards',
+        entranceDelayMs: mixedPatternLayers.length * 140,
+      });
+    }
+
+    return layers;
+  }, [mixedPatternLayers, completedHabitDetails.length, habits.length, date, habitColors, mixedPatternSeed]);
 
   const backgroundStyle = useMemo(() => {
     const baseStyle = {
@@ -203,8 +247,6 @@ const CalendarCell = ({
     // Primary color (most prominent or average)
     const primaryColor = colors[0];
     const secondaryColor = colors[1] || colors[0];
-    const tertiaryColor = colors[2] || colors[1] || colors[0];
-    
     // Create luminous center glow that intensifies with completion
     const centerGlow = `radial-gradient(ellipse at 50% 50%, ${lightenColor(primaryColor, 0.3)}${toHex(glowOpacity * 0.6)} 0%, transparent 70%)`;
     
@@ -321,37 +363,24 @@ const CalendarCell = ({
         ${hasHoveredHabit ? styles.hasHoveredHabit : ''}
       `}
       style={backgroundStyle}
-      onClick={handleCellClick}
+      onClick={patternOnly ? undefined : handleCellClick}
       data-date={date}
+      data-calendar-cell={isPreview ? undefined : 'true'}
     >
-      {/* Overlay for habit hover effect */}
-      <div className={styles.habitOverlay} />
+      {!patternOnly && (
+        <div className={styles.habitOverlay} />
+      )}
       
       {/* P5.js generated geometric pattern background */}
       {completedHabitDetails.length > 0 && (
         patternType === 'mixed' ? (
-          <>
-            {/* Mixed mode: render each habit with its own pattern type and unique seed */}
-            {completedHabitDetails.map((habit, idx) => (
-              <P5PatternBackground
-                key={`${date}-mixed-${habit.id}`}
-                colors={[habit.color || habitColors[idx]]}
-                seed={dateSeed + getHabitSeedOffset(habit.id)}
-                patternType={getPatternForHabit(habit.id)}
-                className={styles.p5Background}
-              />
-            ))}
-            {/* Subtle mosaic celebration overlay when all habits complete */}
-            {completedHabitDetails.length === habits.length && habits.length > 0 && (
-              <P5PatternBackground
-                key={`${date}-mixed-celebration`}
-                colors={habitColors}
-                seed={dateSeed + 777}
-                patternType="mosaic"
-                className={`${styles.p5Background} ${styles.celebrationPattern}`}
-              />
-            )}
-          </>
+          <P5PatternBackground
+            key={`${date}-mixed`}
+            patternLayers={mixedPatternRenderLayers}
+            seed={mixedPatternSeed}
+            className={`${styles.p5Background} ${completedHabitDetails.length === habits.length && habits.length > 0 ? styles.celebrationPattern : ''}`}
+            animated={animatePatterns}
+          />
         ) : (
           // Single pattern mode: all habits share one pattern
           <P5PatternBackground
@@ -360,21 +389,24 @@ const CalendarCell = ({
             seed={dateSeed}
             patternType={patternType}
             className={styles.p5Background}
+            animated={animatePatterns}
           />
         )
       )}
       
-      <Tooltip content={dayNumberTooltipContent} position="top">
-        <div className={styles.dayNumber}>
-          {day.dayjs.date()}
-        </div>
-      </Tooltip>
+      {!patternOnly && (
+        <Tooltip content={dayNumberTooltipContent} position="top">
+          <div className={styles.dayNumber}>
+            {day.dayjs.date()}
+          </div>
+        </Tooltip>
+      )}
       
-      {completedHabitDetails.length > 0 && (
-        <div className={styles.emojiCanvas} ref={canvasRef}>
+      {!patternOnly && completedHabitDetails.length > 0 && (
+        <div className={styles.emojiCanvas}>
           {isMobile ? (
             <div className={styles.mobileLayout} onClick={handleStackedHabitsClick}>
-              {completedHabitDetails.slice(0, 4).map((habit, idx) => (
+              {completedHabitDetails.slice(0, 4).map((habit) => (
                 <span 
                   key={habit.id} 
                   className={`${styles.mobileEmoji} ${hoveredHabitId === habit.id ? styles.highlighted : ''}`}
@@ -390,52 +422,44 @@ const CalendarCell = ({
               )}
             </div>
           ) : (
-            completedHabitDetails.map((habit, index) => {
-              const data = emojiData[index];
-              const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
-              const weeklyCompletions = calculateWeeklyCompletions(habit.id, date, calendarEntries);
-              
-              const emojiTooltipContent = (
-                <div className={styles.emojiTooltip}>
-                  <div className={styles.tooltipHeader}>
-                    <span className={styles.tooltipEmoji}>{habit.emoji}</span>
-                    <span className={styles.tooltipName}>{habit.name}</span>
+            <div className={styles.emojiCluster}>
+              {completedHabitDetails.map((habit, index) => {
+                const data = emojiData[index];
+                const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
+                const weeklyCompletions = calculateWeeklyCompletions(habit.id, date, calendarEntries);
+                
+                const emojiTooltipContent = (
+                  <div className={styles.emojiTooltip}>
+                    <div className={styles.tooltipHeader}>
+                      <span className={styles.tooltipEmoji}>{habit.emoji}</span>
+                      <span className={styles.tooltipName}>{habit.name}</span>
+                    </div>
+                    {hasMetGoal && <div className={styles.goalBadge}>Weekly goal reached</div>}
+                    {!hasMetGoal && weeklyCompletions > 0 && (
+                      <div className={styles.progressText}>{weeklyCompletions}/{habit.weeklyGoal} this week</div>
+                    )}
                   </div>
-                  {hasMetGoal && <div className={styles.goalBadge}>Weekly goal reached</div>}
-                  {!hasMetGoal && weeklyCompletions > 0 && (
-                    <div className={styles.progressText}>{weeklyCompletions}/{habit.weeklyGoal} this week</div>
-                  )}
-                </div>
-              );
-              
-              // Create unique seed from habit ID (use multiple characters)
-              const habitIdHash = habit.id.split('').reduce((acc, char, i) => acc + char.charCodeAt(0) * (i + 1) * 7, 0);
-              const initialSeed = dateSeed * 1000 + index * 10000 + habitIdHash;
-              const initialPosPercent = {
-                x: 10 + seededRandom(initialSeed) * 80,
-                y: 10 + seededRandom(initialSeed + 99999) * 80
-              };
-              
-              return (
-                <BouncingEmoji
-                  key={habit.id}
-                  habit={habit}
-                  initialPosPercent={initialPosPercent}
-                  size={data.size}
-                  hasMetGoal={hasMetGoal}
-                  onHabitClick={handleHabitClick}
-                  tooltipContent={emojiTooltipContent}
-                  dateSeed={dateSeed}
-                  index={index}
-                  isHighlighted={hoveredHabitId === habit.id}
-                />
-              );
-            })
+                );
+
+                return (
+                  <Tooltip key={habit.id} content={emojiTooltipContent} position="bottom">
+                    <span
+                      className={`${styles.floatingEmoji} ${hasMetGoal ? styles.goalMet : ''} ${hoveredHabitId === habit.id ? styles.highlighted : ''}`}
+                      style={{ fontSize: `${data.size}rem` }}
+                      onClick={(e) => handleHabitClick(e, habit.id)}
+                      data-habit-id={habit.id}
+                    >
+                      {habit.emoji}
+                    </span>
+                  </Tooltip>
+                );
+              })}
+            </div>
           )}
         </div>
       )}
 
-      {habits.length > 0 && (
+      {!patternOnly && habits.length > 0 && (
         <div className={styles.progressMeter}>
           <div className={styles.meterTrack}>
             <div 
@@ -461,4 +485,34 @@ const CalendarCell = ({
   );
 };
 
-export default CalendarCell; 
+const areCompletedHabitsEqual = (prev, next) => {
+  if (prev === next) return true;
+  if (!prev || !next || prev.length !== next.length) return false;
+  for (let index = 0; index < prev.length; index++) {
+    if (prev[index] !== next[index]) return false;
+  }
+  return true;
+};
+
+const areEqual = (prevProps, nextProps) => (
+  prevProps.day === nextProps.day &&
+  prevProps.gridRow === nextProps.gridRow &&
+  prevProps.gridCol === nextProps.gridCol &&
+  prevProps.habits === nextProps.habits &&
+  prevProps.patternConfig === nextProps.patternConfig &&
+  areCompletedHabitsEqual(prevProps.completedHabits, nextProps.completedHabits) &&
+  prevProps.hasHabitMetWeeklyGoal === nextProps.hasHabitMetWeeklyGoal &&
+  prevProps.isCurrentMonth === nextProps.isCurrentMonth &&
+  prevProps.isToday === nextProps.isToday &&
+  prevProps.animationIndex === nextProps.animationIndex &&
+  prevProps.calendarEntries === nextProps.calendarEntries &&
+  prevProps.hoveredHabitId === nextProps.hoveredHabitId &&
+  prevProps.patternType === nextProps.patternType &&
+  prevProps.isPreview === nextProps.isPreview &&
+  prevProps.previewOverrides === nextProps.previewOverrides &&
+  prevProps.isMobile === nextProps.isMobile &&
+  prevProps.patternOnly === nextProps.patternOnly &&
+  prevProps.animatePatterns === nextProps.animatePatterns
+);
+
+export default memo(CalendarCell, areEqual); 

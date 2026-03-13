@@ -69,47 +69,51 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 6px 0 10px;
-  opacity: 0.5;
+  gap: 8px;
+  padding: 8px 0 12px;
+  opacity: 1;
+  position: relative;
+  z-index: 5;
   @include transition-fast;
-  
-  &:hover {
-    opacity: 0.8;
-  }
 }
 
 .subtleNavButton {
   @include reset-button;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   @include flex-center;
-  color: #6b7280;
-  font-size: 0.875rem;
-  font-weight: 300;
-  border-radius: 4px;
+  color: #334155;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   @include transition-fast;
   
   &:hover {
-    color: #374151;
-    background: rgba(0, 0, 0, 0.05);
+    color: #0f172a;
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.14);
   }
 }
 
 .subtleMonthLabel {
   @include reset-button;
-  color: #6b7280;
-  font-size: 0.6875rem;
-  font-weight: 500;
+  color: #1e293b;
+  font-size: 0.8125rem;
+  font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   @include transition-fast;
   
   &:hover {
-    color: #374151;
-    background: rgba(0, 0, 0, 0.05);
+    color: #0f172a;
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.14);
   }
 }
 
@@ -312,42 +316,173 @@
   }
 }
 
+.calendarCluster {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .calendarSection {
+  margin-top: -14px;
+  position: relative;
+  z-index: 3;
+
+  > :first-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
   @media (min-width: 1024px) {
     grid-area: calendar;
   }
 }
 
-// Habits Legend - Above Calendar
+// Habits legend docked under calendar
 .habitsLegend {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
+  background:
+    radial-gradient(120% 140% at 12% 0%, rgba(16, 185, 129, 0.08) 0%, rgba(255, 255, 255, 0) 46%),
+    white;
+  border-radius: 20px 20px 0 0;
+  padding: 18px 18px 20px;
   @include card-shadow;
   @include border-subtle;
   border-color: rgba(0, 0, 0, 0.04);
+  border-bottom: none;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 14px;
+  position: relative;
+  z-index: 2;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -14px;
+    height: 14px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+  }
+}
+
+.legendTopRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.legendHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  text-align: left;
+  flex: 1;
+  min-width: 0;
+}
+
+.legendSubtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  letter-spacing: -0.01em;
 }
 
 .legendTitle {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #1f2937;
   letter-spacing: -0.02em;
-  white-space: nowrap;
 }
 
 .legendItems {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  width: 100%;
+  padding-top: 2px;
+}
+
+.legendMainRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.legendItemsPaged {
+  flex-wrap: nowrap;
+  width: auto;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.legendCarouselViewport {
+  width: 100%;
+  overflow: hidden;
+}
+
+.legendCarouselTrack {
+  display: flex;
+  width: 300%;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.legendCarouselTrack.dragging {
+  cursor: grabbing;
+}
+
+.legendCarouselPage {
+  flex: 0 0 calc(100% / 3);
+  width: calc(100% / 3);
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.legendPagerButton {
+  @include reset-button;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  @include flex-center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #334155;
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  @include transition-fast;
+  flex-shrink: 0;
+
+  &:hover {
+    color: #0f172a;
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.14);
+  }
+}
+
+.habitCircleSlot {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 64px;
+}
+
+.goalMetSlot {
+  width: 78px;
+  height: 78px;
+  flex-basis: 78px;
 }
 
 // Habit circle with progress ring
@@ -360,16 +495,13 @@
   border-radius: 50%;
   
   &:hover {
-    transform: scale(1.12);
-    
-    .habitTooltip {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(-50%) translateY(0);
-    }
+    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.35);
   }
   
   &.goalMet {
+    width: 66px;
+    height: 66px;
+
     .progressBar {
       stroke: #10b981;
     }
@@ -547,7 +679,7 @@
   stroke: #10b981;
   stroke-width: 3;
   stroke-linecap: round;
-  transition: stroke-dasharray 0.4s ease;
+  transition: stroke-dasharray 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .legendEmoji {
@@ -563,38 +695,49 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   overflow: hidden;
+  isolation: isolate;
+  background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.24), rgba(0, 0, 0, 0.1));
+  border: 1px solid rgba(255, 255, 255, 0.24);
 }
+
+.goalMet .legendEmoji {
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+  min-height: 54px;
+}
+
+.legendFill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--fill-level, 0%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    var(--habit-color) 65%,
+    var(--habit-color) 100%
+  );
+  transition: height 700ms cubic-bezier(0.2, 0.95, 0.25, 1);
+  z-index: 1;
+}
+
+.legendEmojiGlyph {
+  position: relative;
+  z-index: 3;
+  font-size: 1.25rem;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
 
 // Tooltip
 .habitTooltip {
-  position: absolute;
-  bottom: calc(100% + 12px);
-  left: 50%;
-  transform: translateX(-50%) translateY(8px);
-  background: #1f2937;
-  color: white;
-  padding: 12px 16px;
-  border-radius: 12px;
   min-width: 180px;
   max-width: 240px;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
-  z-index: 100;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 8px solid transparent;
-    border-top-color: #1f2937;
-  }
+  color: inherit;
 }
 
 .tooltipHeader {
@@ -656,8 +799,9 @@
   color: #10b981;
   @include transition-slow;
   flex-shrink: 0;
-  position: relative;
+  margin-left: auto;
   overflow: hidden;
+  position: relative;
   
   &::before {
     content: '';
@@ -1039,6 +1183,10 @@
     padding: 20px;
     gap: 24px;
   }
+
+  .calendarCluster {
+    gap: 0;
+  }
   
   .header {
     justify-content: center;
@@ -1073,21 +1221,76 @@
   }
   
   .habitsLegend {
-    padding: 18px;
-    gap: 16px;
+    padding: 14px 14px 16px;
+    gap: 12px;
+  }
+
+  .legendTopRow {
+    gap: 12px;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+  }
+
+  .legendHeading {
+    gap: 2px;
+    align-items: flex-start;
+    text-align: left;
   }
   
   .legendTitle {
-    font-size: 1.125rem;
+    font-size: 1rem;
+  }
+
+  .legendSubtitle {
+    font-size: 0.75rem;
   }
   
   .legendItems {
-    gap: 12px;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .legendMainRow {
+    align-items: center;
+    gap: 8px;
+  }
+
+  .legendCarouselViewport {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .legendCarouselPage {
+    gap: 8px;
+  }
+
+  .legendPagerButton {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+
+  .legendAddButton {
+    position: relative;
+    margin-left: 8px;
   }
   
   .habitCircle {
     width: 46px;
     height: 46px;
+  }
+
+  .habitCircleSlot {
+    width: 58px;
+    height: 58px;
+    flex-basis: 58px;
+  }
+
+  .goalMetSlot {
+    width: 70px;
+    height: 70px;
+    flex-basis: 70px;
   }
   
   .legendEmoji {
@@ -1145,22 +1348,63 @@
   }
   
   .habitsLegend {
-    padding: 16px;
-    gap: 14px;
-    flex-wrap: wrap;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .legendTopRow {
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: nowrap;
   }
   
   .legendTitle {
-    font-size: 1rem;
+    font-size: 0.9375rem;
+  }
+
+  .legendSubtitle {
+    font-size: 0.6875rem;
   }
   
   .legendItems {
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .legendMainRow {
     gap: 10px;
+  }
+
+  .legendCarouselPage {
+    gap: 6px;
+  }
+
+  .legendPagerButton {
+    width: 26px;
+    height: 26px;
+    font-size: 0.9375rem;
+  }
+
+  .legendAddButton {
+    position: relative;
+    margin-left: 6px;
   }
   
   .habitCircle {
     width: 42px;
     height: 42px;
+  }
+
+  .habitCircleSlot {
+    width: 54px;
+    height: 54px;
+    flex-basis: 54px;
+  }
+
+  .goalMetSlot {
+    width: 62px;
+    height: 62px;
+    flex-basis: 62px;
   }
   
   .legendEmoji {
@@ -1254,41 +1498,50 @@
 
 .subtleMonthNav {
   :global(html.dark-mode) & {
-    opacity: 0.4;
-    
-    &:hover {
-      opacity: 0.7;
-    }
+    opacity: 1;
   }
 }
 
 .subtleNavButton {
   :global(html.dark-mode) & {
-    color: #9ca3af;
+    color: #d1d5db;
+    background: rgba(30, 35, 40, 0.9);
+    border-color: rgba(255, 255, 255, 0.14);
     
     &:hover {
-      color: #d1d5db;
-      background: rgba(255, 255, 255, 0.08);
+      color: #f9fafb;
+      background: rgba(45, 52, 62, 0.95);
+      border-color: rgba(255, 255, 255, 0.24);
     }
   }
 }
 
 .subtleMonthLabel {
   :global(html.dark-mode) & {
-    color: #9ca3af;
+    color: #f3f4f6;
+    background: rgba(30, 35, 40, 0.9);
+    border-color: rgba(255, 255, 255, 0.14);
     
     &:hover {
-      color: #d1d5db;
-      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      background: rgba(45, 52, 62, 0.95);
+      border-color: rgba(255, 255, 255, 0.24);
     }
   }
 }
 
 .habitsLegend {
   :global(html.dark-mode) & {
-    background: #1a1d23;
+    background:
+      radial-gradient(120% 140% at 12% 0%, rgba(52, 211, 153, 0.14) 0%, rgba(26, 29, 35, 0) 44%),
+      #1a1d23;
     border-color: rgba(255, 255, 255, 0.08);
+    border-bottom-color: transparent;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+
+    &::after {
+      background: linear-gradient(180deg, rgba(26, 29, 35, 0.92) 0%, rgba(26, 29, 35, 0) 100%);
+    }
   }
 }
 
@@ -1298,9 +1551,22 @@
   }
 }
 
+.legendSubtitle {
+  :global(html.dark-mode) & {
+    color: #9ca3af;
+  }
+}
+
 .progressBg {
   :global(html.dark-mode) & {
     stroke: rgba(255, 255, 255, 0.12);
+  }
+}
+
+.legendEmoji {
+  :global(html.dark-mode) & {
+    background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.2));
+    border-color: rgba(255, 255, 255, 0.16);
   }
 }
 
@@ -1312,12 +1578,7 @@
 
 .habitTooltip {
   :global(html.dark-mode) & {
-    background: #0f172a;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    
-    &::after {
-      border-top-color: #0f172a;
-    }
+    color: inherit;
   }
 }
 
@@ -1342,6 +1603,20 @@
         background: #10b981;
         color: white;
       }
+    }
+  }
+}
+
+.legendPagerButton {
+  :global(html.dark-mode) & {
+    color: #d1d5db;
+    background: rgba(30, 35, 40, 0.9);
+    border-color: rgba(255, 255, 255, 0.14);
+
+    &:hover {
+      color: #f9fafb;
+      background: rgba(45, 52, 62, 0.95);
+      border-color: rgba(255, 255, 255, 0.24);
     }
   }
 }

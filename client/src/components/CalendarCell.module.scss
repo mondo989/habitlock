@@ -46,7 +46,7 @@
     }
     
     .floatingEmoji {
-      transform: translate(-50%, -50%) rotate(var(--emoji-rotation)) scale(1.1);
+      transform: translateY(-1px) scale(1.06);
     }
   }
 
@@ -283,7 +283,11 @@
 
 .emojiCanvas {
   position: absolute;
-  inset: 28px 8px 24px;
+  inset: 28px 8px 18px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 14px;
   pointer-events: none;
   
   &::after {
@@ -291,38 +295,51 @@
   }
 }
 
+.emojiCluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  max-width: 100%;
+  pointer-events: auto;
+}
+
 .floatingEmoji {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   pointer-events: auto;
   z-index: 2;
   user-select: none;
   line-height: 1;
-  transform: translate(-50%, -50%);
+  transform: translateY(0) scale(1);
+  transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.18));
 
   &:hover {
     z-index: 10;
-  }
-
-  &.bouncing {
-    animation: bounce var(--duration, 4s) ease-in-out var(--delay, 0s) infinite;
+    transform: translateY(-1px) scale(1.08);
   }
 
   &.highlighted {
     z-index: 200;
     font-size: 2rem !important;
-    left: 50% !important;
-    top: 50% !important;
-    animation: none !important;
     filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5))
             drop-shadow(0 0 20px rgba(255, 200, 0, 0.8))
             drop-shadow(0 0 40px rgba(255, 200, 0, 0.4));
-    transition: left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                font-size 0.2s ease,
-                filter 0.2s ease;
+    transform: translateY(-2px) scale(1.12);
+    transition: transform 0.2s ease, font-size 0.2s ease, filter 0.2s ease;
     opacity: 1;
     pointer-events: none;
   }
+}
+
+.goalMet {
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.18))
+          drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
 }
 
 .mobileLayout {
@@ -524,21 +541,6 @@
   }
 }
 
-@keyframes bounce {
-  0%, 100% {
-    transform: translate(-50%, -50%) translate(0, 0);
-  }
-  25% {
-    transform: translate(-50%, -50%) translate(var(--move-x, 20%), calc(var(--move-y, 20%) * -1));
-  }
-  50% {
-    transform: translate(-50%, -50%) translate(calc(var(--move-x, 20%) * -0.5), var(--move-y, 20%));
-  }
-  75% {
-    transform: translate(-50%, -50%) translate(calc(var(--move-x, 20%) * -1), calc(var(--move-y, 20%) * -0.5));
-  }
-}
-
 // ============================================================================
 // Responsive - Mobile
 // ============================================================================
@@ -576,11 +578,12 @@
   }
   
   .emojiCanvas {
-    inset: 24px 4px 20px;
+    inset: 24px 4px 18px;
+    padding-bottom: 10px;
   }
   
   .floatingEmoji:hover {
-    transform: translate(-50%, -50%) rotate(var(--emoji-rotation, 0deg)) scale(1.1) !important;
+    transform: translateY(-1px) scale(1.06) !important;
   }
   
   .meterTrack {
@@ -603,7 +606,8 @@
   }
   
   .emojiCanvas {
-    inset: 20px 3px 16px;
+    inset: 20px 3px 14px;
+    padding-bottom: 8px;
   }
   
   .mobileEmoji {
@@ -763,7 +767,7 @@
   }
   
   .floatingEmoji:hover {
-    transform: scale(1.1) !important;
+    transform: translateY(-1px) scale(1.06) !important;
   }
   
   .meterFill {

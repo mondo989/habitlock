@@ -66,50 +66,20 @@
           drop-shadow(0 0 20px rgba(255, 200, 0, 0.8))
           drop-shadow(0 0 40px rgba(255, 200, 0, 0.4));
   z-index: 1;
-  
-  // Start at original position, animate to center
-  left: var(--original-x);
-  top: var(--original-y);
-  transform: translate(-50%, -50%) scale(1);
+  left: var(--center-x);
+  top: var(--center-y);
+  transform: translate(-50%, -50%) translate(var(--from-dx, 0), var(--from-dy, 0)) scale(1.02);
+  animation: centerSnap 0.24s cubic-bezier(0.22, 1, 0.36, 1) var(--anim-delay, 0s) forwards;
   opacity: 1;
-  animation: emojiToCenter 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) var(--anim-delay, 0s) forwards;
   
   &.leaving {
-    // Set base position to center so there's no jump before animation starts
-    left: var(--center-x);
-    top: var(--center-y);
-    transform: translate(-50%, -50%) scale(1.1);
-    animation: emojiToOriginal 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-}
-
-@keyframes emojiToCenter {
-  0% {
-    left: var(--original-x);
-    top: var(--original-y);
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.7;
-  }
-  100% {
-    left: var(--center-x);
-    top: var(--center-y);
-    transform: translate(-50%, -50%) scale(1.1);
-    opacity: 1;
-  }
-}
-
-@keyframes emojiToOriginal {
-  0% {
-    left: var(--center-x);
-    top: var(--center-y);
-    transform: translate(-50%, -50%) scale(1.1);
-    opacity: 1;
-  }
-  100% {
-    left: var(--original-x);
-    top: var(--original-y);
-    transform: translate(-50%, -50%) scale(1);
     opacity: 0;
+  }
+}
+
+@keyframes centerSnap {
+  to {
+    transform: translate(-50%, -50%) translate(0, 0) scale(1.08);
   }
 }
 
@@ -198,5 +168,12 @@
     > * {
       background: #1e2328;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlayEmoji {
+    animation: none;
+    transform: translate(-50%, -50%) scale(1.08);
   }
 }

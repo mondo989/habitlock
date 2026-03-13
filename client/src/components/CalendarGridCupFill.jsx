@@ -4,6 +4,9 @@
 import { useMemo, useState, useEffect } from 'react';
 import styles from './CalendarGridCupFill.module.scss';
 
+const MAX_EMOJIS_PER_DAY = 24;
+const EMOJIS_PER_HABIT = 8;
+
 // Seeded random for consistent positions
 const seededRandom = (seed, i) => {
   const x = Math.sin(seed + i * 127.1) * 43758.5453;
@@ -18,25 +21,6 @@ const hexToRgb = (hex) => {
     g: parseInt(result[2], 16),
     b: parseInt(result[3], 16)
   } : { r: 59, g: 130, b: 246 }; // fallback blue
-};
-
-// Convert RGB to HSL for better blending
-const rgbToHsl = ({ r, g, b }) => {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h, s, l = (max + min) / 2;
-  if (max === min) {
-    h = s = 0;
-  } else {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-      case g: h = ((b - r) / d + 2) / 6; break;
-      case b: h = ((r - g) / d + 4) / 6; break;
-    }
-  }
-  return { h: h * 360, s: s * 100, l: l * 100 };
 };
 
 // Generate liquid blend style based on completed habit colors
@@ -120,13 +104,12 @@ const generateCupEmojis = (completedDetails, seed) => {
   if (completedDetails.length === 0) return [];
   
   const emojis = [];
-  const emojisPerHabit = 15;
   
   completedDetails.forEach((habit, habitIdx) => {
     // Decide how many large emojis for this habit (1 or 2)
-    const largeCount = seededRandom(seed, habitIdx * 777) > 0.5 ? 2 : 1;
+    const largeCount = seededRandom(seed, habitIdx * 777) > 0.65 ? 2 : 1;
     
-    for (let i = 0; i < emojisPerHabit; i++) {
+    for (let i = 0; i < EMOJIS_PER_HABIT; i++) {
       emojis.push({ 
         emoji: habit.emoji,
         isLarge: i < largeCount // First 1-2 emojis of each habit are large
@@ -135,7 +118,7 @@ const generateCupEmojis = (completedDetails, seed) => {
   });
   
   // Shuffle emojis so different types are mixed together
-  const shuffled = emojis.slice(0, 50);
+  const shuffled = emojis.slice(0, MAX_EMOJIS_PER_DAY);
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(seededRandom(seed, i + 999) * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -226,6 +209,42 @@ const CalendarGridCupFill = ({
     return counts;
   }, [calendarMatrix, getCompletedHabits]);
 
+  const habitMap = useMemo(() => {
+    return new Map(habits.map((habit) => [habit.id, habit]));
+  }, [habits]);
+
+  const dayRenderData = useMemo(() => {
+    return calendarMatrix.map((week) =>
+      week.map((day) => {
+        const completedHabits = calendarEntries[day.date]?.completedHabits || [];
+        const completedDetails = completedHabits
+          .map((habitId) => habitMap.get(habitId))
+          .filter(Boolean);
+        const hasCompletions = completedDetails.length > 0;
+        const completionRatio = habits.length > 0 ? completedDetails.length / habits.length : 0;
+        const dateSeed = day.date.split('-').reduce((a, b) => a + parseInt(b, 10), 0);
+        const uniqueColorCount = new Set(completedDetails.map((habit) => habit.color || '#3b82f6')).size;
+
+        const displayEmojis = hasCompletions ? generateCupEmojis(completedDetails, dateSeed) : [];
+        const positions = hasCompletions ? generateWaterPositions(displayEmojis.length, dateSeed, completionRatio) : [];
+        const liquidBlend = hasCompletions ? generateLiquidBlend(completedDetails, completionRatio, dateSeed) : null;
+
+        return {
+          day,
+          completedDetails,
+          hasCompletions,
+          completionRatio,
+          dateSeed,
+          uniqueColorCount,
+          displayEmojis,
+          positions,
+          liquidBlend,
+          isPerfectDay: habits.length > 0 && completionRatio >= 1,
+        };
+      })
+    );
+  }, [calendarMatrix, calendarEntries, habitMap, habits.length]);
+
   // Animate only NEW days or days with changed completions
   useEffect(() => {
     const timeoutIds = [];
@@ -294,23 +313,11 @@ const CalendarGridCupFill = ({
       </div>
 
       <div className={styles.calendarBody}>
-        {calendarMatrix.map((week, weekIndex) => (
+        {dayRenderData.map((week, weekIndex) => (
           <div key={weekIndex} className={styles.week}>
-            {week.map((day) => {
-              const completedHabits = getCompletedHabits(day.date);
-              const completedDetails = habits.filter(h => completedHabits.includes(h.id));
-              const hasCompletions = completedDetails.length > 0;
-              const completionRatio = habits.length > 0 ? completedDetails.length / habits.length : 0;
+            {week.map(({ day, hasCompletions, completionRatio, dateSeed, displayEmojis, positions, liquidBlend, uniqueColorCount, isPerfectDay }) => {
               const isVisible = visibleDays.has(day.date);
-
-              const dateSeed = day.date.split('-').reduce((a, b) => a + parseInt(b, 10), 0);
-              const displayEmojis = hasCompletions ? generateCupEmojis(completedDetails, dateSeed) : [];
-              const positions = generateWaterPositions(displayEmojis.length, dateSeed, completionRatio);
-              const liquidBlend = generateLiquidBlend(completedDetails, completionRatio, dateSeed);
-              const uniqueColorCount = new Set(completedDetails.map(h => h.color || '#3b82f6')).size;
               const animKey = animationKeys[day.date]?.key || 0;
-
-              const isPerfectDay = habits.length > 0 && completionRatio >= 1;
 
               return (
                 <div

@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useHabits } from '../hooks/useHabits';
 import { useCalendar } from '../hooks/useCalendar';
+import usePatternConfig from '../hooks/usePatternConfig';
 import { useOnboarding } from '../context/OnboardingContext';
 import { getWeekStatsForDate, getBestStreak, getHabitStatsForRange } from '../utils/streakUtils';
 import CalendarGrid from '../components/CalendarGrid';
 import CalendarGridSavant from '../components/CalendarGridSavant';
 import CalendarGridCupFill from '../components/CalendarGridCupFill';
-import { PATTERN_TYPES } from '../components/P5PatternBackground';
+import Tooltip from '../components/Tooltip';
 import HabitModal from '../components/HabitModal';
 import HabitDayModal from '../components/HabitDayModal';
 import HabitStatsModal from '../components/HabitStatsModal';
@@ -23,6 +24,10 @@ const CALENDAR_TYPES = {
   savant: { id: 'savant', name: 'Savant', icon: '💫' },
   cupfill: { id: 'cupfill', name: 'Cup Fill', icon: '🫗' },
 };
+
+const MOBILE_CAROUSEL_CENTER = -100 / 3;
+const MOBILE_CAROUSEL_PREV = 0;
+const MOBILE_CAROUSEL_NEXT = -(200 / 3);
 
 const CalendarView = () => {
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
@@ -56,11 +61,18 @@ const CalendarView = () => {
   // Calendar type toggle state
   const [calendarType, setCalendarType] = useState('original');
 
-  // Pattern type for P5 backgrounds
-  const [patternType, setPatternType] = useState('bokeh');
-
   // Hovered habit for calendar highlight
   const [hoveredHabitId, setHoveredHabitId] = useState(null);
+  const [viewportWidth, setViewportWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1200
+  );
+  const [mobileLegendPage, setMobileLegendPage] = useState(0);
+  const [mobileLegendTrackX, setMobileLegendTrackX] = useState(MOBILE_CAROUSEL_CENTER);
+  const [isLegendDragging, setIsLegendDragging] = useState(false);
+  const [isLegendAnimating, setIsLegendAnimating] = useState(false);
+  const [legendDragDelta, setLegendDragDelta] = useState(0);
+  const legendDragStartXRef = useRef(0);
+  const legendAnimationTimerRef = useRef(null);
 
   const {
     habits,
@@ -70,6 +82,9 @@ const CalendarView = () => {
     editHabit,
     removeHabit,
   } = useHabits();
+  const {
+    patternConfig,
+  } = usePatternConfig();
 
   const {
     calendarMatrix,
@@ -94,6 +109,193 @@ const CalendarView = () => {
   const selectedWeekStats = selectedDate 
     ? getWeekStatsForDate(habits, calendarEntries, new Date(selectedDate))
     : weekStats;
+
+  const isMobileLegend = viewportWidth <= 768;
+  const mobileHabitsPerPage = viewportWidth <= 420 ? 4 : 5;
+  const mobileLegendTotalPages = Math.max(1, Math.ceil(habits.length / mobileHabitsPerPage));
+  const mobileLegendStart = mobileLegendPage * mobileHabitsPerPage;
+  const visibleHabits = isMobileLegend
+    ? habits.slice(mobileLegendStart, mobileLegendStart + mobileHabitsPerPage)
+    : habits;
+
+  const getLoopedPageIndex = (pageIndex) => {
+    if (mobileLegendTotalPages <= 0) return 0;
+    return (pageIndex % mobileLegendTotalPages + mobileLegendTotalPages) % mobileLegendTotalPages;
+  };
+
+  const habitPages = useMemo(() => {
+    const pages = [];
+    for (let i = 0; i < habits.length; i += mobileHabitsPerPage) {
+      pages.push(habits.slice(i, i + mobileHabitsPerPage));
+    }
+    return pages.length > 0 ? pages : [[]];
+  }, [habits, mobileHabitsPerPage]);
+
+  const prevPageHabits = habitPages[getLoopedPageIndex(mobileLegendPage - 1)] || [];
+  const currentPageHabits = habitPages[getLoopedPageIndex(mobileLegendPage)] || [];
+  const nextPageHabits = habitPages[getLoopedPageIndex(mobileLegendPage + 1)] || [];
+
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    setMobileLegendPage((currentPage) => {
+      const lastPage = Math.max(0, mobileLegendTotalPages - 1);
+      return Math.min(currentPage, lastPage);
+    });
+  }, [mobileLegendTotalPages]);
+
+  useEffect(() => {
+    if (!isMobileLegend) {
+      setMobileLegendPage(0);
+    }
+  }, [isMobileLegend]);
+
+  useEffect(() => {
+    return () => {
+      if (legendAnimationTimerRef.current) {
+        clearTimeout(legendAnimationTimerRef.current);
+      }
+    };
+  }, []);
+
+  const completeLegendSlide = (direction) => {
+    if (legendAnimationTimerRef.current) {
+      clearTimeout(legendAnimationTimerRef.current);
+    }
+    legendAnimationTimerRef.current = setTimeout(() => {
+      setMobileLegendPage((page) => {
+        if (direction === 'next') return getLoopedPageIndex(page + 1);
+        return getLoopedPageIndex(page - 1);
+      });
+      setIsLegendAnimating(false);
+      setMobileLegendTrackX(MOBILE_CAROUSEL_CENTER);
+      setLegendDragDelta(0);
+    }, 280);
+  };
+
+  const triggerLegendSlide = (direction) => {
+    if (mobileLegendTotalPages <= 1 || isLegendAnimating) return;
+    setIsLegendAnimating(true);
+    setIsLegendDragging(false);
+    setLegendDragDelta(0);
+    setMobileLegendTrackX(direction === 'next' ? MOBILE_CAROUSEL_NEXT : MOBILE_CAROUSEL_PREV);
+    completeLegendSlide(direction);
+  };
+
+  const handleLegendPrevPage = () => {
+    triggerLegendSlide('prev');
+  };
+
+  const handleLegendNextPage = () => {
+    triggerLegendSlide('next');
+  };
+
+  const handleLegendPointerDown = (event) => {
+    if (!isMobileLegend || mobileLegendTotalPages <= 1 || isLegendAnimating) return;
+    setIsLegendDragging(true);
+    setLegendDragDelta(0);
+    legendDragStartXRef.current = event.clientX;
+  };
+
+  const handleLegendPointerMove = (event) => {
+    if (!isLegendDragging) return;
+    setLegendDragDelta(event.clientX - legendDragStartXRef.current);
+  };
+
+  const handleLegendPointerEnd = () => {
+    if (!isLegendDragging) return;
+    const threshold = 50;
+    if (legendDragDelta <= -threshold) {
+      triggerLegendSlide('next');
+      return;
+    }
+    if (legendDragDelta >= threshold) {
+      triggerLegendSlide('prev');
+      return;
+    }
+    setIsLegendDragging(false);
+    setLegendDragDelta(0);
+    setMobileLegendTrackX(MOBILE_CAROUSEL_CENTER);
+  };
+
+  const renderLegendHabitItem = (habit, animationPattern, keyPrefix = '') => {
+    const weekStat = weekStats[habit.id];
+    const completions = weekStat?.completions || 0;
+    const goal = habit.weeklyGoal || 7;
+    const percentage = Math.min((completions / goal) * 100, 100);
+    const fillRatio = percentage / 100;
+    const isGoalMet = weekStat?.hasMetGoal || false;
+    const legendTooltipContent = (
+      <div className={styles.habitTooltip}>
+        <div className={styles.tooltipHeader}>
+          <span className={styles.tooltipEmoji}>{habit.emoji}</span>
+          <span className={styles.tooltipName}>{habit.name}</span>
+        </div>
+        <div className={styles.tooltipStats}>
+          <span className={styles.tooltipProgress}>
+            {completions} / {goal} this week
+          </span>
+          {isGoalMet && <span className={styles.tooltipBadge}>Goal Met!</span>}
+        </div>
+        {habit.description && (
+          <p className={styles.tooltipDesc}>{habit.description}</p>
+        )}
+      </div>
+    );
+
+    return (
+      <Tooltip key={`${keyPrefix}${habit.id}`} content={legendTooltipContent} position="bottom">
+        <div className={`${styles.habitCircleSlot} ${isGoalMet ? styles.goalMetSlot : ''}`}>
+          <div
+            className={`${styles.habitCircle} ${isGoalMet ? styles.goalMet : ''}`}
+            onClick={() => handleHabitDetailClick(habit.id)}
+            onMouseEnter={() => setHoveredHabitId(habit.id)}
+            onMouseLeave={() => setHoveredHabitId(null)}
+            style={{
+              '--habit-color': habit.color,
+              '--fill-level': `${percentage}%`,
+              '--fill-ratio': fillRatio.toFixed(2),
+            }}
+            data-pattern={animationPattern}
+          >
+            <svg className={styles.progressRing} viewBox="0 0 52 52">
+              <circle
+                className={styles.progressBg}
+                cx="26"
+                cy="26"
+                r="23"
+              />
+              <circle
+                className={styles.progressBar}
+                cx="26"
+                cy="26"
+                r="23"
+                strokeDasharray={`${(percentage / 100) * 144.51} 144.51`}
+              />
+            </svg>
+            <span className={styles.legendEmoji}>
+              <span className={styles.legendFill} />
+              <span className={styles.legendEmojiGlyph}>
+                {habit.emoji}
+              </span>
+            </span>
+            {isGoalMet && (
+              <div className={`${styles.starSparkles} ${styles[`pattern${animationPattern}`]}`}>
+                <span className={styles.starSparkle}>✨</span>
+                <span className={styles.starSparkle}>⭐</span>
+                <span className={styles.starSparkle}>✨</span>
+                <span className={styles.starSparkle}>💫</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </Tooltip>
+    );
+  };
 
   // Check for achievements when habits are completed
   useEffect(() => {
@@ -364,185 +566,175 @@ const CalendarView = () => {
       )}
       */}
 
-      {/* Habits Legend - Above Calendar */}
-      <div className={styles.habitsLegend}>
-        <h2 className={styles.legendTitle}>My Habits</h2>
-        
-        <div className={styles.legendItems}>
-          {habits.map((habit, index) => {
-            const weekStat = weekStats[habit.id];
-            const completions = weekStat?.completions || 0;
-            const goal = habit.weeklyGoal || 7;
-            const percentage = Math.min((completions / goal) * 100, 100);
-            const isGoalMet = weekStat?.hasMetGoal || false;
-            const animationPattern = index % 4;
-            
-            return (
-              <div 
-                key={habit.id} 
-                className={`${styles.habitCircle} ${isGoalMet ? styles.goalMet : ''}`}
-                onClick={() => handleHabitDetailClick(habit.id)}
-                onMouseEnter={() => setHoveredHabitId(habit.id)}
-                onMouseLeave={() => setHoveredHabitId(null)}
-                style={{ '--habit-color': habit.color }}
-                data-pattern={animationPattern}
+      <section className={styles.calendarCluster}>
+        {/* Habits Legend - Integrated above Calendar */}
+        <div className={styles.habitsLegend}>
+          <div className={styles.legendTopRow}>
+            <div className={styles.legendHeading}>
+              <h2 className={styles.legendTitle}>My Habits</h2>
+              <p className={styles.legendSubtitle}>
+                Pick a habit to trace your streak through the month.
+              </p>
+            </div>
+
+            <button 
+              className={styles.legendAddButton}
+              onClick={handleCreateHabit}
+              data-onboarding="add-habit"
+            >
+              <span className={styles.legendAddIcon}>+</span>
+              <span className={styles.legendAddText}>New Habit</span>
+            </button>
+          </div>
+
+          <div className={styles.legendMainRow}>
+            {isMobileLegend && mobileLegendTotalPages > 1 && (
+              <button
+                className={styles.legendPagerButton}
+                onClick={handleLegendPrevPage}
+                aria-label="Previous habits"
+                title="Previous habits"
               >
-                <svg className={styles.progressRing} viewBox="0 0 52 52">
-                  <circle 
-                    className={styles.progressBg}
-                    cx="26" 
-                    cy="26" 
-                    r="23"
-                  />
-                  <circle 
-                    className={styles.progressBar}
-                    cx="26" 
-                    cy="26" 
-                    r="23"
-                    strokeDasharray={`${(percentage / 100) * 144.51} 144.51`}
-                  />
-                </svg>
-                <span 
-                  className={styles.legendEmoji}
-                  style={{ backgroundColor: habit.color }}
+                ‹
+              </button>
+            )}
+
+            {isMobileLegend ? (
+              <div
+                className={styles.legendCarouselViewport}
+                onPointerDown={handleLegendPointerDown}
+                onPointerMove={handleLegendPointerMove}
+                onPointerUp={handleLegendPointerEnd}
+                onPointerCancel={handleLegendPointerEnd}
+                onPointerLeave={handleLegendPointerEnd}
+              >
+                <div
+                  className={`${styles.legendCarouselTrack} ${isLegendDragging ? styles.dragging : ''}`}
+                  style={{
+                    transform: `translateX(calc(${mobileLegendTrackX}% + ${legendDragDelta}px))`,
+                    transition: isLegendDragging || !isLegendAnimating ? 'none' : 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)',
+                  }}
                 >
-                  {habit.emoji}
-                </span>
-                {isGoalMet && (
-                  <div className={`${styles.starSparkles} ${styles[`pattern${animationPattern}`]}`}>
-                    <span className={styles.starSparkle}>✨</span>
-                    <span className={styles.starSparkle}>⭐</span>
-                    <span className={styles.starSparkle}>✨</span>
-                    <span className={styles.starSparkle}>💫</span>
+                  <div className={`${styles.legendItems} ${styles.legendCarouselPage}`}>
+                    {prevPageHabits.map((habit, index) =>
+                      renderLegendHabitItem(habit, (mobileLegendStart - mobileHabitsPerPage + index + habits.length * 8) % 4, 'prev-')
+                    )}
                   </div>
-                )}
-                <div className={styles.habitTooltip}>
-                  <div className={styles.tooltipHeader}>
-                    <span className={styles.tooltipEmoji}>{habit.emoji}</span>
-                    <span className={styles.tooltipName}>{habit.name}</span>
+                  <div className={`${styles.legendItems} ${styles.legendCarouselPage}`}>
+                    {currentPageHabits.map((habit, index) =>
+                      renderLegendHabitItem(habit, (mobileLegendStart + index) % 4, 'current-')
+                    )}
                   </div>
-                  <div className={styles.tooltipStats}>
-                    <span className={styles.tooltipProgress}>
-                      {completions} / {goal} this week
-                    </span>
-                    {isGoalMet && <span className={styles.tooltipBadge}>Goal Met!</span>}
+                  <div className={`${styles.legendItems} ${styles.legendCarouselPage}`}>
+                    {nextPageHabits.map((habit, index) =>
+                      renderLegendHabitItem(habit, (mobileLegendStart + mobileHabitsPerPage + index) % 4, 'next-')
+                    )}
                   </div>
-                  {habit.description && (
-                    <p className={styles.tooltipDesc}>{habit.description}</p>
-                  )}
                 </div>
               </div>
-            );
-          })}
-        </div>
-        
-        <button 
-          className={styles.legendAddButton}
-          onClick={handleCreateHabit}
-          data-onboarding="add-habit"
-        >
-          <span className={styles.legendAddIcon}>+</span>
-          <span className={styles.legendAddText}>New Habit</span>
-        </button>
-      </div>
+            ) : (
+              <div className={styles.legendItems}>
+                {visibleHabits.map((habit, index) =>
+                  renderLegendHabitItem(habit, (mobileLegendStart + index) % 4)
+                )}
+              </div>
+            )}
 
-      {/* Pattern Type Toggle */}
-      <div className={styles.patternToggle}>
-        <span className={styles.patternLabel}>Pattern:</span>
-        <div className={styles.patternButtons}>
-          {Object.values(PATTERN_TYPES).map((type) => (
-            <button
-              key={type.id}
-              className={`${styles.patternButton} ${patternType === type.id ? styles.active : ''}`}
-              onClick={() => setPatternType(type.id)}
-              title={type.name}
-            >
-              <span className={styles.patternIcon}>{type.icon}</span>
-              <span className={styles.patternName}>{type.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Calendar Grid */}
-      <div className={styles.calendarSection} data-onboarding="calendar">
-        {/* Subtle Month Navigation - Inside Calendar */}
-        <div className={styles.subtleMonthNav}>
-          <button 
-            className={styles.subtleNavButton}
-            onClick={goToPrevMonth}
-            title="Previous month"
-          >
-            ‹
-          </button>
-          <button 
-            className={styles.subtleMonthLabel}
-            onClick={goToToday}
-            title="Jump to today"
-          >
-            {monthDisplayName}
-          </button>
-          <button 
-            className={styles.subtleNavButton}
-            onClick={goToNextMonth}
-            title="Next month"
-          >
-            ›
-          </button>
-        </div>
-        {habits.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyStateContent}>
-              <h2>No habits yet</h2>
-              <p>Create your first habit to start tracking.</p>
-              <button 
-                className={styles.primaryButton}
-                onClick={handleCreateHabit}
+            {isMobileLegend && mobileLegendTotalPages > 1 && (
+              <button
+                className={styles.legendPagerButton}
+                onClick={handleLegendNextPage}
+                aria-label="Next habits"
+                title="Next habits"
               >
-                Add Habit
+                ›
               </button>
-            </div>
+            )}
+
           </div>
-        ) : (
-          <>
-            {calendarType === 'original' && (
-              <CalendarGrid
-                calendarMatrix={calendarMatrix}
-                habits={habits}
-                getCompletedHabits={getCompletedHabits}
-                onHabitToggle={toggleHabitCompletion}
-                onHabitDetailClick={handleHabitDetailClick}
-                onDayClick={handleDayClick}
-                onDayHabitsClick={handleDayHabitsClick}
-                hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
-                calendarEntries={calendarEntries}
-                hoveredHabitId={hoveredHabitId}
-                patternType={patternType}
-              />
-            )}
-            {calendarType === 'savant' && (
-              <CalendarGridSavant
-                calendarMatrix={calendarMatrix}
-                habits={habits}
-                getCompletedHabits={getCompletedHabits}
-                onDayClick={handleDayClick}
-                hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
-                calendarEntries={calendarEntries}
-              />
-            )}
-            {calendarType === 'cupfill' && (
-              <CalendarGridCupFill
-                calendarMatrix={calendarMatrix}
-                habits={habits}
-                getCompletedHabits={getCompletedHabits}
-                onDayClick={handleDayClick}
-                hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
-                calendarEntries={calendarEntries}
-              />
-            )}
-          </>
-        )}
-      </div>
+        </div>
+
+        {/* Calendar Grid */}
+        <div className={styles.calendarSection} data-onboarding="calendar">
+          {/* Subtle Month Navigation - Inside Calendar */}
+          <div className={styles.subtleMonthNav}>
+            <button 
+              className={styles.subtleNavButton}
+              onClick={goToPrevMonth}
+              title="Previous month"
+            >
+              ‹
+            </button>
+            <button 
+              className={styles.subtleMonthLabel}
+              onClick={goToToday}
+              title="Jump to today"
+            >
+              {monthDisplayName}
+            </button>
+            <button 
+              className={styles.subtleNavButton}
+              onClick={goToNextMonth}
+              title="Next month"
+            >
+              ›
+            </button>
+          </div>
+          {habits.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyStateContent}>
+                <h2>No habits yet</h2>
+                <p>Create your first habit to start tracking.</p>
+                <button 
+                  className={styles.primaryButton}
+                  onClick={handleCreateHabit}
+                >
+                  Add Habit
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {calendarType === 'original' && (
+                  <CalendarGrid
+                  calendarMatrix={calendarMatrix}
+                  habits={habits}
+                  patternConfig={patternConfig}
+                  getCompletedHabits={getCompletedHabits}
+                  onHabitToggle={toggleHabitCompletion}
+                  onHabitDetailClick={handleHabitDetailClick}
+                  onDayClick={handleDayClick}
+                  onDayHabitsClick={handleDayHabitsClick}
+                  hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
+                  calendarEntries={calendarEntries}
+                  hoveredHabitId={hoveredHabitId}
+                  patternType="mixed"
+                />
+              )}
+              {calendarType === 'savant' && (
+                <CalendarGridSavant
+                  calendarMatrix={calendarMatrix}
+                  habits={habits}
+                  getCompletedHabits={getCompletedHabits}
+                  onDayClick={handleDayClick}
+                  hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
+                  calendarEntries={calendarEntries}
+                />
+              )}
+              {calendarType === 'cupfill' && (
+                <CalendarGridCupFill
+                  calendarMatrix={calendarMatrix}
+                  habits={habits}
+                  getCompletedHabits={getCompletedHabits}
+                  onDayClick={handleDayClick}
+                  hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
+                  calendarEntries={calendarEntries}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </section>
 
       {/* Habit Modal */}
       <HabitModal

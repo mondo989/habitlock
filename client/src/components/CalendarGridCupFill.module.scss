@@ -48,6 +48,7 @@
   transition: all 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.05);
   min-height: 90px;
+  contain: layout paint;
   
   &:hover {
     background: rgba(40, 40, 55, 0.8);
@@ -86,16 +87,9 @@
         radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.12) 0%, transparent 3%),
         radial-gradient(circle at 70% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 2%),
         radial-gradient(circle at 40% 85%, rgba(255, 255, 255, 0.08) 0%, transparent 2.5%);
-      animation: bubbles 4s ease-in-out infinite;
-      animation-delay: 1.5s;
       pointer-events: none;
       z-index: 10;
-      opacity: 0;
-    }
-    
-    .liquidBlend {
-      animation: potionFill 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-      animation-delay: 0.2s;
+      opacity: 0.6;
     }
   }
 }
@@ -154,15 +148,14 @@
       rgba(255, 255, 255, 0.06) 55%,
       transparent 70%
     );
-    animation: shimmer 4s ease-in-out infinite;
-    animation-delay: 1s;
+    opacity: 0.7;
   }
   
   // Multi-color swirl effect
   &.multiColor {
     animation: liquidFillSwirl 0.8s ease-out forwards;
     animation-delay: 0.1s;
-    
+
     &::after {
       background: linear-gradient(
         115deg,
@@ -172,7 +165,7 @@
         rgba(255, 255, 255, 0.05) 60%,
         transparent 70%
       );
-      animation: shimmer 2.5s ease-in-out infinite;
+      opacity: 0.6;
     }
   }
 }
@@ -195,15 +188,12 @@
   0% {
     opacity: 0;
     transform: translateY(100%) rotate(0deg);
-    filter: blur(2px);
   }
   30% {
     opacity: 0.5;
-    filter: blur(1px);
   }
   60% {
     transform: translateY(10%) rotate(2deg);
-    filter: blur(0);
   }
   80% {
     transform: translateY(-5%) rotate(-1deg);
@@ -211,7 +201,6 @@
   100% {
     opacity: 1;
     transform: translateY(0) rotate(0deg);
-    filter: blur(0);
   }
 }
 
@@ -287,7 +276,6 @@
   animation-delay: var(--delay);
   opacity: 0;
   pointer-events: none;
-  will-change: transform, opacity;
   
   &.emojiLarge {
     font-size: 22px;
@@ -355,12 +343,7 @@
     rgba(150, 70, 30, 0.2) 100%
   );
   pointer-events: none;
-  animation: glowPulse 2.5s ease-in-out infinite;
-}
-
-@keyframes glowPulse {
-  0%, 100% { opacity: 0.85; }
-  50% { opacity: 1; }
+  opacity: 0.9;
 }
 
 // Crown emoji above day number

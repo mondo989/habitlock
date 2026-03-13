@@ -2,17 +2,10 @@ import { useRef, useEffect, useState, useMemo } from 'react';
 import CalendarCell from './CalendarCell';
 import styles from './CalendarGrid.module.scss';
 
-// Seeded random function (same as CalendarCell)
-const seededRandom = (seed) => {
-  let t = seed + 0x6D2B79F5;
-  t = Math.imul(t ^ t >>> 15, t | 1);
-  t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-  return ((t ^ t >>> 14) >>> 0) / 4294967296;
-};
-
 const CalendarGrid = ({ 
   calendarMatrix, 
   habits, 
+  patternConfig,
   getCompletedHabits, 
   onHabitToggle,
   onHabitDetailClick,
@@ -27,6 +20,14 @@ const CalendarGrid = ({
   const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const gridRef = useRef(null);
   const [streakLines, setStreakLines] = useState([]);
+  const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth <= 768 : false));
+
+  useEffect(() => {
+    const updateIsMobile = () => setIsMobile(window.innerWidth <= 768);
+    updateIsMobile();
+    window.addEventListener('resize', updateIsMobile);
+    return () => window.removeEventListener('resize', updateIsMobile);
+  }, []);
 
   // Get the color and emoji of the hovered habit
   const hoveredHabit = useMemo(() => {
@@ -57,6 +58,16 @@ const CalendarGrid = ({
       setIsLeaving(false);
     }
   }, [hoveredHabitId, allEmojiPositions, hoveredHabit]);
+
+  const completedHabitsByDate = useMemo(() => {
+    const lookup = {};
+    calendarMatrix.forEach((week) => {
+      week.forEach((day) => {
+        lookup[day.date] = getCompletedHabits(day.date);
+      });
+    });
+    return lookup;
+  }, [calendarMatrix, getCompletedHabits, calendarEntries]);
   
   // Handle exit animation when hover ends
   useEffect(() => {
@@ -91,8 +102,7 @@ const CalendarGrid = ({
       const grid = gridRef.current;
       if (!grid) return;
 
-      const habit = habits.find(h => h.id === hoveredHabitId);
-      if (!habit) return;
+      if (!habits.find(h => h.id === hoveredHabitId)) return;
 
       const cellsNodeList = grid.querySelectorAll('[data-date]');
       const cells = Array.from(cellsNodeList); // Convert to array for .find() method
@@ -106,40 +116,28 @@ const CalendarGrid = ({
         if (completed.includes(hoveredHabitId)) {
           const rect = cell.getBoundingClientRect();
           const gridRect = grid.getBoundingClientRect();
-          
-          // The emojiCanvas has inset: 28px 8px 24px (top, horizontal, bottom)
-          const canvasTop = 28;
-          const canvasLeft = 8;
-          const canvasRight = 8;
-          const canvasBottom = 24;
-          const canvasWidth = rect.width - canvasLeft - canvasRight;
-          const canvasHeight = rect.height - canvasTop - canvasBottom;
-          
-          // Calculate center position (target)
-          const centerX = rect.left - gridRect.left + canvasLeft + (canvasWidth * 0.5);
-          const centerY = rect.top - gridRect.top + canvasTop + (canvasHeight * 0.5);
-          
-          // Calculate original position using same seed logic as CalendarCell
-          const dateSeed = date.split('-').reduce((acc, num) => acc + parseInt(num), 0);
-          const completedHabits = completed;
-          const habitIndex = completedHabits.indexOf(hoveredHabitId);
-          const habitIdHash = habit.id.split('').reduce((acc, char, i) => acc + char.charCodeAt(0) * (i + 1) * 7, 0);
-          const seed = dateSeed * 1000 + habitIndex * 10000 + habitIdHash;
-          
-          // Original position as percentage of canvas (same as BouncingEmoji)
-          const startXPercent = 10 + seededRandom(seed + 2) * 80;
-          const startYPercent = 10 + seededRandom(seed + 3) * 80;
-          
-          // Convert to absolute position relative to grid
-          const originalX = rect.left - gridRect.left + canvasLeft + (canvasWidth * startXPercent / 100);
-          const originalY = rect.top - gridRect.top + canvasTop + (canvasHeight * startYPercent / 100);
+          const emojiElement = cell.querySelector(`[data-habit-id="${hoveredHabitId}"]`);
+
+          const centerX = rect.left - gridRect.left + rect.width / 2;
+          const centerY = rect.top - gridRect.top + rect.height / 2;
+
+          let emojiX = centerX;
+          let emojiY = centerY;
+
+          if (emojiElement) {
+            const emojiRect = emojiElement.getBoundingClientRect();
+            emojiX = emojiRect.left - gridRect.left + emojiRect.width / 2;
+            emojiY = emojiRect.top - gridRect.top + emojiRect.height / 2;
+          }
           
           allCompletedCells.push({
             date,
+            // Keep streak lines horizontally centered within the day cell.
             x: centerX,
             y: centerY,
-            originalX,
-            originalY,
+            // Preserve original emoji position for a center-seeking hover animation.
+            fromX: emojiX,
+            fromY: emojiY,
           });
         }
       });
@@ -367,8 +365,8 @@ const CalendarGrid = ({
               style={{
                 '--center-x': `${pos.x}px`,
                 '--center-y': `${pos.y}px`,
-                '--original-x': `${pos.originalX}px`,
-                '--original-y': `${pos.originalY}px`,
+                '--from-dx': `${(pos.fromX ?? pos.x) - pos.x}px`,
+                '--from-dy': `${(pos.fromY ?? pos.y) - pos.y}px`,
                 '--emoji-color': displayedHabit.color,
                 '--anim-delay': `${index * 0.03}s`
               }}
@@ -393,14 +391,18 @@ const CalendarGrid = ({
         {calendarMatrix.map((week, weekIndex) => (
           <div key={weekIndex} className={styles.calendarWeek} data-week={weekIndex}>
             {week.map((day, dayIndex) => {
-              const completedHabits = getCompletedHabits(day.date);
+              const completedHabits = completedHabitsByDate[day.date] || [];
               const animationIndex = weekIndex * 7 + dayIndex;
+              const shouldAnimatePatterns = completedHabits.length > 0;
               
               return (
                 <CalendarCell
                   key={day.date}
                   day={day}
+                  gridRow={weekIndex}
+                  gridCol={dayIndex}
                   habits={habits}
+                  patternConfig={patternConfig}
                   completedHabits={completedHabits}
                   onHabitToggle={onHabitToggle}
                   onHabitDetailClick={onHabitDetailClick}
@@ -413,6 +415,8 @@ const CalendarGrid = ({
                   calendarEntries={calendarEntries}
                   hoveredHabitId={hoveredHabitId}
                   patternType={patternType}
+                  isMobile={isMobile}
+                  animatePatterns={shouldAnimatePatterns}
                   data-date={day.date}
                 />
               );

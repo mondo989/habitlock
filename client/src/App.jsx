@@ -27,6 +27,18 @@ const P5PatternDemo = import.meta.env.DEV
   ? lazy(() => import('./components/P5PatternDemo'))
   : null;
 
+const PatternDebugView = import.meta.env.DEV
+  ? lazy(() => import('./views/PatternDebugView'))
+  : null;
+
+const isLocalhost = () => {
+  if (typeof window === 'undefined') return false;
+  const host = window.location.hostname;
+  return host === 'localhost' || host === '127.0.0.1' || host === '::1';
+};
+
+const isLocalDevOnlyEnabled = () => import.meta.env.DEV && isLocalhost();
+
 // Main App Layout component (for authenticated users)
 function AppLayout({ children }) {
   const location = useLocation();
@@ -425,6 +437,22 @@ function App() {
                   }>
                     <P5PatternDemo />
                   </Suspense>
+                } />
+              )}
+
+              {/* LOCAL-ONLY: Pattern debug page */}
+              {isLocalDevOnlyEnabled() && PatternDebugView && (
+                <Route path="/dev/pattern-debug" element={
+                  <ProtectedRoute>
+                    <Suspense fallback={
+                      <div className={styles.loadingScreen}>
+                        <div className={styles.spinner}></div>
+                        <p>Loading pattern debug...</p>
+                      </div>
+                    }>
+                      <PatternDebugView />
+                    </Suspense>
+                  </ProtectedRoute>
                 } />
               )}
               
