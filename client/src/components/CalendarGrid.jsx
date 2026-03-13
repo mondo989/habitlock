@@ -2,6 +2,44 @@ import { useRef, useEffect, useState, useMemo } from 'react';
 import CalendarCell from './CalendarCell';
 import styles from './CalendarGrid.module.scss';
 
+const hexToRgb = (hex) => {
+  if (!hex || typeof hex !== 'string') return null;
+  const normalized = hex.trim();
+  const cleanHex = normalized.startsWith('#') ? normalized.slice(1) : normalized;
+  if (!/^[a-fA-F0-9]{3}$|^[a-fA-F0-9]{6}$/.test(cleanHex)) return null;
+
+  const fullHex = cleanHex.length === 3
+    ? cleanHex.split('').map((char) => char + char).join('')
+    : cleanHex;
+
+  const value = parseInt(fullHex, 16);
+  return {
+    r: (value >> 16) & 255,
+    g: (value >> 8) & 255,
+    b: value & 255,
+  };
+};
+
+const averageColor = (colors) => {
+  if (!colors.length) return null;
+  const totals = colors.reduce((acc, color) => {
+    const rgb = hexToRgb(color);
+    if (!rgb) return acc;
+    acc.r += rgb.r;
+    acc.g += rgb.g;
+    acc.b += rgb.b;
+    acc.count += 1;
+    return acc;
+  }, { r: 0, g: 0, b: 0, count: 0 });
+
+  if (!totals.count) return null;
+  return {
+    r: Math.round(totals.r / totals.count),
+    g: Math.round(totals.g / totals.count),
+    b: Math.round(totals.b / totals.count),
+  };
+};
+
 const CalendarGrid = ({ 
   calendarMatrix, 
   habits, 
@@ -68,6 +106,39 @@ const CalendarGrid = ({
     });
     return lookup;
   }, [calendarMatrix, getCompletedHabits, calendarEntries]);
+
+  const terrainBlendBackground = useMemo(() => {
+    if (!calendarMatrix.length || !habits.length) return '';
+
+    const habitColorById = new Map(
+      habits.map((habit) => [habit.id, habit.color || '#60a5fa'])
+    );
+    const rowCount = calendarMatrix.length;
+    const blendLayers = [];
+
+    calendarMatrix.forEach((week, weekIndex) => {
+      week.forEach((day, dayIndex) => {
+        if (!day.isCurrentMonth) return;
+        const completedIds = completedHabitsByDate[day.date] || [];
+        if (!completedIds.length) return;
+
+        const colors = completedIds
+          .map((habitId) => habitColorById.get(habitId))
+          .filter(Boolean);
+        const mixedColor = averageColor(colors);
+        if (!mixedColor) return;
+
+        const x = ((dayIndex + 0.5) / 7) * 100;
+        const y = ((weekIndex + 0.5) / rowCount) * 100;
+        blendLayers.push(
+          `radial-gradient(circle at ${x}% ${y}%, rgba(${mixedColor.r}, ${mixedColor.g}, ${mixedColor.b}, 0.8) 0%, rgba(${mixedColor.r}, ${mixedColor.g}, ${mixedColor.b}, 0.35) 22%, transparent 58%)`
+        );
+      });
+    });
+
+    if (!blendLayers.length) return '';
+    return blendLayers.join(', ');
+  }, [calendarMatrix, completedHabitsByDate, habits]);
   
   // Handle exit animation when hover ends
   useEffect(() => {
@@ -387,7 +458,11 @@ const CalendarGrid = ({
       </div>
 
       {/* Calendar weeks */}
-      <div className={styles.calendarWeeks}>
+      <div
+        className={styles.calendarWeeks}
+        style={terrainBlendBackground ? { '--terrain-blend': terrainBlendBackground } : undefined}
+      >
+        {terrainBlendBackground && <div className={styles.terrainBlendOverlay} aria-hidden="true" />}
         {calendarMatrix.map((week, weekIndex) => (
           <div key={weekIndex} className={styles.calendarWeek} data-week={weekIndex}>
             {week.map((day, dayIndex) => {

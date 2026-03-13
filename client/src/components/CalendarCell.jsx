@@ -406,20 +406,9 @@ const CalendarCell = ({
         <div className={styles.emojiCanvas}>
           {isMobile ? (
             <div className={styles.mobileLayout} onClick={handleStackedHabitsClick}>
-              {completedHabitDetails.slice(0, 4).map((habit) => (
-                <span 
-                  key={habit.id} 
-                  className={`${styles.mobileEmoji} ${hoveredHabitId === habit.id ? styles.highlighted : ''}`}
-                  style={{ 
-                    fontSize: completedHabitDetails.length > 3 ? '1rem' : '1.2rem'
-                  }}
-                >
-                  {habit.emoji}
-                </span>
-              ))}
-              {completedHabitDetails.length > 4 && (
-                <span className={styles.moreCount}>+{completedHabitDetails.length - 4}</span>
-              )}
+              <span className={styles.mobileCount}>
+                {completedHabitDetails.length}
+              </span>
             </div>
           ) : (
             <div className={styles.emojiCluster}>
@@ -459,28 +448,6 @@ const CalendarCell = ({
         </div>
       )}
 
-      {!patternOnly && habits.length > 0 && (
-        <div className={styles.progressMeter}>
-          <div className={styles.meterTrack}>
-            <div 
-              className={styles.meterFill}
-              style={{ 
-                width: `${completionPercentage}%`,
-                background: completedHabitDetails.length > 0 
-                  ? completedHabitDetails.length === 1
-                    ? completedHabitDetails[0].color
-                    : `linear-gradient(90deg, ${completedHabitDetails.map((h, i) => 
-                        `${h.color} ${(i / (completedHabitDetails.length - 1)) * 100}%`
-                      ).join(', ')})`
-                  : 'transparent'
-              }}
-            />
-          </div>
-          <span className={styles.taskCount}>
-            {completedHabitDetails.length}/{habits.length}
-          </span>
-        </div>
-      )}
     </div>
   );
 };

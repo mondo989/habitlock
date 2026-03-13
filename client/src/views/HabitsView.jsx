@@ -3,11 +3,9 @@ import { useState, useEffect } from 'react';
 import { useHabits } from '../hooks/useHabits';
 import { useCalendar } from '../hooks/useCalendar';
 import { useOnboarding } from '../context/OnboardingContext';
-import { getWeekStatsForDate, getBestStreak, getHabitStatsForRange } from '../utils/streakUtils';
+import { getBestStreak, getHabitStatsForRange } from '../utils/streakUtils';
 import HabitModal from '../components/HabitModal';
-import HabitStatsModal from '../components/HabitStatsModal';
 import AchievementCelebrationModal from '../components/AchievementCelebrationModal';
-import analytics from '../services/analytics';
 import { checkAndUpdateAchievements } from '../services/supabaseAchievements';
 import { getUserInfo } from '../services/supabase';
 import styles from './HabitsView.module.scss';
@@ -16,10 +14,8 @@ const HabitsView = () => {
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
   const [modalMode, setModalMode] = useState('create');
-
-  // State for habit stats modal
-  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
-  const [selectedHabit, setSelectedHabit] = useState(null);
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [revealedHabitId, setRevealedHabitId] = useState(null);
 
   // State for achievement celebration
   const [celebrationAchievement, setCelebrationAchievement] = useState(null);
@@ -38,14 +34,11 @@ const HabitsView = () => {
   } = useHabits();
 
   const {
-    calendarMatrix,
     streaks,
     weekStats,
     calendarEntries,
     loading: calendarLoading,
     error: calendarError,
-    hasHabitMetWeeklyGoal,
-    getCompletedHabits,
   } = useCalendar(habits);
 
   // Check for achievements when habits are completed
@@ -110,6 +103,34 @@ const HabitsView = () => {
     };
   }, [habits, calendarEntries, streaks, weekStats]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const updateMobileState = () => setIsMobileView(mediaQuery.matches);
+
+    updateMobileState();
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', updateMobileState);
+    } else {
+      mediaQuery.addListener(updateMobileState);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', updateMobileState);
+      } else {
+        mediaQuery.removeListener(updateMobileState);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isMobileView && revealedHabitId) {
+      setRevealedHabitId(null);
+    }
+  }, [isMobileView, revealedHabitId]);
+
   const handleCreateHabit = () => {
     setModalMode('create');
     setEditingHabit(null);
@@ -121,6 +142,18 @@ const HabitsView = () => {
     setModalMode('edit');
     setEditingHabit(habit);
     setIsHabitModalOpen(true);
+  };
+
+  const handleMobileEmojiTap = (event, habitId) => {
+    if (!isMobileView) return;
+    event.stopPropagation();
+    setRevealedHabitId(prevHabitId => (prevHabitId === habitId ? null : habitId));
+  };
+
+  const handleOpenHabitSettings = (event, habit) => {
+    event.stopPropagation();
+    setRevealedHabitId(null);
+    handleEditHabit(habit);
   };
 
   const handleSaveHabit = async (habitIdOrData, updates = null) => {
@@ -138,12 +171,9 @@ const HabitsView = () => {
     }
   };
 
-  const handleHabitDetailClick = (habitId) => {
-    const habit = habits.find(h => h.id === habitId);
-    if (habit) {
-      setSelectedHabit(habit);
-      setIsStatsModalOpen(true);
-    }
+  const handleHabitCardClick = (habitId) => {
+    if (!isMobileView) return;
+    setRevealedHabitId(prevHabitId => (prevHabitId === habitId ? null : habitId));
   };
 
   const loading = habitsLoading || calendarLoading;
@@ -210,6 +240,7 @@ const HabitsView = () => {
               const streak = streaks[habit.id] || 0;
               const weekStat = weekStats[habit.id];
               const percentage = weekStat?.percentage || 0;
+              const isRevealedOnMobile = isMobileView && revealedHabitId === habit.id;
               
               const today = new Date().toISOString().split('T')[0];
               const isCompletedToday = calendarEntries[today]?.completedHabits?.includes(habit.id);
@@ -217,22 +248,40 @@ const HabitsView = () => {
               return (
                 <div 
                   key={habit.id} 
-                  className={`${styles.habitCard} ${isCompletedToday ? styles.completed : ''}`}
+                  className={`${styles.habitCard} ${isCompletedToday ? styles.completed : ''} ${isRevealedOnMobile ? styles.mobileRevealed : ''}`}
                   style={{ '--habit-color': habit.color }}
-                  onClick={() => handleHabitDetailClick(habit.id)}
+                  onClick={() => handleHabitCardClick(habit.id)}
                 >
                   <div className={styles.habitMainInfo}>
                     <div className={styles.habitBasics}>
-                      <span 
+                      <button
+                        type="button"
                         className={styles.habitEmoji}
                         style={{ backgroundColor: `${habit.color}20` }}
+                        onClick={(event) => handleMobileEmojiTap(event, habit.id)}
+                        title={isMobileView ? 'Show habit actions' : undefined}
+                        aria-label={isMobileView ? `Show actions for ${habit.name}` : `${habit.name} emoji`}
                       >
                         {habit.emoji}
-                      </span>
+                      </button>
                       <div className={styles.habitDetails}>
                         <div className={styles.habitName}>
                           <span className={styles.checkmark}>✓</span>
-                          {habit.name}
+                          <span className={styles.habitNameText}>{habit.name}</span>
+                          {isRevealedOnMobile && (
+                            <button
+                              type="button"
+                              className={styles.quickSettingsButton}
+                              onClick={(event) => handleOpenHabitSettings(event, habit)}
+                              title={`Edit ${habit.name}`}
+                              aria-label={`Edit ${habit.name}`}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82L4.21 7.2a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0A1.65 1.65 0 0 0 10 3.24V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0A1.65 1.65 0 0 0 20.76 10H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                              </svg>
+                            </button>
+                          )}
                         </div>
                         <div className={styles.habitDescription}>{habit.description}</div>
                         <div className={styles.habitStats}>
@@ -303,19 +352,6 @@ const HabitsView = () => {
         onSave={handleSaveHabit}
         habit={editingHabit}
         mode={modalMode}
-      />
-
-      {/* Habit Stats Modal */}
-      <HabitStatsModal
-        isOpen={isStatsModalOpen}
-        onClose={() => setIsStatsModalOpen(false)}
-        onEditHabit={handleEditHabit}
-        habit={selectedHabit}
-        streaks={streaks}
-        weekStats={weekStats}
-        getCompletedHabits={getCompletedHabits}
-        calendarMatrix={calendarMatrix}
-        calendarEntries={calendarEntries}
       />
 
       {/* Achievement Celebration Modal */}

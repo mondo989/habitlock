@@ -1,555 +1,191 @@
 @use '../styles/mixins.scss' as *;
 
-.modalOverlay {
+.popoverOverlay {
   @include modal-overlay;
-  background: rgba(0, 0, 0, 0.6);
-  animation: fadeIn 0.2s ease-out;
+  background: rgba(2, 6, 23, 0.35);
+  animation: fadeIn 160ms ease-out;
+  align-items: flex-start;
+  padding-top: clamp(84px, 12vh, 130px);
 }
 
-.modal {
-  @include modal-content;
-  border-radius: 20px;
-  max-width: 480px;
-  width: 90vw;
-  max-height: 80vh;
-  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+.popover {
+  width: min(92vw, 420px);
+  max-height: min(76vh, 620px);
+  overflow-y: auto;
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(10, 17, 40, 0.98) 0%, rgba(17, 25, 49, 0.98) 100%);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 26px 50px rgba(2, 6, 23, 0.48),
+    0 0 0 1px rgba(148, 163, 184, 0.08) inset;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  animation: popIn 230ms cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
 }
 
-.modalHeader {
-  @include modal-header;
+.pointer {
+  position: absolute;
+  top: -7px;
+  left: 28%;
+  width: 14px;
+  height: 14px;
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(145deg, rgba(10, 17, 40, 0.98) 0%, rgba(17, 25, 49, 0.98) 100%);
+  transform: rotate(-45deg);
+}
+
+.header {
   @include flex-between;
-  align-items: center;
-  background: #f8fafc;
+  align-items: flex-start;
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+  gap: 10px;
 }
 
 .habitInfo {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
+  min-width: 0;
+}
+
+.habitEmoji {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 11px;
+  @include flex-center;
+  font-size: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.habitDetails {
+  min-width: 0;
+}
+
+.habitName {
+  margin: 0;
+  font-size: 1.32rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.habitDescription {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: rgba(226, 232, 240, 0.78);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .headerActions {
   display: flex;
-  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  @include button-base;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  @include flex-center;
+  color: #cbd5e1;
+  background: rgba(51, 65, 85, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    background: rgba(71, 85, 105, 0.72);
+    border-color: rgba(148, 163, 184, 0.35);
+    color: #f8fafc;
+  }
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  padding: 12px;
+}
+
+.metricCard {
+  background: rgba(15, 23, 42, 0.64);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 12px;
+  padding: 10px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.wideCard {
+  grid-column: 1 / -1;
+}
+
+.metricRow {
+  @include flex-between;
   gap: 8px;
 }
 
-.editButton {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: #f3f4f6;
-  color: #6b7280;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-
-  &:hover {
-    background: #e5e7eb;
-    color: #374151;
-    transform: scale(1.05);
-  }
-}
-
-.habitEmoji {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  border: 2px solid #e5e7eb;
-}
-
-.habitDetails {
-  flex: 1;
-}
-
-.habitName {
-  font-size: 1.5rem;
+.metricLabel {
+  font-size: 0.7rem;
   font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 4px 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(203, 213, 225, 0.88);
 }
 
-.habitDescription {
-  font-size: 0.9rem;
-  color: #6b7280;
-  margin: 0;
-}
-
-.closeButton {
-  @include modal-close-button;
-  position: relative;
-  top: auto;
-  right: auto;
-  width: 32px;
-  height: 32px;
-  background: #f3f4f6;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6b7280;
-
-  svg {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-  }
-
-  &:hover {
-    background: #e5e7eb;
-    color: #1f2937;
-  }
-}
-
-.modalContent {
-  @include modal-body;
-  @include flex-column-center;
-  align-items: stretch;
-  justify-content: flex-start;
-  gap: 20px;
-  max-height: 60vh;
-}
-
-.statCard {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
-  background: #f8fafc;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.statIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: #f3f4f6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  flex-shrink: 0;
-}
-
-.statInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.statValue {
-  font-size: 1.8rem;
+.metricValue {
+  font-size: 1.06rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #f8fafc;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.statLabel {
-  font-size: 0.9rem;
-  color: #6b7280;
-  font-weight: 500;
+.metricSubtext {
+  font-size: 0.74rem;
+  color: rgba(203, 213, 225, 0.8);
 }
 
-.statSubtext {
-  font-size: 0.8rem;
-  color: #9ca3af;
-  font-weight: 400;
+.goalMet {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #86efac;
+  background: rgba(20, 83, 45, 0.48);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  padding: 2px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
-.goalBadge {
-  font-size: 0.8rem;
-  color: #10b981;
-  font-weight: 600;
-  margin-top: 4px;
-}
-
-.progressBar {
+.progressTrack {
   width: 100%;
   height: 8px;
-  background: #f3f4f6;
-  border-radius: 4px;
+  border-radius: 999px;
+  background: rgba(71, 85, 105, 0.6);
   overflow: hidden;
-  margin-top: 8px;
 }
 
 .progressFill {
   height: 100%;
-  background: #3b82f6;
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.settingsCard {
-  padding: 20px;
-  background: #f8fafc;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-}
-
-.settingsTitle {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 16px 0;
-}
-
-.settingRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-  
-  &:not(:last-child) {
-    border-bottom: 1px solid #e5e7eb;
-  }
-}
-
-.settingLabel {
-  font-size: 0.9rem;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.settingValue {
-  font-size: 0.9rem;
-  color: #1f2937;
-  font-weight: 600;
-}
-
-.colorSwatch {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  border: 2px solid #e5e7eb;
-}
-
-// Time Analysis Styles
-.timeAnalysisCard {
-  padding: 20px;
-  background: #f8fafc;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.timeInsights {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.timeInsight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-}
-
-.timeIcon {
-  width: 40px;
-  height: 40px;
-  background: #f3f4f6;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.timeInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.timeLabel {
-  font-size: 0.75rem;
-  color: #6b7280;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.timeValue {
-  font-size: 1rem;
-  color: #1f2937;
-  font-weight: 600;
-}
-
-.timeSubtext {
-  font-size: 0.75rem;
-  color: #9ca3af;
-}
-
-.timeDistribution {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.distributionTitle {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0;
-}
-
-.timePeriods {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.timePeriod {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.periodHeader {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-}
-
-.periodEmoji {
-  font-size: 14px;
-}
-
-.periodName {
-  flex: 1;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.periodCount {
-  color: #1f2937;
-  font-weight: 600;
-}
-
-.periodBar {
-  height: 6px;
-  background: #f3f4f6;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.periodFill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.3s ease;
-}
-
-.recentCompletions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.completionsList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.completionItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  font-size: 0.8rem;
-}
-
-.completionDate {
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.completionTime {
-  color: #1f2937;
-  font-weight: 600;
-}
-
-// Dark mode styles
-:global(html.dark-mode) {
-  .modal {
-    background: #1f2937;
-    color: #f9fafb;
-  }
-
-  .modalHeader {
-    background: #111827;
-    border-bottom-color: #374151;
-  }
-
-  .habitName {
-    color: #f9fafb;
-  }
-
-  .habitDescription {
-    color: #d1d5db;
-  }
-
-  .habitEmoji {
-    border-color: #374151;
-  }
-
-  .headerActions {
-    gap: 8px;
-  }
-
-  .editButton {
-    background: #374151;
-    color: #d1d5db;
-
-    &:hover {
-      background: #4b5563;
-      color: #f9fafb;
-    }
-  }
-
-  .closeButton {
-    background: #374151;
-    color: #d1d5db;
-
-    &:hover {
-      background: #4b5563;
-      color: #f9fafb;
-    }
-  }
-
-  .statCard {
-    background: #111827;
-    border-color: #374151;
-  }
-
-  .statIcon {
-    background: #374151;
-  }
-
-  .statValue {
-    color: #f9fafb;
-  }
-
-  .statLabel {
-    color: #d1d5db;
-  }
-
-  .statSubtext {
-    color: #9ca3af;
-  }
-
-  .progressBar {
-    background: #374151;
-  }
-
-  .settingsCard {
-    background: #111827;
-    border-color: #374151;
-  }
-
-  .settingsTitle {
-    color: #f9fafb;
-  }
-
-  .settingRow {
-    border-bottom-color: #374151;
-  }
-
-  .settingLabel {
-    color: #d1d5db;
-  }
-
-  .settingValue {
-    color: #f9fafb;
-  }
-
-  .colorSwatch {
-    border-color: #374151;
-  }
-
-  .timeAnalysisCard {
-    background: #111827;
-    border-color: #374151;
-  }
-
-  .timeInsight {
-    background: #1f2937;
-    border-color: #374151;
-  }
-
-  .timeIcon {
-    background: #374151;
-  }
-
-  .timeValue {
-    color: #f9fafb;
-  }
-
-  .timeLabel {
-    color: #d1d5db;
-  }
-
-  .timeSubtext {
-    color: #9ca3af;
-  }
-
-  .distributionTitle {
-    color: #f9fafb;
-  }
-
-  .periodName {
-    color: #d1d5db;
-  }
-
-  .periodCount {
-    color: #f9fafb;
-  }
-
-  .periodBar {
-    background: #374151;
-  }
-
-  .completionItem {
-    background: #1f2937;
-    border-color: #374151;
-  }
-
-  .completionDate {
-    color: #d1d5db;
-  }
-
-  .completionTime {
-    color: #f9fafb;
-  }
+  border-radius: inherit;
+  transition: width 280ms ease;
 }
 
 @keyframes fadeIn {
@@ -557,78 +193,65 @@
   to { opacity: 1; }
 }
 
-@keyframes slideUp {
-  from { 
+@keyframes popIn {
+  from {
     opacity: 0;
-    transform: translateY(40px) scale(0.95);
+    transform: translateY(8px) scale(0.96);
   }
-  to { 
+  to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
 
-// Mobile responsive
 @media (max-width: 768px) {
-  .modal {
-    max-width: 95vw;
-    margin: 20px;
+  .popoverOverlay {
+    padding-top: 72px;
   }
-  
-  .modalHeader {
-    padding: 20px;
+
+  .popover {
+    width: min(94vw, 390px);
+    max-height: min(74vh, 560px);
   }
-  
-  .modalContent {
-    padding: 20px;
+
+  .pointer {
+    left: 32%;
   }
-  
-  .statCard {
-    padding: 16px;
-    gap: 12px;
-  }
-  
-  .statIcon {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
-  
-  .statValue {
-    font-size: 1.5rem;
-  }
-  
+
   .habitName {
-    font-size: 1.3rem;
+    font-size: 1.18rem;
   }
 
-  .timeAnalysisCard {
-    padding: 16px;
-    gap: 16px;
+  .metricsGrid {
+    gap: 8px;
+    padding: 11px;
   }
 
-  .timeInsights {
-    grid-template-columns: 1fr;
-    gap: 12px;
+  .metricCard {
+    padding: 9px 10px;
+    gap: 4px;
   }
 
-  .timeInsight {
-    padding: 12px;
-    gap: 10px;
+  .metricValue {
+    font-size: 1rem;
+  }
+}
+
+:global(html.dark-mode) {
+  .popoverOverlay {
+    background: rgba(0, 0, 0, 0.42);
   }
 
-  .timeIcon {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
+  .popover {
+    background: linear-gradient(145deg, rgba(8, 12, 24, 0.98) 0%, rgba(16, 22, 38, 0.98) 100%);
+    border-color: rgba(148, 163, 184, 0.24);
+    box-shadow:
+      0 28px 54px rgba(2, 6, 23, 0.62),
+      0 0 0 1px rgba(148, 163, 184, 0.11) inset;
   }
 
-  .timeValue {
-    font-size: 0.9rem;
+  .pointer {
+    background: linear-gradient(145deg, rgba(8, 12, 24, 0.98) 0%, rgba(16, 22, 38, 0.98) 100%);
+    border-color: rgba(148, 163, 184, 0.24);
   }
-
-  .completionItem {
-    padding: 6px 10px;
-    font-size: 0.75rem;
-  }
-} 
+}

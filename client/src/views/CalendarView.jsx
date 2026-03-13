@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import dayjs from 'dayjs';
 import { useHabits } from '../hooks/useHabits';
 import { useCalendar } from '../hooks/useCalendar';
 import usePatternConfig from '../hooks/usePatternConfig';
@@ -10,7 +11,6 @@ import CalendarGridCupFill from '../components/CalendarGridCupFill';
 import Tooltip from '../components/Tooltip';
 import HabitModal from '../components/HabitModal';
 import HabitDayModal from '../components/HabitDayModal';
-import HabitStatsModal from '../components/HabitStatsModal';
 import AchievementCelebrationModal from '../components/AchievementCelebrationModal';
 import DayHabitsModal from '../components/DayHabitsModal';
 import analytics from '../services/analytics';
@@ -38,10 +38,6 @@ const CalendarView = () => {
   const [isDayModalOpen, setIsDayModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
-
-  // State for habit stats modal
-  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
-  const [selectedHabit, setSelectedHabit] = useState(null);
 
   // State for achievement celebration
   const [celebrationAchievement, setCelebrationAchievement] = useState(null);
@@ -229,6 +225,12 @@ const CalendarView = () => {
     const percentage = Math.min((completions / goal) * 100, 100);
     const fillRatio = percentage / 100;
     const isGoalMet = weekStat?.hasMetGoal || false;
+    const streak = streaks[habit.id] || 0;
+    const today = dayjs().format('YYYY-MM-DD');
+    const monthStart = dayjs().startOf('month').format('YYYY-MM-DD');
+    const monthStats = getHabitStatsForRange(habit.id, monthStart, today, calendarEntries);
+    const monthRate = Number.isFinite(monthStats.completionRate) ? monthStats.completionRate : 0;
+
     const legendTooltipContent = (
       <div className={styles.habitTooltip}>
         <div className={styles.tooltipHeader}>
@@ -240,6 +242,27 @@ const CalendarView = () => {
             {completions} / {goal} this week
           </span>
           {isGoalMet && <span className={styles.tooltipBadge}>Goal Met!</span>}
+        </div>
+        <div className={styles.tooltipProgressTrack}>
+          <div
+            className={styles.tooltipProgressFill}
+            style={{
+              width: `${percentage}%`,
+              backgroundColor: habit.color
+            }}
+          />
+        </div>
+        <div className={styles.tooltipMetrics}>
+          <div className={styles.tooltipMetric}>
+            <span className={styles.tooltipMetricLabel}>Streak</span>
+            <span className={styles.tooltipMetricValue}>{streak}d</span>
+          </div>
+          <div className={styles.tooltipMetric}>
+            <span className={styles.tooltipMetricLabel}>Month</span>
+            <span className={styles.tooltipMetricValue}>
+              {monthStats.completedDays}/{monthStats.totalDays} ({monthRate.toFixed(0)}%)
+            </span>
+          </div>
         </div>
         {habit.description && (
           <p className={styles.tooltipDesc}>{habit.description}</p>
@@ -401,13 +424,9 @@ const CalendarView = () => {
     setIsDayModalOpen(true);
   };
 
-  // Handle habit detail click to show stats
+  // Keep this as a no-op: details are shown in the compact tooltip, not a modal.
   const handleHabitDetailClick = (habitId) => {
-    const habit = habits.find(h => h.id === habitId);
-    if (habit) {
-      setSelectedHabit(habit);
-      setIsStatsModalOpen(true);
-    }
+    void habitId;
   };
 
   // Handle day habits click to show mobile stacked view modal
@@ -761,19 +780,6 @@ const CalendarView = () => {
         hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
         weekStats={selectedWeekStats}
         calendarEntry={selectedDate ? calendarEntries[selectedDate] : null}
-      />
-
-      {/* Habit Stats Modal */}
-      <HabitStatsModal
-        isOpen={isStatsModalOpen}
-        onClose={() => setIsStatsModalOpen(false)}
-        onEditHabit={handleEditHabit}
-        habit={selectedHabit}
-        streaks={streaks}
-        weekStats={weekStats}
-        getCompletedHabits={getCompletedHabits}
-        calendarMatrix={calendarMatrix}
-        calendarEntries={calendarEntries}
       />
 
       {/* Day Habits Modal (Mobile Stacked View) */}

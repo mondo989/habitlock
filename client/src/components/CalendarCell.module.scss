@@ -13,7 +13,7 @@
   background: var(--cell-bg, #fafbfc);
   display: flex;
   flex-direction: column;
-  border-radius: 10px;
+  border-radius: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s;
   animation: cellFadeIn 0.4s ease-out var(--animation-delay, 0s) both;
   overflow: hidden;
@@ -38,7 +38,7 @@
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.15),
       inset 0 0 30px rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    border-radius: 0;
     
     &::before {
       opacity: 0.1;
@@ -100,7 +100,7 @@
 
   &.today {
     box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.5);
-    border-radius: 8px;
+    border-radius: 0;
     
     .dayNumber {
       background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
@@ -346,11 +346,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
   width: 100%;
   height: 100%;
-  flex-wrap: wrap;
   pointer-events: auto;
+}
+
+.mobileCount {
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  color: white;
+  background: rgba(0, 0, 0, 0.42);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.32);
 }
 
 .mobileEmoji {
@@ -375,52 +389,6 @@
   border-radius: 10px;
   backdrop-filter: blur(4px);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-// ============================================================================
-// Progress Meter
-// ============================================================================
-
-.progressMeter {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0 8px 8px;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.meterTrack {
-  flex: 1;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  overflow: hidden;
-  backdrop-filter: blur(4px);
-}
-
-.meterFill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 0 8px currentColor;
-}
-
-.taskCount {
-  font-size: 0.5625rem;
-  font-weight: 500;
-  color: rgba(107, 114, 128, 0.7);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  white-space: nowrap;
-  
-  .hasCompletions & {
-    color: rgba(255, 255, 255, 0.6);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  }
 }
 
 // ============================================================================
@@ -557,7 +525,7 @@
     }
     
     &.today {
-      border-radius: 6px;
+      border-radius: 0;
       
       .dayNumber {
         padding: 3px 6px;
@@ -586,13 +554,6 @@
     transform: translateY(-1px) scale(1.06) !important;
   }
   
-  .meterTrack {
-    height: 3px;
-  }
-  
-  .taskCount {
-    font-size: 0.5rem;
-  }
 }
 
 @include mobile-small {
@@ -613,24 +574,19 @@
   .mobileEmoji {
     font-size: 0.9rem !important;
   }
+
+  .mobileCount {
+    min-width: 1.3rem;
+    height: 1.3rem;
+    font-size: 0.72rem;
+    padding: 0 0.32rem;
+  }
   
   .moreCount {
     font-size: 0.5625rem;
     padding: 1px 4px;
   }
   
-  .meterTrack {
-    height: 2px;
-  }
-  
-  .progressMeter {
-    padding: 0 4px 4px;
-    gap: 4px;
-  }
-  
-  .taskCount {
-    font-size: 0.4375rem;
-  }
 }
 
 // ============================================================================
@@ -695,24 +651,18 @@
       }
     }
     
-    &.hasCompletions .taskCount {
-      color: rgba(255, 255, 255, 0.55);
-    }
   }
 
   .dayNumber {
     color: #e5e7eb;
   }
   
-  .meterTrack {
-    background: rgba(255, 255, 255, 0.15);
-  }
-  
-  .taskCount {
-    color: rgba(156, 163, 175, 0.6);
-  }
-  
   .moreCount {
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .mobileCount {
     color: white;
     background: rgba(0, 0, 0, 0.5);
   }
@@ -770,7 +720,4 @@
     transform: translateY(-1px) scale(1.06) !important;
   }
   
-  .meterFill {
-    transition: none;
-  }
 }

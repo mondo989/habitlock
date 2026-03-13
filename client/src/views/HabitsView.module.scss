@@ -220,6 +220,8 @@
   }
 }
 
+.mobileRevealed {}
+
 .habitMainInfo {
   @include flex-between;
   align-items: flex-start;
@@ -237,6 +239,7 @@
 }
 
 .habitEmoji {
+  @include button-base;
   width: 48px;
   height: 48px;
   min-width: 48px;
@@ -245,6 +248,33 @@
   font-size: 1.5rem;
   flex-shrink: 0;
   @include card-shadow;
+  line-height: 1;
+}
+
+.quickSettingsButton {
+  @include button-base;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  @include flex-center;
+  background: white;
+  color: #374151;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  animation: gearReveal 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: left center;
+  flex-shrink: 0;
+  margin-left: auto;
+
+  svg {
+    animation: gearSpinIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  &:hover {
+    background: #f8fafc;
+    border-color: rgba(0, 0, 0, 0.12);
+  }
 }
 
 .habitDetails {
@@ -262,9 +292,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 0;
 
   .checkmark {
     opacity: 0;
@@ -281,6 +309,14 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+.habitNameText {
+  min-width: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .habitDescription {
@@ -412,6 +448,26 @@
   100% { transform: translateX(100%); }
 }
 
+@keyframes gearReveal {
+  from {
+    opacity: 0;
+    transform: translateX(-8px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes gearSpinIn {
+  from {
+    transform: rotate(-55deg) scale(0.8);
+  }
+  to {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
 // Empty state
 .emptyState {
   @include flex-column-center;
@@ -475,6 +531,48 @@
   
   .habitCard {
     padding: 18px;
+  }
+
+  .habitActions {
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    max-width: 0;
+    overflow: hidden;
+    transition: opacity 0.22s ease, transform 0.22s ease, max-width 0.22s ease;
+  }
+
+  .mobileRevealed .habitActions {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    max-width: 120px;
+  }
+
+  .editButton {
+    display: none;
+  }
+
+  .weeklyProgressSection {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-6px);
+    overflow: hidden;
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+    transition: max-height 0.28s ease, opacity 0.22s ease, transform 0.22s ease, padding 0.22s ease, border-width 0.22s ease, margin-top 0.22s ease;
+  }
+
+  .mobileRevealed .weeklyProgressSection {
+    max-height: 140px;
+    opacity: 1;
+    transform: translateY(0);
+    margin-top: 8px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    border-width: 1px;
   }
 
   .habitsContainer {
@@ -681,6 +779,20 @@
     &:hover {
       background: #2d343e;
       border-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+}
+
+.quickSettingsButton {
+  :global(html.dark-mode) & {
+    background: #2a313b;
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #e5e7eb;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+
+    &:hover {
+      background: #313946;
+      border-color: rgba(255, 255, 255, 0.2);
     }
   }
 }
