@@ -67,6 +67,19 @@ const PATTERN_ENTER_DURATION_MS = 460;
 const PATTERN_EXIT_DURATION_MS = 420;
 const STREAK_ROTATION_MIN_DAYS = 7;
 
+const createSpinSettings = (spinSeed) => {
+  const durationSeconds = 22 + (seededRandom(spinSeed) * 20);
+  const duration = `${durationSeconds.toFixed(2)}s`;
+  const delay = `-${(seededRandom(spinSeed + 1) * durationSeconds).toFixed(2)}s`;
+  const reverse = seededRandom(spinSeed + 2) > 0.5;
+
+  return {
+    duration,
+    delay,
+    reverse,
+  };
+};
+
 const CalendarCell = ({
   day,
   habits,
@@ -153,6 +166,9 @@ const CalendarCell = ({
     if (completedHabitDetails.length <= 1) return completedHabitDetails;
 
     const entryHabits = calendarEntries?.[date]?.habits || {};
+    const completedOrderById = new Map(
+      completedHabits.map((habitId, index) => [habitId, index]),
+    );
     const originalOrderById = new Map(
       completedHabitDetails.map((habit, index) => [habit.id, index]),
     );
@@ -165,9 +181,26 @@ const CalendarCell = ({
         return aTimestamp - bTimestamp;
       }
 
+      if (aTimestamp != null && bTimestamp == null) return 1;
+      if (aTimestamp == null && bTimestamp != null) return -1;
+
+      const aCreatedAt = toTimestamp(a?.createdAt);
+      const bCreatedAt = toTimestamp(b?.createdAt);
+      if (aCreatedAt != null && bCreatedAt != null && aCreatedAt !== bCreatedAt) {
+        return aCreatedAt - bCreatedAt;
+      }
+
+      if (aCreatedAt != null && bCreatedAt == null) return 1;
+      if (aCreatedAt == null && bCreatedAt != null) return -1;
+
+      const completedOrderDelta = (completedOrderById.get(a.id) ?? 0) - (completedOrderById.get(b.id) ?? 0);
+      if (completedOrderDelta !== 0) {
+        return completedOrderDelta;
+      }
+
       return (originalOrderById.get(a.id) ?? 0) - (originalOrderById.get(b.id) ?? 0);
     });
-  }, [calendarEntries, completedHabitDetails, date]);
+  }, [calendarEntries, completedHabitDetails, completedHabits, date]);
 
   const patternSeed = useMemo(() => (
     completedHabitDetails.length > 0
@@ -254,22 +287,31 @@ const CalendarCell = ({
       }
 
       const spinSeed = (patternLayer.seed ?? (patternSeed + index + 1)) + dateSeed + (index * 37);
-      const durationSeconds = 22 + (seededRandom(spinSeed) * 20);
-      const duration = `${durationSeconds.toFixed(2)}s`;
-      const delay = `-${(seededRandom(spinSeed + 1) * durationSeconds).toFixed(2)}s`;
-      const reverse = seededRandom(spinSeed + 2) > 0.5;
-
-      return {
-        duration,
-        delay,
-        reverse,
-      };
+      return createSpinSettings(spinSeed);
     });
   }, [dateSeed, disableAnimations, isPreview, patternLayers, patternOnly, patternSeed]);
-  const hasRotatingPatternLayer = useMemo(
-    () => rotatingPatternSettings.some(Boolean),
-    [rotatingPatternSettings],
-  );
+  const rotatingPatternLayerIndex = useMemo(() => {
+    for (let index = rotatingPatternSettings.length - 1; index >= 0; index -= 1) {
+      if (rotatingPatternSettings[index]) return index;
+    }
+    return -1;
+  }, [rotatingPatternSettings]);
+  const hasRotatingPatternLayer = rotatingPatternLayerIndex >= 0;
+  const wholePatternSpin = useMemo(() => {
+    if (
+      !allHabitsComplete
+      || disableAnimations
+      || isPreview
+      || patternOnly
+      || patternLayers.length === 0
+    ) {
+      return null;
+    }
+
+    const spinSeed = patternSeed + dateSeed + (patternLayers.length * 41);
+    return createSpinSettings(spinSeed);
+  }, [allHabitsComplete, dateSeed, disableAnimations, isPreview, patternLayers.length, patternOnly, patternSeed]);
+  const shouldSpinWholePattern = Boolean(wholePatternSpin);
 
   useEffect(() => {
     if (disableAnimations || isPreview || patternOnly) {
@@ -335,26 +377,37 @@ const CalendarCell = ({
 
     const colors = habitColors;
     const completionRatio = completedHabitDetails.length / habits.length;
-    const baseOpacity = clamp(isPreview ? 0.2 + (dayVisualStrength * 0.5) : dayVisualStrength, 0.08, 1);
+    const allHabitsCompleted = completionRatio >= 1;
+    const completionIntensity = allHabitsCompleted ? 1 : Math.max(dayVisualStrength, completionRatio);
+    const computedOpacity = clamp(isPreview ? 0.2 + (completionIntensity * 0.5) : completionIntensity, 0.08, 1);
+    const baseOpacity = allHabitsCompleted ? 1 : computedOpacity;
     const primaryColor = colors[0];
     const secondaryColor = colors[1] || colors[0];
     const angle1 = Math.floor(seededRandom(dateSeed) * 360);
     const angle2 = (angle1 + 120 + Math.floor(seededRandom(dateSeed + 1) * 60)) % 360;
+    const centerGlowOpacity = baseOpacity * (0.1 + (completionRatio * 0.18));
+    const orbOpacityMultiplier = 0.04 + (completionRatio * 0.13);
+    const edgeGlowOpacity = baseOpacity * (0.04 + (completionRatio * 0.06));
+    const auroraOpacity = baseOpacity * (0.04 + (completionRatio * 0.08));
+    const singleAuroraStartOpacity = baseOpacity * (0.05 + (completionRatio * 0.08));
+    const singleAuroraEndOpacity = baseOpacity * (0.03 + (completionRatio * 0.05));
+    const baseFillStartOpacity = baseOpacity * (0.18 + (completionRatio * 0.42));
+    const baseFillEndOpacity = baseOpacity * (0.34 + (completionRatio * 0.66));
 
-    const centerGlow = `radial-gradient(ellipse at 50% 50%, ${lightenColor(primaryColor, 0.22)}${toHex(baseOpacity * 0.18)} 0%, transparent 72%)`;
+    const centerGlow = `radial-gradient(ellipse at 50% 50%, ${lightenColor(primaryColor, 0.22)}${toHex(centerGlowOpacity)} 0%, transparent 72%)`;
     const orbs = colors.slice(0, Math.min(4, colors.length)).map((color, index) => {
       const orbSeed = dateSeed + (index * 17);
       const x = 15 + (seededRandom(orbSeed) * 70);
       const y = 15 + (seededRandom(orbSeed + 1) * 70);
       const size = 38 + (seededRandom(orbSeed + 2) * 32) + (completionRatio * 18);
-      const orbOpacity = baseOpacity * (0.05 + (completionRatio * 0.07));
+      const orbOpacity = baseOpacity * orbOpacityMultiplier;
       return `radial-gradient(ellipse ${size}% ${size * 1.18}% at ${x}% ${y}%, ${color}${toHex(orbOpacity)} 0%, ${color}${toHex(orbOpacity * 0.32)} 38%, transparent 72%)`;
     });
-    const edgeGlow = `radial-gradient(ellipse at 50% 100%, ${secondaryColor}${toHex(baseOpacity * 0.06)} 0%, transparent 50%)`;
+    const edgeGlow = `radial-gradient(ellipse at 50% 100%, ${secondaryColor}${toHex(edgeGlowOpacity)} 0%, transparent 50%)`;
     const aurora = colors.length >= 2
-      ? `linear-gradient(${angle1}deg, ${colors.map((color, index) => `${color}${toHex(baseOpacity * 0.06)} ${(index / colors.length) * 100}%`).join(', ')}, transparent 100%)`
-      : `linear-gradient(${angle1}deg, ${primaryColor}${toHex(baseOpacity * 0.08)} 0%, ${lightenColor(primaryColor, 0.16)}${toHex(baseOpacity * 0.04)} 100%)`;
-    const baseFill = `linear-gradient(${angle2}deg, ${primaryColor}${toHex(baseOpacity * 0.24)} 0%, ${secondaryColor}${toHex(baseOpacity * 0.5)} 100%)`;
+      ? `linear-gradient(${angle1}deg, ${colors.map((color, index) => `${color}${toHex(auroraOpacity)} ${(index / colors.length) * 100}%`).join(', ')}, transparent 100%)`
+      : `linear-gradient(${angle1}deg, ${primaryColor}${toHex(singleAuroraStartOpacity)} 0%, ${lightenColor(primaryColor, 0.16)}${toHex(singleAuroraEndOpacity)} 100%)`;
+    const baseFill = `linear-gradient(${angle2}deg, ${primaryColor}${toHex(baseFillStartOpacity)} 0%, ${secondaryColor}${toHex(baseFillEndOpacity)} 100%)`;
 
     return {
       ...baseStyle,
@@ -421,20 +474,40 @@ const CalendarCell = ({
           key={patternAnimationKey}
           className={`${styles.patternLayer} ${isPatternEntering ? styles.patternEnter : ''}`}
         >
-          {hasRotatingPatternLayer ? (
+          {shouldSpinWholePattern ? (
+            <div className={styles.patternLayerStack}>
+              <div
+                className={`${styles.patternLayerItem} ${styles.patternLayerSpin} ${wholePatternSpin?.reverse ? styles.patternLayerSpinReverse : ''}`}
+                style={{
+                  '--pattern-spin-duration': wholePatternSpin?.duration,
+                  '--pattern-spin-delay': wholePatternSpin?.delay,
+                }}
+              >
+                <PatternBackground
+                  patternLayers={patternLayers}
+                  seed={patternSeed}
+                  className={styles.patternBackground}
+                />
+              </div>
+            </div>
+          ) : hasRotatingPatternLayer ? (
             <div className={styles.patternLayerStack}>
               {patternLayers.map((patternLayer, index) => {
-                const spin = rotatingPatternSettings[index];
+                const spin = index === rotatingPatternLayerIndex ? rotatingPatternSettings[index] : null;
                 const layerSeed = patternLayer.seed ?? (patternSeed + index + 1);
+                const layerStyle = spin
+                  ? {
+                    zIndex: index + 1,
+                    '--pattern-spin-duration': spin.duration,
+                    '--pattern-spin-delay': spin.delay,
+                  }
+                  : { zIndex: index + 1 };
 
                 return (
                   <div
                     key={`${patternLayer.habitId || `layer-${index}`}-${layerSeed}`}
                     className={`${styles.patternLayerItem} ${spin ? styles.patternLayerSpin : ''} ${spin?.reverse ? styles.patternLayerSpinReverse : ''}`}
-                    style={spin ? {
-                      '--pattern-spin-duration': spin.duration,
-                      '--pattern-spin-delay': spin.delay,
-                    } : undefined}
+                    style={layerStyle}
                   >
                     <PatternBackground
                       patternLayers={[patternLayer]}

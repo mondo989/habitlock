@@ -227,14 +227,43 @@ export const useCalendar = (habits = []) => {
     const hasDayChanged = validHabitIds.length !== priorCompletedHabits.length
       || validHabitIds.some((habitId) => !priorCompletedHabits.includes(habitId));
     
-    // Create habit details for all completed habits
+    // Preserve existing completion times and assign ordered timestamps to newly added habits.
+    // This keeps pattern stacking stable with the most recently added habit on top.
     const habitDetails = {};
-    const timestamp = new Date().toISOString();
-    
-    validHabitIds.forEach(habitId => {
+    const existingHabitDetails = entry.habits || {};
+    const priorCompletedSet = new Set(priorCompletedHabits);
+    const priorOrderById = new Map(priorCompletedHabits.map((habitId, index) => [habitId, index]));
+    const addedHabitIds = validHabitIds.filter((habitId) => !priorCompletedSet.has(habitId));
+    const addedOrderById = new Map(addedHabitIds.map((habitId, index) => [habitId, index]));
+    const nowMs = Date.now();
+    const existingFallbackBaseMs = nowMs - ((priorCompletedHabits.length + 1) * 10);
+
+    validHabitIds.forEach((habitId) => {
+      const existingDetail = existingHabitDetails[habitId];
+      const existingCompletedAt = existingDetail?.completedAt;
+
+      if (priorCompletedSet.has(habitId) && existingCompletedAt) {
+        habitDetails[habitId] = {
+          ...existingDetail,
+          completedAt: existingCompletedAt,
+          habitId,
+        };
+        return;
+      }
+
+      if (priorCompletedSet.has(habitId)) {
+        const fallbackOrder = priorOrderById.get(habitId) ?? 0;
+        habitDetails[habitId] = {
+          completedAt: new Date(existingFallbackBaseMs + fallbackOrder).toISOString(),
+          habitId,
+        };
+        return;
+      }
+
+      const addedOrder = addedOrderById.get(habitId) ?? 0;
       habitDetails[habitId] = {
-        completedAt: timestamp,
-        habitId: habitId,
+        completedAt: new Date(nowMs + addedOrder).toISOString(),
+        habitId,
       };
     });
 

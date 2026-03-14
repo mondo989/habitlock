@@ -109,6 +109,9 @@
   justify-content: center;
   gap: 8px;
   padding: 8px 0 12px;
+  background: #ffffff;
+  border-left: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
   opacity: 1;
   position: relative;
   z-index: 5;
@@ -153,12 +156,6 @@
     background: #ffffff;
     border-color: rgba(0, 0, 0, 0.14);
   }
-}
-
-.mapExportRow {
-  display: flex;
-  justify-content: center;
-  padding-top: 14px;
 }
 
 .inlineTimelineStrip {
@@ -946,9 +943,7 @@
 
 // Habits legend docked under calendar
 .habitsLegend {
-  background:
-    radial-gradient(120% 140% at 12% 0%, rgba(16, 185, 129, 0.08) 0%, rgba(255, 255, 255, 0) 46%),
-    white;
+  background: white;
   border-radius: 20px 20px 0 0;
   padding: 18px 18px 20px;
   @include card-shadow;
@@ -1987,26 +1982,40 @@
   }
   
   .habitCircle {
-    width: 46px;
-    height: 46px;
+    width: 37px;
+    height: 37px;
+  }
+
+  .habitCircle.goalMet {
+    width: 53px;
+    height: 53px;
   }
 
   .habitCircleSlot {
-    width: 58px;
-    height: 58px;
-    flex-basis: 58px;
+    width: 46px;
+    height: 46px;
+    flex-basis: 46px;
   }
 
   .goalMetSlot {
-    width: 70px;
-    height: 70px;
-    flex-basis: 70px;
+    width: 56px;
+    height: 56px;
+    flex-basis: 56px;
   }
   
   .legendEmoji {
-    width: 36px;
-    height: 36px;
+    width: 29px;
+    height: 29px;
+    min-width: 29px;
+    min-height: 29px;
     font-size: 1rem;
+  }
+
+  .goalMet .legendEmoji {
+    width: 43px;
+    height: 43px;
+    min-width: 43px;
+    min-height: 43px;
   }
   
   .habitTooltip {
@@ -2101,26 +2110,40 @@
   }
   
   .habitCircle {
-    width: 42px;
-    height: 42px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .habitCircle.goalMet {
+    width: 50px;
+    height: 50px;
   }
 
   .habitCircleSlot {
-    width: 54px;
-    height: 54px;
-    flex-basis: 54px;
+    width: 43px;
+    height: 43px;
+    flex-basis: 43px;
   }
 
   .goalMetSlot {
-    width: 62px;
-    height: 62px;
-    flex-basis: 62px;
+    width: 50px;
+    height: 50px;
+    flex-basis: 50px;
   }
   
   .legendEmoji {
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    min-height: 26px;
     font-size: 0.9375rem;
+  }
+
+  .goalMet .legendEmoji {
+    width: 39px;
+    height: 39px;
+    min-width: 39px;
+    min-height: 39px;
   }
   
   .habitTooltip {
@@ -2209,6 +2232,9 @@
 .subtleMonthNav {
   :global(html.dark-mode) & {
     opacity: 1;
+    background: #12151a;
+    border-left-color: rgba(255, 255, 255, 0.06);
+    border-right-color: rgba(255, 255, 255, 0.06);
   }
 }
 
@@ -2242,9 +2268,7 @@
 
 .habitsLegend {
   :global(html.dark-mode) & {
-    background:
-      radial-gradient(120% 140% at 12% 0%, rgba(52, 211, 153, 0.14) 0%, rgba(26, 29, 35, 0) 44%),
-      #1a1d23;
+    background: #1a1d23;
     border-color: rgba(255, 255, 255, 0.08);
     border-bottom-color: transparent;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);

@@ -1195,18 +1195,19 @@ const CalendarView = () => {
                 getCompletedHabits={getCompletedHabits}
                 habitProgressByDate={exportHabitProgressByDate}
                 size={viewportWidth <= 768 ? 'compact' : 'default'}
+                quarterPaging
+                overlayAction={(
+                  <button
+                    className={styles.mapExportButton}
+                    onClick={handleExportHabitMap}
+                    disabled={isExportingPoster || isSharingPoster || habits.length === 0}
+                  >
+                    Export Habit Map (1080×1080)
+                  </button>
+                )}
               />
             </div>
           )}
-          <div className={styles.mapExportRow}>
-            <button
-              className={styles.mapExportButton}
-              onClick={handleExportHabitMap}
-              disabled={isExportingPoster || isSharingPoster || habits.length === 0}
-            >
-              Export Habit Map (1080×1080)
-            </button>
-          </div>
         </div>
       </section>
 

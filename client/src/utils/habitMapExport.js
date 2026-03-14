@@ -205,7 +205,7 @@ const createAngleGradient = (ctx, x, y, width, height, angleDegrees, stops) => {
 };
 
 const drawCalendarCellBackground = (ctx, cell, backgroundModel) => {
-  const { x, y, width, height, isCurrentMonth, date } = cell;
+  const { x, y, width, height, isCurrentMonth } = cell;
 
   drawRoundedPanel(
     ctx,
@@ -231,23 +231,28 @@ const drawCalendarCellBackground = (ctx, cell, backgroundModel) => {
   roundRect(ctx, x, y, width, height, 0);
   ctx.clip();
 
+  const baseFillStartOpacity = backgroundModel.baseFillStartOpacity ?? (backgroundModel.baseOpacity * 0.24);
+  const baseFillEndOpacity = backgroundModel.baseFillEndOpacity ?? (backgroundModel.baseOpacity * 0.5);
   ctx.fillStyle = createAngleGradient(ctx, x, y, width, height, backgroundModel.angle2, [
-    { offset: 0, color: rgbaFromHex(backgroundModel.primaryColor, backgroundModel.baseOpacity * 0.24) },
-    { offset: 1, color: rgbaFromHex(backgroundModel.secondaryColor, backgroundModel.baseOpacity * 0.5) },
+    { offset: 0, color: rgbaFromHex(backgroundModel.primaryColor, baseFillStartOpacity) },
+    { offset: 1, color: rgbaFromHex(backgroundModel.secondaryColor, baseFillEndOpacity) },
   ]);
   ctx.fillRect(x, y, width, height);
 
+  const auroraOpacity = backgroundModel.auroraOpacity ?? (backgroundModel.baseOpacity * 0.06);
+  const singleAuroraStartOpacity = backgroundModel.singleAuroraStartOpacity ?? (backgroundModel.baseOpacity * 0.08);
+  const singleAuroraEndOpacity = backgroundModel.singleAuroraEndOpacity ?? (backgroundModel.baseOpacity * 0.04);
   if (backgroundModel.colors.length >= 2) {
     const auroraStops = backgroundModel.colors.map((color, index) => ({
       offset: backgroundModel.colors.length === 1 ? 0 : index / (backgroundModel.colors.length - 1),
-      color: rgbaFromHex(color, backgroundModel.baseOpacity * 0.06),
+      color: rgbaFromHex(color, auroraOpacity),
     }));
     auroraStops.push({ offset: 1, color: 'rgba(255,255,255,0)' });
     ctx.fillStyle = createAngleGradient(ctx, x, y, width, height, backgroundModel.angle1, auroraStops);
   } else {
     ctx.fillStyle = createAngleGradient(ctx, x, y, width, height, backgroundModel.angle1, [
-      { offset: 0, color: rgbaFromHex(backgroundModel.primaryColor, backgroundModel.baseOpacity * 0.08) },
-      { offset: 1, color: rgbaFromHex(backgroundModel.centerGlowColor, backgroundModel.baseOpacity * 0.04) },
+      { offset: 0, color: rgbaFromHex(backgroundModel.primaryColor, singleAuroraStartOpacity) },
+      { offset: 1, color: rgbaFromHex(backgroundModel.centerGlowColor, singleAuroraEndOpacity) },
     ]);
   }
   ctx.fillRect(x, y, width, height);

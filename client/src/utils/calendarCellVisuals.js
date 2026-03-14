@@ -86,19 +86,30 @@ export const buildCalendarCellVisuals = ({
   let backgroundModel = null;
   if (completedHabitDetails.length > 0 && habits.length > 0) {
     const completionRatio = completedHabitDetails.length / habits.length;
-    const baseOpacity = clamp(isPreview ? 0.2 + (dayVisualStrength * 0.5) : dayVisualStrength, 0.08, 1);
+    const allHabitsCompleted = completionRatio >= 1;
+    const completionIntensity = allHabitsCompleted ? 1 : Math.max(dayVisualStrength, completionRatio);
+    const computedOpacity = clamp(isPreview ? 0.2 + (completionIntensity * 0.5) : completionIntensity, 0.08, 1);
+    const baseOpacity = allHabitsCompleted ? 1 : computedOpacity;
     const primaryColor = habitColors[0];
     const secondaryColor = habitColors[1] || habitColors[0];
     const angle1 = Math.floor(seededRandom(dateSeed) * 360);
     const angle2 = (angle1 + 120 + Math.floor(seededRandom(dateSeed + 1) * 60)) % 360;
+    const centerGlowOpacity = baseOpacity * (0.1 + (completionRatio * 0.18));
+    const orbOpacityMultiplier = 0.04 + (completionRatio * 0.13);
+    const edgeGlowOpacity = baseOpacity * (0.04 + (completionRatio * 0.06));
+    const auroraOpacity = baseOpacity * (0.04 + (completionRatio * 0.08));
+    const singleAuroraStartOpacity = baseOpacity * (0.05 + (completionRatio * 0.08));
+    const singleAuroraEndOpacity = baseOpacity * (0.03 + (completionRatio * 0.05));
+    const baseFillStartOpacity = baseOpacity * (0.18 + (completionRatio * 0.42));
+    const baseFillEndOpacity = baseOpacity * (0.34 + (completionRatio * 0.66));
 
-    const centerGlow = `radial-gradient(ellipse at 50% 50%, ${lightenColor(primaryColor, 0.22)}${toHex(baseOpacity * 0.18)} 0%, transparent 72%)`;
+    const centerGlow = `radial-gradient(ellipse at 50% 50%, ${lightenColor(primaryColor, 0.22)}${toHex(centerGlowOpacity)} 0%, transparent 72%)`;
     const orbs = habitColors.slice(0, Math.min(4, habitColors.length)).map((color, index) => {
       const orbSeed = dateSeed + (index * 17);
       const x = 15 + (seededRandom(orbSeed) * 70);
       const y = 15 + (seededRandom(orbSeed + 1) * 70);
       const size = 38 + (seededRandom(orbSeed + 2) * 32) + (completionRatio * 18);
-      const orbOpacity = baseOpacity * (0.05 + (completionRatio * 0.07));
+      const orbOpacity = baseOpacity * orbOpacityMultiplier;
       return {
         color,
         x,
@@ -108,11 +119,11 @@ export const buildCalendarCellVisuals = ({
         css: `radial-gradient(ellipse ${size}% ${size * 1.18}% at ${x}% ${y}%, ${color}${toHex(orbOpacity)} 0%, ${color}${toHex(orbOpacity * 0.32)} 38%, transparent 72%)`,
       };
     });
-    const edgeGlow = `radial-gradient(ellipse at 50% 100%, ${secondaryColor}${toHex(baseOpacity * 0.06)} 0%, transparent 50%)`;
+    const edgeGlow = `radial-gradient(ellipse at 50% 100%, ${secondaryColor}${toHex(edgeGlowOpacity)} 0%, transparent 50%)`;
     const aurora = habitColors.length >= 2
-      ? `linear-gradient(${angle1}deg, ${habitColors.map((color, index) => `${color}${toHex(baseOpacity * 0.06)} ${(index / habitColors.length) * 100}%`).join(', ')}, transparent 100%)`
-      : `linear-gradient(${angle1}deg, ${primaryColor}${toHex(baseOpacity * 0.08)} 0%, ${lightenColor(primaryColor, 0.16)}${toHex(baseOpacity * 0.04)} 100%)`;
-    const baseFill = `linear-gradient(${angle2}deg, ${primaryColor}${toHex(baseOpacity * 0.24)} 0%, ${secondaryColor}${toHex(baseOpacity * 0.5)} 100%)`;
+      ? `linear-gradient(${angle1}deg, ${habitColors.map((color, index) => `${color}${toHex(auroraOpacity)} ${(index / habitColors.length) * 100}%`).join(', ')}, transparent 100%)`
+      : `linear-gradient(${angle1}deg, ${primaryColor}${toHex(singleAuroraStartOpacity)} 0%, ${lightenColor(primaryColor, 0.16)}${toHex(singleAuroraEndOpacity)} 100%)`;
+    const baseFill = `linear-gradient(${angle2}deg, ${primaryColor}${toHex(baseFillStartOpacity)} 0%, ${secondaryColor}${toHex(baseFillEndOpacity)} 100%)`;
 
     backgroundModel = {
       dateSeed,
@@ -125,10 +136,15 @@ export const buildCalendarCellVisuals = ({
       angle2,
       centerGlow,
       centerGlowColor: lightenColor(primaryColor, 0.22),
-      centerGlowOpacity: baseOpacity * 0.18,
+      centerGlowOpacity,
       orbs,
       edgeGlow,
-      edgeGlowOpacity: baseOpacity * 0.06,
+      edgeGlowOpacity,
+      auroraOpacity,
+      singleAuroraStartOpacity,
+      singleAuroraEndOpacity,
+      baseFillStartOpacity,
+      baseFillEndOpacity,
       aurora,
       baseFill,
       css: [centerGlow, ...orbs.map((orb) => orb.css), edgeGlow, aurora, baseFill].filter(Boolean).join(', '),

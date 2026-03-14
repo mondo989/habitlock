@@ -4,6 +4,48 @@
   --timeline-month-gap: 4px;
 }
 
+.quarterControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.quarterNavButton {
+  appearance: none;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.2);
+  color: #e2e8f0;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.16s ease;
+
+  &:hover:not(:disabled) {
+    border-color: rgba(148, 163, 184, 0.55);
+    background: rgba(15, 23, 42, 0.34);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.quarterLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+  font-weight: 700;
+  min-width: 70px;
+  text-align: center;
+}
+
 .scrollFrame {
   overflow-x: auto;
   overflow-y: visible;
@@ -25,9 +67,19 @@
   min-width: 100%;
 }
 
+.pagedTrack {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  gap: var(--timeline-month-gap);
+  min-width: 0;
+  width: max-content;
+  position: relative;
+}
+
 .monthBlock {
   opacity: var(--month-opacity, 1);
   transition: opacity 0.2s ease;
+  position: relative;
 }
 
 .monthGrid {
@@ -179,4 +231,25 @@
   margin-top: 8px;
   font-size: 0.76rem;
   color: #94a3b8;
+}
+
+.futureOverlay {
+  grid-row: 1;
+  align-self: center;
+  justify-self: center;
+  z-index: 4;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.futureOverlayButton {
+  pointer-events: auto;
+}
+
+.actionFallbackRow {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
 }

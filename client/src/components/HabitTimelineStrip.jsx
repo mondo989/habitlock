@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import Tooltip from './Tooltip';
 import { PatternBackgroundSvg } from './PatternBackground';
@@ -34,11 +34,20 @@ const HabitTimelineStrip = ({
   habitProgressByDate = {},
   size = 'default',
   className = '',
+  quarterPaging = false,
+  overlayAction = null,
 }) => {
   const habitById = useMemo(
     () => new Map(habits.filter((habit) => habit?.id).map((habit) => [habit.id, habit])),
     [habits],
   );
+
+  const currentQuarterIndex = useMemo(() => Math.floor(dayjs().month() / 3), []);
+  const [quarterIndex, setQuarterIndex] = useState(currentQuarterIndex);
+
+  useEffect(() => {
+    setQuarterIndex(Math.floor(dayjs().month() / 3));
+  }, [year]);
 
   const months = useMemo(() => Array.from({ length: 12 }, (_, monthIndex) => {
     const monthStart = dayjs().year(year).month(monthIndex).startOf('month');
@@ -83,18 +92,70 @@ const HabitTimelineStrip = ({
 
     return {
       id: `${year}-${monthIndex}`,
+      shortLabel: monthStart.format('MMM').toUpperCase(),
+      isFutureMonth: monthStart.isAfter(dayjs(), 'month'),
       activeCount,
       rows,
     };
   }), [year, habits, habitById, getCompletedHabits, habitProgressByDate]);
 
+  const maxQuarterIndex = 3;
+  const visibleMonths = quarterPaging
+    ? months.slice(quarterIndex * 3, (quarterIndex * 3) + 3)
+    : months;
   const activeMonthCount = months.filter((month) => month.activeCount > 0).length;
+  const quarterLabel = visibleMonths.length > 0
+    ? `${visibleMonths[0].shortLabel}-${visibleMonths[visibleMonths.length - 1].shortLabel}`
+    : '';
+
+  const overlayPlacement = useMemo(() => {
+    if (!overlayAction || !quarterPaging || visibleMonths.length === 0) return null;
+    const firstFutureMonth = visibleMonths.findIndex((month) => month.isFutureMonth);
+    if (firstFutureMonth === -1) return null;
+
+    let futureSpan = 0;
+    for (let monthIndex = firstFutureMonth; monthIndex < visibleMonths.length; monthIndex += 1) {
+      if (!visibleMonths[monthIndex].isFutureMonth) break;
+      futureSpan += 1;
+    }
+
+    return {
+      start: firstFutureMonth + 1,
+      span: futureSpan,
+    };
+  }, [overlayAction, quarterPaging, visibleMonths]);
+
+  const showOverlayAction = Boolean(overlayPlacement);
+  const showFallbackAction = Boolean(overlayAction) && !showOverlayAction;
 
   return (
     <div className={`${styles.timeline} ${styles[size] || ''} ${className}`.trim()}>
+      {quarterPaging && (
+        <div className={styles.quarterControls}>
+          <button
+            type="button"
+            className={styles.quarterNavButton}
+            onClick={() => setQuarterIndex((current) => Math.max(0, current - 1))}
+            disabled={quarterIndex === 0}
+            aria-label="Show previous quarter"
+          >
+            ‹
+          </button>
+          <span className={styles.quarterLabel}>{quarterLabel}</span>
+          <button
+            type="button"
+            className={styles.quarterNavButton}
+            onClick={() => setQuarterIndex((current) => Math.min(maxQuarterIndex, current + 1))}
+            disabled={quarterIndex === maxQuarterIndex}
+            aria-label="Show next quarter"
+          >
+            ›
+          </button>
+        </div>
+      )}
       <div className={styles.scrollFrame}>
-        <div className={styles.monthTrack}>
-          {months.map((month) => {
+        <div className={`${styles.monthTrack} ${quarterPaging ? styles.pagedTrack : ''}`.trim()}>
+          {visibleMonths.map((month) => {
             const monthOpacity = month.activeCount > 0
               ? 1
               : activeMonthCount > 0
@@ -160,8 +221,23 @@ const HabitTimelineStrip = ({
               </div>
             );
           })}
+          {showOverlayAction && (
+            <div
+              className={styles.futureOverlay}
+              style={{ gridColumn: `${overlayPlacement.start} / span ${overlayPlacement.span}` }}
+            >
+              <div className={styles.futureOverlayButton}>
+                {overlayAction}
+              </div>
+            </div>
+          )}
         </div>
       </div>
+      {showFallbackAction && (
+        <div className={styles.actionFallbackRow}>
+          {overlayAction}
+        </div>
+      )}
     </div>
   );
 };
