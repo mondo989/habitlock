@@ -109,7 +109,7 @@ const HabitTimelineStrip = ({
     : '';
 
   const overlayPlacement = useMemo(() => {
-    if (!overlayAction || !quarterPaging || visibleMonths.length === 0) return null;
+    if (!overlayAction || visibleMonths.length === 0) return null;
     const firstFutureMonth = visibleMonths.findIndex((month) => month.isFutureMonth);
     if (firstFutureMonth === -1) return null;
 
@@ -127,6 +127,7 @@ const HabitTimelineStrip = ({
 
   const showOverlayAction = Boolean(overlayPlacement);
   const showFallbackAction = Boolean(overlayAction) && !showOverlayAction;
+  const shouldUseGridTrack = quarterPaging || showOverlayAction;
 
   return (
     <div className={`${styles.timeline} ${styles[size] || ''} ${className}`.trim()}>
@@ -154,7 +155,10 @@ const HabitTimelineStrip = ({
         </div>
       )}
       <div className={styles.scrollFrame}>
-        <div className={`${styles.monthTrack} ${quarterPaging ? styles.pagedTrack : ''}`.trim()}>
+        <div
+          className={`${styles.monthTrack} ${shouldUseGridTrack ? styles.gridTrack : ''}`.trim()}
+          style={shouldUseGridTrack ? { gridTemplateColumns: `repeat(${visibleMonths.length}, max-content)` } : undefined}
+        >
           {visibleMonths.map((month) => {
             const monthOpacity = month.activeCount > 0
               ? 1

@@ -119,7 +119,7 @@ const LandingPageConversion = () => {
               <div className={styles.miniAvatar}>SM</div>
               <div className={styles.miniAvatar}>AL</div>
             </div>
-            <span><strong>1,000+</strong> people building better habits</span>
+            <span><strong>Special offer:</strong> track up to 8 habits free during beta</span>
           </div>
           
           <h1>
@@ -317,7 +317,7 @@ const LandingPageConversion = () => {
       <section className={styles.midCta}>
         <div className={styles.midCtaContent}>
           <h2>Ready to build better habits?</h2>
-          <p>Join 1,000+ people who've transformed their routines</p>
+          <p>Beta special: track up to 8 habits for free while HabitLock is in beta.</p>
           <button className={styles.midCtaButton} onClick={openAuthModal}>
             Start Free Today →
           </button>
@@ -449,7 +449,7 @@ const LandingPageConversion = () => {
             </button>
             <span className={styles.exitEmoji}>👋</span>
             <h2>Wait! Before you go...</h2>
-            <p>Join 1,000+ people who are building better habits with HabitLock.</p>
+            <p>Beta offer: unlock 8 tracked habits free, no credit card required.</p>
             <button className={styles.exitCta} onClick={openAuthModal}>
               Try Free Now →
             </button>

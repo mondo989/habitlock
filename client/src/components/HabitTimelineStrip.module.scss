@@ -67,12 +67,12 @@
   min-width: 100%;
 }
 
-.pagedTrack {
+.gridTrack {
   display: grid;
-  grid-template-columns: repeat(3, max-content);
   gap: var(--timeline-month-gap);
-  min-width: 0;
+  min-width: 100%;
   width: max-content;
+  margin-inline: auto;
   position: relative;
 }
 
@@ -251,5 +251,5 @@
 .actionFallbackRow {
   display: flex;
   justify-content: center;
-  margin-top: 10px;
+  margin-top: 22px;
 }
