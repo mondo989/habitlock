@@ -10,7 +10,7 @@
   min-height: 120px;
   padding: 10px;
   cursor: pointer;
-  background: var(--cell-bg, #fafbfc);
+  background: transparent;
   display: flex;
   flex-direction: column;
   border-radius: 0;
@@ -18,15 +18,16 @@
   animation: cellFadeIn 0.4s ease-out var(--animation-delay, 0s) both;
   overflow: hidden;
   
-  // Base pseudo-element for shimmer effects
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: inherit;
+    background: var(--cell-overlay-background, transparent);
     opacity: 0;
     transition: opacity 0.3s ease, background 0.3s ease;
     border-radius: inherit;
+    z-index: 1;
+    pointer-events: none;
   }
   
   // ---------------------------------------------------------------------------
@@ -61,37 +62,48 @@
     }
   }
 
-  &.habitHovered {
+  :global([data-calendar-hover-active='true']) & {
     .habitOverlay {
       opacity: 1;
       background: rgba(0, 0, 0, 0.55);
     }
+
+    .patternLayer :global([data-layer-habit-id]) {
+      transition: opacity 0.2s ease, filter 0.2s ease;
+    }
+
+    .patternLayer :global([data-layer-habit-id]:not([data-hover-match='true'])) {
+      opacity: 0.22;
+      filter: saturate(0.6) brightness(0.8);
+    }
     
     // Dim non-highlighted emojis under the overlay
-    .floatingEmoji:not(.highlighted) {
+    .floatingEmoji:not([data-hover-match='true']) {
       opacity: 0.3;
       filter: grayscale(0.5);
     }
     
-    .mobileEmoji:not(.highlighted) {
+    .mobileEmoji:not([data-hover-match='true']) {
       opacity: 0.3;
       filter: grayscale(0.5);
     }
-    
-    // Cells with the completed habit
-    &.hasHoveredHabit {
-      // 20% lighter overlay for completed days (0.55 - 0.20 = 0.35)
+
+    &[data-hover-match='true'] {
       .habitOverlay {
         background: rgba(0, 0, 0, 0.35);
       }
-      
-      // Hide the highlighted emoji in the cell - it's rendered in the overlay layer instead
-      .floatingEmoji.highlighted {
+
+      .patternLayer :global([data-layer-habit-id][data-hover-match='true']) {
+        opacity: 1;
+        filter: none;
+      }
+
+      .floatingEmoji[data-hover-match='true'] {
         opacity: 0;
         pointer-events: none;
       }
-      
-      .mobileEmoji.highlighted {
+
+      .mobileEmoji[data-hover-match='true'] {
         opacity: 0;
         pointer-events: none;
       }
@@ -131,7 +143,7 @@
     &::before {
       background: 
         linear-gradient(
-          var(--gradient-angle, 135deg),
+          135deg,
           transparent 0%,
           rgba(255, 255, 255, 0.04) 25%,
           rgba(255, 255, 255, 0.08) 50%,
@@ -139,30 +151,23 @@
           transparent 100%
         ),
         linear-gradient(
-          var(--gradient-angle-2, 225deg),
+          225deg,
           transparent 0%,
           rgba(255, 255, 255, 0.03) 40%,
           rgba(255, 255, 255, 0.05) 60%,
           transparent 100%
         );
-      background-size: 300% 300%, 250% 250%;
-      animation: 
-        gradientShimmer var(--anim-duration, 10s) ease-in-out infinite,
-        shimmerCross calc(var(--anim-duration, 10s) * 1.3) ease-in-out infinite reverse;
-      animation-delay: var(--anim-delay, 0s), calc(var(--anim-delay, 0s) + 1s);
-      opacity: 1;
-      will-change: background-position;
+      opacity: var(--completion-overlay-opacity, 0.16);
     }
     
     &:hover::before {
-      opacity: 1;
-      animation-duration: calc(var(--anim-duration, 10s) * 0.7), calc(var(--anim-duration, 10s) * 0.9);
+      opacity: calc(var(--completion-overlay-opacity, 0.16) + 0.08);
     }
     
     &:not(.allComplete)::before {
       background: 
         linear-gradient(
-          var(--gradient-angle, 135deg),
+          135deg,
           transparent 0%,
           rgba(255, 255, 255, 0.05) 25%,
           rgba(255, 255, 255, 0.1) 50%,
@@ -170,7 +175,7 @@
           transparent 100%
         ),
         linear-gradient(
-          var(--gradient-angle-2, 225deg),
+          225deg,
           transparent 0%,
           rgba(255, 255, 255, 0.04) 40%,
           rgba(255, 255, 255, 0.06) 60%,
@@ -193,7 +198,6 @@
         0 0 8px rgba(16, 185, 129, 0.8),
         0 0 16px rgba(16, 185, 129, 0.4),
         0 0 24px rgba(16, 185, 129, 0.2);
-      animation: completePulse 2.5s ease-in-out infinite;
     }
     
     .emojiCanvas::after {
@@ -207,8 +211,124 @@
         transparent 60%
       );
       pointer-events: none;
-      animation: bloomPulse 4s ease-in-out infinite;
+      opacity: 0.7;
     }
+  }
+}
+
+.backgroundLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: var(--cell-background, #fafbfc);
+  pointer-events: none;
+}
+
+.patternLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.patternLayerStack {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.patternLayerItem {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  transform-origin: 50% 50%;
+}
+
+.patternLayerSpin {
+  animation: patternLayerSpin var(--pattern-spin-duration, 30s) linear infinite;
+  animation-delay: var(--pattern-spin-delay, 0s);
+  will-change: transform;
+}
+
+.patternLayerSpinReverse {
+  animation-direction: reverse;
+}
+
+.patternEnter {
+  animation: patternReveal 0.46s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  transform-origin: 50% 50%;
+}
+
+.patternExit {
+  z-index: 2;
+  animation: patternRemove 0.42s cubic-bezier(0.4, 0, 0.2, 1) both;
+  transform-origin: 50% 50%;
+}
+
+.patternBackground {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+}
+
+.staticPreview {
+  animation: none;
+  transition: none;
+  cursor: default;
+  pointer-events: none;
+
+  &::before,
+  &::after {
+    transition: none;
+  }
+
+  &:hover {
+    transform: none;
+    z-index: 1;
+    box-shadow: none;
+
+    &::before {
+      opacity: var(--completion-overlay-opacity, 0.16);
+      background: inherit;
+    }
+
+    .floatingEmoji {
+      transform: none;
+    }
+  }
+}
+
+.previewMonthCell {
+  min-height: 0;
+  aspect-ratio: 1;
+  padding: 8px;
+
+  .dayNumber {
+    font-size: 0.9rem;
+  }
+}
+
+.previewYearCell {
+  min-height: 0;
+  aspect-ratio: 1;
+  padding: 4px;
+
+  .dayNumber {
+    font-size: 0.5rem;
   }
 }
 
@@ -221,48 +341,6 @@
   opacity: 0;
   transition: opacity 0.3s ease, background 0.3s ease;
   border-radius: inherit;
-}
-
-.p5Background {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border-radius: inherit;
-  overflow: hidden;
-
-  canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block;
-  }
-}
-
-.celebrationPattern {
-  z-index: 2;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  animation: mosaicReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  
-  canvas {
-    filter: contrast(1.1) saturate(1.1);
-  }
-}
-
-@keyframes mosaicReveal {
-  0% {
-    opacity: 0;
-    transform: scale(0.8) rotate(-5deg);
-    filter: blur(8px);
-  }
-  50% {
-    opacity: 0.5;
-    filter: blur(2px);
-  }
-  100% {
-    opacity: 0.4;
-    transform: scale(1) rotate(0deg);
-    filter: blur(0px);
-  }
 }
 
 // ============================================================================
@@ -279,6 +357,13 @@
   transition: all 0.2s ease;
   position: relative;
   z-index: 5;
+}
+
+.dayNumberTooltipAnchor {
+  display: inline-flex;
+  align-self: flex-start;
+  width: fit-content;
+  max-width: fit-content;
 }
 
 .emojiCanvas {
@@ -461,51 +546,52 @@
   }
 }
 
-@keyframes gradientShimmer {
-  0%, 100% {
-    background-position: 0% 50%, 100% 50%;
+@keyframes patternReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+    filter: saturate(0.65) blur(1px);
   }
-  50% {
-    background-position: 100% 50%, 0% 50%;
-  }
-}
-
-@keyframes shimmerCross {
-  0%, 100% {
-    background-position: 50% 0%, 50% 100%;
-  }
-  50% {
-    background-position: 50% 100%, 50% 0%;
-  }
-}
-
-@keyframes completePulse {
-  0%, 100% { 
-    transform: scale(1); 
+  64% {
     opacity: 1;
-    box-shadow: 
-      0 0 8px rgba(16, 185, 129, 0.8),
-      0 0 16px rgba(16, 185, 129, 0.4),
-      0 0 24px rgba(16, 185, 129, 0.2);
+    transform: scale(1.04);
+    filter: saturate(1.06) blur(0);
   }
-  50% { 
-    transform: scale(1.2); 
-    opacity: 0.9;
-    box-shadow: 
-      0 0 12px rgba(16, 185, 129, 1),
-      0 0 24px rgba(16, 185, 129, 0.6),
-      0 0 36px rgba(16, 185, 129, 0.3);
-  }
-}
-
-@keyframes bloomPulse {
-  0%, 100% {
-    opacity: 0.6;
+  100% {
+    opacity: 1;
     transform: scale(1);
+    filter: saturate(1) blur(0);
   }
-  50% {
+}
+
+@keyframes patternRemove {
+  0% {
     opacity: 1;
-    transform: scale(1.05);
+    transform: scale(1);
+    filter: saturate(1) blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.78);
+    filter: saturate(0.55) blur(1px);
+  }
+}
+
+@keyframes patternLayerSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patternEnter,
+  .patternExit,
+  .patternLayerSpin,
+  .patternLayerSpinReverse {
+    animation: none;
   }
 }
 
@@ -594,8 +680,12 @@
 // ============================================================================
 
 :global(html.dark-mode) {
+  .backgroundLayer {
+    background: var(--cell-background, #1a1d23);
+  }
+
   .calendarCell {
-    background: var(--cell-bg, #1a1d23);
+    background: transparent;
     
     &:hover {
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -705,14 +795,6 @@
     
     &:hover {
       transform: none;
-    }
-    
-    &.hasCompletions::before {
-      animation: none;
-    }
-    
-    &.allComplete::after {
-      animation: none;
     }
   }
   

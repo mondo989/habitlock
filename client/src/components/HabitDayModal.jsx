@@ -1,6 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import useScrollLock from '../hooks/useScrollLock';
 import styles from './HabitDayModal.module.scss';
+
+const areHabitListsEqual = (left = [], right = []) => {
+  if (left.length !== right.length) return false;
+
+  const leftSorted = [...left].sort();
+  const rightSorted = [...right].sort();
+
+  return leftSorted.every((habitId, index) => habitId === rightSorted[index]);
+};
 
 // Helper function to format completion time
 const formatCompletionTime = (timestamp) => {
@@ -13,7 +22,7 @@ const formatCompletionTime = (timestamp) => {
       minute: '2-digit',
       hour12: true 
     });
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -27,7 +36,6 @@ const HabitDayModal = ({
   day,
   habits,
   completedHabits,
-  hasHabitMetWeeklyGoal,
   weekStats,
   calendarEntry
 }) => {
@@ -45,25 +53,6 @@ const HabitDayModal = ({
   }, [isOpen, completedHabits]);
 
   // Add keyboard shortcuts - moved to top to maintain hooks order
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e) => {
-      const hasChanges = JSON.stringify(selectedHabits.sort()) !== JSON.stringify(completedHabits.sort());
-      
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        handleCancel();
-      } else if (e.key === 'Enter' && hasChanges) {
-        e.preventDefault();
-        handleSave();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, selectedHabits, completedHabits]);
-
   const handleHabitToggle = (habitId) => {
     if (!habitId || habitId === '') {
       console.warn('Invalid habit ID provided to handleHabitToggle:', habitId);
@@ -79,16 +68,35 @@ const HabitDayModal = ({
     });
   };
 
-  const handleSave = () => {
+  const handleSave = useCallback(async () => {
     const validSelectedHabits = selectedHabits.filter(habitId => habitId != null && habitId !== '');
-    onSave(date, validSelectedHabits);
-    onClose();
-  };
+    return onSave(date, validSelectedHabits);
+  }, [date, onSave, selectedHabits]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setSelectedHabits([...completedHabits]);
     onClose();
-  };
+  }, [completedHabits, onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = async (e) => {
+      const hasChanges = !areHabitListsEqual(selectedHabits, completedHabits);
+      
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleCancel();
+      } else if (e.key === 'Enter' && hasChanges) {
+        e.preventDefault();
+        void handleSave();
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, selectedHabits, completedHabits, handleCancel, handleSave, onClose]);
 
   const handleEditHabit = (e, habit) => {
     e.stopPropagation();
@@ -98,7 +106,7 @@ const HabitDayModal = ({
 
   if (!isOpen || !day) return null;
 
-  const hasChanges = JSON.stringify(selectedHabits.sort()) !== JSON.stringify(completedHabits.sort());
+  const hasChanges = !areHabitListsEqual(selectedHabits, completedHabits);
 
   return (
     <div className={styles.modalOverlay} onClick={handleCancel}>
@@ -128,7 +136,6 @@ const HabitDayModal = ({
           <div className={styles.habitsList}>
             {habits.filter(habit => habit && habit.id).map(habit => {
               const isSelected = selectedHabits.includes(habit.id);
-              const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
               const originalWeekStat = weekStats?.[habit.id] || { completions: 0, goal: habit.weeklyGoal, percentage: 0 };
               
               // Calculate dynamic weekly stats based on current selection
@@ -172,28 +179,48 @@ const HabitDayModal = ({
                   `}
                   onClick={() => handleHabitToggle(habit.id)}
                 >
-                  <div className={styles.habitInfo}>
-                    <span 
-                      className={styles.habitEmoji}
-                      style={{ backgroundColor: habit.color }}
-                    >
-                      {habit.emoji}
-                    </span>
-                    
-                    <div className={styles.habitDetails}>
-                      <div className={styles.habitName}>{habit.name}</div>
-                      {habit.description && (
-                        <div className={styles.habitDescription}>{habit.description}</div>
-                      )}
-                      {completionTime && (
-                        <div className={styles.completionTime}>
-                          ⏰ Completed at {completionTime}
+                  <div className={styles.habitCardTop}>
+                    <div className={styles.habitInfo}>
+                      <span 
+                        className={styles.habitEmoji}
+                        style={{ backgroundColor: habit.color }}
+                      >
+                        {habit.emoji}
+                      </span>
+                      
+                      <div className={styles.habitDetails}>
+                        <div className={styles.habitName}>{habit.name}</div>
+                        {habit.description && (
+                          <div className={styles.habitDescription}>{habit.description}</div>
+                        )}
+                        {completionTime && (
+                          <div className={styles.completionTime}>
+                            ⏰ Completed at {completionTime}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={styles.habitActions}>
+                      <button 
+                        className={styles.editButton}
+                        onClick={(e) => handleEditHabit(e, habit)}
+                        title="Edit habit"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="m18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                      
+                      <div className={styles.checkbox}>
+                        <div className={`${styles.checkmark} ${isSelected ? styles.checked : ''}`}>
+                          {isSelected && '✓'}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                   
-                  {/* Full-width progress section */}
                   <div className={styles.habitStats}>
                     <div className={styles.weeklyProgress}>
                       <span className={styles.progressText}>
@@ -212,25 +239,6 @@ const HabitDayModal = ({
                     {weekStat.hasMetGoal && (
                       <div className={styles.goalMetBadge}>🎯 Goal achieved!</div>
                     )}
-                  </div>
-                  
-                  <div className={styles.habitActions}>
-                    <button 
-                      className={styles.editButton}
-                      onClick={(e) => handleEditHabit(e, habit)}
-                      title="Edit habit"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="m18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                      </svg>
-                    </button>
-                    
-                    <div className={styles.checkbox}>
-                      <div className={`${styles.checkmark} ${isSelected ? styles.checked : ''}`}>
-                        {isSelected && '✓'}
-                      </div>
-                    </div>
                   </div>
                 </div>
               );
@@ -265,7 +273,10 @@ const HabitDayModal = ({
             </button>
             <button 
               className={`${styles.saveButton} ${hasChanges ? styles.hasChanges : ''}`}
-              onClick={handleSave}
+              onClick={() => {
+                void handleSave();
+                onClose();
+              }}
               disabled={!hasChanges}
             >
               {hasChanges ? 'Save Changes' : 'No Changes'}

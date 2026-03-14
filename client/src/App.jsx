@@ -22,11 +22,6 @@ const AdminView = import.meta.env.DEV
   ? lazy(() => import('./views/AdminView'))
   : null;
 
-// DEV-ONLY: P5 Pattern demo for testing
-const P5PatternDemo = import.meta.env.DEV
-  ? lazy(() => import('./components/P5PatternDemo'))
-  : null;
-
 const PatternDebugView = import.meta.env.DEV
   ? lazy(() => import('./views/PatternDebugView'))
   : null;
@@ -130,7 +125,7 @@ function AppLayout({ children }) {
   return (
     <div className={styles.app}>
       {/* Navigation Header */}
-      <nav className={styles.nav}>
+      <nav className={styles.nav} data-tooltip-top-boundary>
         <div className={styles.navContent}>
           <div 
             className={styles.logo}
@@ -426,20 +421,6 @@ function App() {
                 } />
               )}
               
-              {/* DEV-ONLY: P5 Pattern demo page */}
-              {import.meta.env.DEV && P5PatternDemo && (
-                <Route path="/dev/p5-demo" element={
-                  <Suspense fallback={
-                    <div className={styles.loadingScreen}>
-                      <div className={styles.spinner}></div>
-                      <p>Loading P5 demo...</p>
-                    </div>
-                  }>
-                    <P5PatternDemo />
-                  </Suspense>
-                } />
-              )}
-
               {/* LOCAL-ONLY: Pattern debug page */}
               {isLocalDevOnlyEnabled() && PatternDebugView && (
                 <Route path="/dev/pattern-debug" element={

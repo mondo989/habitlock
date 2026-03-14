@@ -1,37 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import bundledPatternConfig from '../config/patternPresets.json';
+import {
+  createPatternConfigClone,
+  getPatternOverrideForHabit,
+  normalizePatternConfig,
+} from '../utils/patterns';
 
 const DEV_ENDPOINT = '/__dev/pattern-config';
 
-const cloneConfig = (config) => ({
-  presets: { ...(config?.presets || {}) },
-  emojiAssignments: { ...(config?.emojiAssignments || {}) },
-});
-
-export const getPatternOverrideForHabit = (habit, patternConfig) => {
-  if (!habit?.emoji || !patternConfig?.emojiAssignments) {
-    return null;
-  }
-
-  const presetId = patternConfig.emojiAssignments[habit.emoji];
-  if (!presetId) {
-    return null;
-  }
-
-  const preset = patternConfig.presets?.[presetId];
-  return preset ? { ...preset } : null;
-};
-
-export const createPatternConfigClone = (config) => cloneConfig(config);
-
 const usePatternConfig = () => {
-  const [patternConfig, setPatternConfig] = useState(() => cloneConfig(bundledPatternConfig));
+  const [patternConfig, setPatternConfig] = useState(() => createPatternConfigClone(bundledPatternConfig));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
   const loadConfig = useCallback(async () => {
     if (!import.meta.env.DEV) {
-      setPatternConfig(cloneConfig(bundledPatternConfig));
+      setPatternConfig(createPatternConfigClone(bundledPatternConfig));
       return;
     }
 
@@ -42,12 +26,12 @@ const usePatternConfig = () => {
       }
 
       const config = await response.json();
-      setPatternConfig(cloneConfig(config));
+      setPatternConfig(normalizePatternConfig(config));
       setError(null);
     } catch (loadError) {
       console.error('Failed to load dev pattern config:', loadError);
       setError(loadError.message);
-      setPatternConfig(cloneConfig(bundledPatternConfig));
+      setPatternConfig(createPatternConfigClone(bundledPatternConfig));
     }
   }, []);
 
@@ -56,7 +40,7 @@ const usePatternConfig = () => {
   }, [loadConfig]);
 
   const saveConfig = useCallback(async (nextConfig) => {
-    const normalizedConfig = cloneConfig(nextConfig);
+    const normalizedConfig = normalizePatternConfig(nextConfig);
 
     if (!import.meta.env.DEV) {
       setPatternConfig(normalizedConfig);
@@ -78,7 +62,7 @@ const usePatternConfig = () => {
       }
 
       const savedConfig = await response.json();
-      setPatternConfig(cloneConfig(savedConfig));
+      setPatternConfig(normalizePatternConfig(savedConfig));
       setError(null);
       return true;
     } catch (saveError) {
@@ -99,4 +83,5 @@ const usePatternConfig = () => {
   }), [patternConfig, saving, error, saveConfig, loadConfig]);
 };
 
+export { getPatternOverrideForHabit };
 export default usePatternConfig;

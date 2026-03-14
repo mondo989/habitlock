@@ -2,34 +2,38 @@
 
 .modalOverlay {
   @include modal-overlay;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.58);
 }
 
 .modalContent {
   @include modal-content;
-  animation: modalSlideIn 0.3s ease-out;
+  max-width: 1320px;
+  max-height: 92vh;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 24px 65px rgba(15, 23, 42, 0.35);
+  animation: modalSlideIn 0.28s ease-out;
 }
 
 .modalHeader {
   @include modal-header;
-  padding: 24px 24px 0;
+  padding: 22px 24px 0;
 }
 
 .dayLabel {
-  margin: 4px 0 10px;
-  color: #6b7280;
+  margin: 4px 0 12px;
+  color: #64748b;
   @include text-body;
   @include flex-start;
-  gap: 8px;
+  gap: 10px;
 }
 
 .todayBadge {
   background: #3b82f6;
-  color: white;
-  padding: 2px 8px;
+  color: #ffffff;
+  padding: 3px 9px;
   @include border-radius-full;
   @include text-small;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .closeButton {
@@ -37,7 +41,7 @@
   width: 32px;
   height: 32px;
   @include flex-center;
-  color: #6b7280;
+  color: #64748b;
   @include border-radius-sm;
   @include transition-fast;
 
@@ -48,212 +52,190 @@
   }
 
   &:hover {
-    background: #f3f4f6;
-    color: #374151;
+    background: #eef2f7;
+    color: #334155;
   }
 }
 
 .modalBody {
-  padding: 24px;
+  padding: 22px 24px;
   flex: 1;
   overflow-y: auto;
 
   h3 {
-    margin: 0 0 16px;
-    @include text-large;
-    font-weight: 600;
-    color: #374151;
+    margin: 0 0 14px;
+    font-size: 1.25rem;
+    line-height: 1.35;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
   }
 }
 
 .habitsList {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 12px;
   width: 100%;
 
-  // Two columns on desktop
-  @media (min-width: 768px) {
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+  @media (min-width: 700px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
   }
 }
 
 .habitItem {
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  background: #f9fafb;
-  @include border-subtle;
-  border: 2px solid #e5e7eb;
-  @include border-radius-md;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background:
+    radial-gradient(140% 170% at 0% 0%, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0) 56%),
+    linear-gradient(180deg, #fbfdff 0%, #f4f7fb 100%);
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.08);
   cursor: pointer;
-  @include transition-fast;
-  min-height: 80px;
-  position: relative;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  min-height: 168px;
 
   &:hover {
-    background: #f3f4f6;
-    border-color: #d1d5db;
-    @include hover-lift;
-    @include card-shadow;
+    transform: translateY(-1px);
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
   }
 
   &.selected {
-    background: #eff6ff;
+    background:
+      radial-gradient(130% 160% at 100% 0%, rgba(37, 99, 235, 0.2) 0%, rgba(37, 99, 235, 0) 58%),
+      linear-gradient(180deg, #eff6ff 0%, #e8f0ff 100%);
     border-color: #3b82f6;
-    
-    &:hover {
-      background: #dbeafe;
-    }
+    box-shadow: 0 10px 28px rgba(37, 99, 235, 0.2);
   }
 
   &.goalMet {
-    background: #f59e0b60;
-    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.1), 0 0 12px rgba(245, 158, 11, 0.15);
-    
-    &:hover {
-      box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.2), 0 0 16px rgba(245, 158, 11, 0.2);
-    }
+    border-color: rgba(217, 119, 6, 0.38);
+    background:
+      radial-gradient(130% 170% at 0% 100%, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0) 58%),
+      linear-gradient(180deg, #fffbf2 0%, #fff6e5 100%);
+    box-shadow: 0 8px 28px rgba(217, 119, 6, 0.16);
 
     &.selected {
-      background: #eff6ff;
       border-color: #3b82f6;
-      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1), 0 0 12px rgba(59, 130, 246, 0.15);
-      
-      &:hover {
-        background: #dbeafe;
-        box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2), 0 0 16px rgba(59, 130, 246, 0.2);
-      }
+      background:
+        radial-gradient(130% 170% at 100% 0%, rgba(37, 99, 235, 0.24) 0%, rgba(37, 99, 235, 0) 58%),
+        linear-gradient(180deg, #eff6ff 0%, #e8f0ff 100%);
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.24);
     }
   }
 }
 
+.habitCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .habitInfo {
-  @include flex-start;
-  gap: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
   flex: 1;
-  margin-bottom: 16px;
-  padding-right: 80px; // Space for actions in top-right
 }
 
 .habitEmoji {
-  width: 48px;
-  height: 48px;
-  @include border-radius-md;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   @include flex-center;
-  @include icon-xl;
+  font-size: 1.2rem;
   flex-shrink: 0;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  @include card-shadow;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
 }
 
 .habitDetails {
+  min-width: 0;
   flex: 1;
 }
 
 .habitName {
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 4px;
-  font-size: 1.0625rem;
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.01rem;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .habitDescription {
-  @include text-body;
-  color: #6b7280;
-  margin-bottom: 8px;
-  line-height: 1.4;
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .completionTime {
-  @include text-small;
-  color: #059669;
-  font-weight: 500;
-  background: rgba(16, 185, 129, 0.1);
-  padding: 3px 8px;
-  @include border-radius-sm;
-  display: inline-block;
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.habitStats {
-  @include flex-column-center;
-  align-items: flex-start;
-  gap: 6px;
-  width: 100%;
-}
-
-.weeklyProgress {
-  @include flex-column-center;
-  align-items: flex-start;
-  gap: 4px;
-  width: 100%;
-}
-
-.progressText {
-  font-size: 0.8125rem;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.progressBar {
-  height: 6px;
-  background: #f1f5f9;
-  @include border-radius-sm;
-  overflow: hidden;
-  width: 100%;
-}
-
-.progressFill {
-  height: 100%;
-  @include border-radius-sm;
-  @include transition-standard;
-}
-
-.goalMetBadge {
-  @include text-small;
-  color: #f59e0b;
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  color: #047857;
+  font-size: 0.75rem;
   font-weight: 600;
-  background: rgba(251, 191, 36, 0.1);
-  padding: 2px 6px;
-  @include border-radius-sm;
-  align-self: flex-start;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .habitActions {
-  position: absolute;
-  top: 16px;
-  right: 16px;
   @include flex-center;
-  gap: 12px;
+  align-items: flex-start;
+  gap: 7px;
   flex-shrink: 0;
-  z-index: 2;
 }
 
 .editButton {
   @include reset-button;
-  background: white;
-  @include border-subtle;
-  @include border-radius-sm;
-  color: #6b7280;
-  @include transition-fast;
+  width: 28px;
+  height: 28px;
   @include flex-center;
-  width: 24px;
-  height: 24px;
-
-  &:hover {
-    background: #f9fafb;
-    border-color: #d1d5db;
-    color: #374151;
-    transform: scale(1.05);
-  }
+  border-radius: 9px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(255, 255, 255, 0.74);
+  color: #64748b;
+  @include transition-fast;
 
   svg {
     width: 12px;
     height: 12px;
+  }
+
+  &:hover {
+    border-color: rgba(59, 130, 246, 0.45);
+    background: rgba(255, 255, 255, 0.95);
+    color: #2563eb;
+    transform: translateY(-1px);
   }
 }
 
@@ -262,26 +244,79 @@
 }
 
 .checkmark {
-  width: 24px;
-  height: 24px;
-  border: 2px solid #d1d5db;
-  @include border-radius-sm;
+  width: 28px;
+  height: 28px;
   @include flex-center;
-  @include transition-fast;
-  @include text-body;
-  font-weight: 600;
-  color: white;
+  border-radius: 9px;
+  border: 2px solid #cbd5e1;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
 
   &.checked {
-    background: #3b82f6;
     border-color: #3b82f6;
+    background: #3b82f6;
   }
+}
+
+.habitStats {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+}
+
+.weeklyProgress {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+}
+
+.progressText {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(148, 163, 184, 0.28);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.2s ease;
+}
+
+.goalMetBadge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.16);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .emptyState {
   text-align: center;
   padding: 40px 20px;
-  color: #6b7280;
+  color: #64748b;
 
   p {
     margin: 0;
@@ -290,45 +325,46 @@
 }
 
 .modalFooter {
-  padding: 16px 24px;
-  border-top: 1px solid #f3f4f6;
-  background: #f9fafb;
-  @include flex-between;
-  gap: 16px;
+  @include modal-footer;
+  padding: 14px 24px;
+  border-top-color: rgba(148, 163, 184, 0.28);
+  background:
+    radial-gradient(130% 160% at 0% 0%, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0)),
+    #f8fafc;
 }
 
 .summary {
   @include text-body;
-  color: #6b7280;
-  font-weight: 500;
+  color: #475569;
+  font-weight: 600;
   @include flex-column-center;
   align-items: flex-start;
-  gap: 8px;
+  gap: 6px;
 }
 
 .keyboardHints {
   @include flex-center;
   gap: 12px;
-  opacity: 0.7;
+  opacity: 0.82;
 }
 
 .keyHint {
   @include flex-center;
   gap: 4px;
   @include text-small;
-  color: #9ca3af;
+  color: #64748b;
 }
 
 .key {
-  background: #f3f4f6;
-  @include border-subtle;
-  @include border-radius-sm;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
   padding: 2px 6px;
   font-size: 0.6875rem;
-  font-family: monospace;
-  font-weight: 600;
-  color: #6b7280;
-  @include card-shadow;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-weight: 700;
+  color: #475569;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 
 .actions {
@@ -336,69 +372,69 @@
   gap: 8px;
 }
 
-.cancelButton, .saveButton {
+.cancelButton,
+.saveButton {
   @include button-base;
   @include transition-fast;
-  padding: 12px 24px;
-  min-width: 120px;
-  height: 44px;
+  padding: 11px 20px;
+  min-width: 116px;
+  height: 42px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   @include flex-center;
-  @include border-radius-md;
+  border-radius: 10px;
 }
 
 .cancelButton {
   @include button-ghost;
-  border: 1px solid #d1d5db;
-  background: white;
-  color: #6b7280;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
 
   &:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
-    color: #374151;
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #1f2937;
   }
 }
 
 .saveButton {
-  background: #e5e7eb;
-  color: #9ca3af;
-  border: 1px solid #d1d5db;
+  background: #e2e8f0;
+  color: #94a3b8;
+  border: 1px solid #cbd5e1;
 
   &.hasChanges {
-    background: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
 
     &:hover {
-      background: #2563eb;
-      border-color: #2563eb;
+      background: #1d4ed8;
+      border-color: #1d4ed8;
     }
   }
 
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 0.65;
   }
 }
 
-// Animation
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px) scale(0.95);
+    transform: translateY(10px) scale(0.985);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
 
-// Responsive design
 @include mobile {
   .modalOverlay {
-    padding: 12px;
+    padding: 10px;
   }
 
   .modalContent {
@@ -410,115 +446,132 @@
     padding: 16px 16px 0;
 
     h2 {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
     }
   }
 
   .modalBody {
-    padding: 16px;
+    padding: 14px 16px;
+
+    h3 {
+      margin-bottom: 12px;
+      font-size: 1.06rem;
+    }
+  }
+
+  .habitsList {
+    gap: 10px;
+  }
+
+  .habitItem {
+    padding: 12px;
+    min-height: 152px;
+  }
+
+  .habitEmoji {
+    width: 36px;
+    height: 36px;
+    font-size: 1.05rem;
+    border-radius: 10px;
+  }
+
+  .habitName {
+    font-size: 0.95rem;
+  }
+
+  .habitDescription {
+    font-size: 0.82rem;
+  }
+
+  .completionTime,
+  .goalMetBadge,
+  .progressText {
+    font-size: 0.74rem;
   }
 
   .modalFooter {
     padding: 12px 16px;
     flex-direction: column;
-    gap: 12px;
+    align-items: stretch;
+    gap: 10px;
+  }
 
-    .actions {
-      width: 100%;
-      justify-content: stretch;
+  .summary {
+    width: 100%;
+    align-items: flex-start;
+    gap: 6px;
+  }
 
-      .cancelButton, .saveButton {
-        flex: 1;
-        min-width: 0; // Allow flex to override min-width
-        height: 48px; // Slightly larger on mobile for better touch targets
-      }
+  .keyboardHints {
+    gap: 10px;
+  }
+
+  .actions {
+    width: 100%;
+
+    .cancelButton,
+    .saveButton {
+      flex: 1;
+      min-width: 0;
+      height: 44px;
     }
   }
+}
 
-  .habitItem {
-    padding: 16px;
-    padding-top: 13px; // Extra space for actions on mobile
-    min-height: auto;
+@include mobile-small {
+  .habitsList {
+    grid-template-columns: 1fr;
   }
 
-  .habitInfo {
-    gap: 12px;
-    padding-right: 70px; // Adjust for smaller mobile actions
-    margin-bottom: 12px;
-  }
-
-  .habitEmoji {
-    width: 40px;
-    height: 40px;
-    @include icon-lg;
-  }
-
-  .habitActions {
-    top: 12px;
-    right: 12px;
-    gap: 8px;
-  }
-
-  .habitName {
-    font-size: 0.9375rem;
-  }
-
-  .habitDescription {
-    font-size: 0.8125rem;
-  }
-
-  .weeklyProgress {
-    align-items: flex-start;
-  }
-
-  .progressText {
-    text-align: left;
+  .keyboardHints {
+    display: none;
   }
 }
-// Dark mode styles - using nested selectors for proper CSS modules scope
+
 .modalOverlay {
   :global(html.dark-mode) & {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(2, 6, 23, 0.75);
   }
 }
 
 .modalContent {
   :global(html.dark-mode) & {
-    background: #1f2937;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    background: #0f172a;
+    border-color: rgba(148, 163, 184, 0.24);
+    box-shadow: 0 26px 80px rgba(2, 6, 23, 0.72);
   }
 }
 
 .modalHeader {
   :global(html.dark-mode) & {
-    border-bottom-color: #4b5563;
+    border-bottom-color: rgba(71, 85, 105, 0.55);
 
     h2 {
-      color: #f9fafb;
+      color: #f8fafc;
     }
   }
 }
 
 .dayLabel {
   :global(html.dark-mode) & {
-    color: #9ca3af;
+    color: #94a3b8;
   }
 }
 
 .todayBadge {
   :global(html.dark-mode) & {
     background: #3b82f6;
-    color: white;
+    color: #ffffff;
   }
 }
 
 .closeButton {
   :global(html.dark-mode) & {
-    color: #9ca3af;
+    color: #94a3b8;
 
     &:hover {
-      background: #374151;
-      color: #d1d5db;
+      background: rgba(148, 163, 184, 0.16);
+      color: #e2e8f0;
     }
   }
 }
@@ -526,46 +579,43 @@
 .modalBody {
   h3 {
     :global(html.dark-mode) & {
-      color: #d1d5db;
+      color: #e2e8f0;
     }
   }
 }
 
 .habitItem {
   :global(html.dark-mode) & {
-    background: #374151;
-    border-color: #4b5563;
+    background:
+      radial-gradient(140% 170% at 0% 0%, rgba(96, 165, 250, 0.15) 0%, rgba(96, 165, 250, 0) 56%),
+      linear-gradient(180deg, #1f2937 0%, #111827 100%);
+    border-color: rgba(100, 116, 139, 0.56);
+    box-shadow: 0 8px 28px rgba(2, 6, 23, 0.4);
 
     &:hover {
-      background: #4b5563;
-      border-color: #6b7280;
+      border-color: rgba(96, 165, 250, 0.58);
+      box-shadow: 0 12px 32px rgba(2, 6, 23, 0.5);
     }
 
     &.selected {
-      background: #1e3a8a;
+      background:
+        radial-gradient(130% 160% at 100% 0%, rgba(37, 99, 235, 0.5) 0%, rgba(37, 99, 235, 0) 58%),
+        linear-gradient(180deg, #1e3a8a 0%, #1e3a8a 100%);
       border-color: #3b82f6;
-
-      &:hover {
-        background: #1e40af;
-      }
+      box-shadow: 0 12px 34px rgba(30, 58, 138, 0.45);
     }
 
     &.goalMet {
-      box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.2), 0 0 12px rgba(217, 119, 6, 0.25);
-      
-      &:hover {
-        box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.3), 0 0 16px rgba(217, 119, 6, 0.3);
-      }
+      background:
+        radial-gradient(130% 170% at 0% 100%, rgba(217, 119, 6, 0.26) 0%, rgba(217, 119, 6, 0) 58%),
+        linear-gradient(180deg, #1f2937 0%, #111827 100%);
+      border-color: rgba(217, 119, 6, 0.65);
 
       &.selected {
-        background: #1e3a8a;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2), 0 0 12px rgba(59, 130, 246, 0.25);
-        
-        &:hover {
-          background: #1e40af;
-          box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3), 0 0 16px rgba(59, 130, 246, 0.3);
-        }
+        background:
+          radial-gradient(130% 170% at 100% 0%, rgba(37, 99, 235, 0.52) 0%, rgba(37, 99, 235, 0) 58%),
+          linear-gradient(180deg, #1e3a8a 0%, #1e3a8a 100%);
+        border-color: #60a5fa;
       }
     }
   }
@@ -573,149 +623,145 @@
 
 .habitEmoji {
   :global(html.dark-mode) & {
-    border-color: rgba(255, 255, 255, 0.4);
-    color: white;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
   }
 }
 
 .habitName {
   :global(html.dark-mode) & {
-    color: #f9fafb;
+    color: #f8fafc;
   }
 }
 
 .habitDescription {
   :global(html.dark-mode) & {
-    color: #9ca3af;
+    color: #94a3b8;
   }
 }
 
 .completionTime {
   :global(html.dark-mode) & {
-    color: #10b981;
-    background: rgba(16, 185, 129, 0.15);
-    border-color: rgba(16, 185, 129, 0.3);
-  }
-}
-
-.progressText {
-  :global(html.dark-mode) & {
-    color: #9ca3af;
-  }
-}
-
-.progressBar {
-  :global(html.dark-mode) & {
-    background: #4b5563;
-  }
-}
-
-.goalMetBadge {
-  :global(html.dark-mode) & {
-    color: #fbbf24;
-    background: rgba(251, 191, 36, 0.2);
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.35);
   }
 }
 
 .editButton {
   :global(html.dark-mode) & {
-    background: #4b5563;
-    border-color: #6b7280;
-    color: #9ca3af;
+    background: rgba(30, 41, 59, 0.84);
+    border-color: rgba(100, 116, 139, 0.6);
+    color: #94a3b8;
 
     &:hover {
-      background: #6b7280;
-      border-color: #9ca3af;
-      color: #d1d5db;
-    }
-
-    svg {
-      width: 12px;
-      height: 12px;
+      background: rgba(51, 65, 85, 0.92);
+      border-color: rgba(96, 165, 250, 0.7);
+      color: #bfdbfe;
     }
   }
 }
 
 .checkmark {
   :global(html.dark-mode) & {
-    border-color: #6b7280;
-    color: white;
+    border-color: rgba(100, 116, 139, 0.7);
 
     &.checked {
+      border-color: #60a5fa;
       background: #3b82f6;
-      border-color: #3b82f6;
     }
+  }
+}
+
+.progressText {
+  :global(html.dark-mode) & {
+    color: #94a3b8;
+  }
+}
+
+.progressBar {
+  :global(html.dark-mode) & {
+    background: rgba(100, 116, 139, 0.45);
+  }
+}
+
+.goalMetBadge {
+  :global(html.dark-mode) & {
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.2);
+    border-color: rgba(245, 158, 11, 0.36);
   }
 }
 
 .emptyState {
   :global(html.dark-mode) & {
-    color: #9ca3af;
+    color: #94a3b8;
 
     p {
-      color: #9ca3af;
+      color: #94a3b8;
     }
   }
 }
 
 .modalFooter {
   :global(html.dark-mode) & {
-    border-top-color: #4b5563;
-    background: #374151;
+    border-top-color: rgba(71, 85, 105, 0.65);
+    background:
+      radial-gradient(130% 160% at 0% 0%, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0)),
+      #111827;
   }
 }
 
 .summary {
   :global(html.dark-mode) & {
-    color: #9ca3af;
+    color: #cbd5e1;
   }
 }
 
 .keyHint {
   :global(html.dark-mode) & {
-    color: #6b7280;
+    color: #94a3b8;
   }
 }
 
 .key {
   :global(html.dark-mode) & {
-    background: #4b5563;
-    border-color: #6b7280;
-    color: #9ca3af;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(100, 116, 139, 0.65);
+    color: #cbd5e1;
+    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.5);
   }
 }
 
 .cancelButton {
   :global(html.dark-mode) & {
-    background: #374151;
-    color: #d1d5db;
-    border-color: #4b5563;
+    background: #1e293b;
+    color: #cbd5e1;
+    border-color: rgba(100, 116, 139, 0.56);
 
     &:hover {
-      background: #4b5563;
-      color: #f9fafb;
-      border-color: #6b7280;
+      background: #334155;
+      color: #f8fafc;
+      border-color: rgba(148, 163, 184, 0.75);
     }
   }
 }
 
 .saveButton {
   :global(html.dark-mode) & {
-    background: #4b5563;
-    color: #6b7280;
-    border-color: #6b7280;
+    background: #334155;
+    color: #94a3b8;
+    border-color: #475569;
 
     &.hasChanges {
-      background: #3b82f6;
-      color: white;
-      border-color: #3b82f6;
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
 
       &:hover {
-        background: #2563eb;
-        border-color: #2563eb;
+        background: #1d4ed8;
+        border-color: #1d4ed8;
       }
     }
   }
-} 
+}

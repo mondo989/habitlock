@@ -1,6 +1,5 @@
 import usePatternConfig from '../hooks/usePatternConfig';
 import { useHabits } from '../hooks/useHabits';
-import { useCalendar } from '../hooks/useCalendar';
 import PatternDebugPanel from '../components/PatternDebugPanel';
 import styles from './PatternDebugView.module.scss';
 
@@ -12,17 +11,8 @@ const PatternDebugView = () => {
     saving: savingPatternConfig,
     error: patternConfigError,
   } = usePatternConfig();
-  const {
-    calendarMatrix,
-    calendarEntries,
-    loading: calendarLoading,
-    error: calendarError,
-    getCompletedHabits,
-    hasHabitMetWeeklyGoal,
-  } = useCalendar(habits);
-
-  const loading = habitsLoading || calendarLoading;
-  const error = habitsError || calendarError;
+  const loading = habitsLoading;
+  const error = habitsError;
 
   if (loading) {
     return (
@@ -53,11 +43,6 @@ const PatternDebugView = () => {
         saving={savingPatternConfig}
         error={patternConfigError}
         onSaveConfig={savePatternConfig}
-        calendarMatrix={calendarMatrix}
-        getCompletedHabits={getCompletedHabits}
-        calendarEntries={calendarEntries}
-        hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
-        patternType="mixed"
       />
     </div>
   );

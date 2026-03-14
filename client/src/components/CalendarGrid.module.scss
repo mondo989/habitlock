@@ -126,9 +126,9 @@
   position: absolute;
   inset: -6px;
   background: var(--terrain-blend);
-  filter: blur(11px) saturate(1.15);
-  opacity: 0.52;
-  mix-blend-mode: screen;
+  filter: blur(7px) saturate(0.9);
+  opacity: 0.16;
+  mix-blend-mode: soft-light;
   pointer-events: none;
   z-index: 1;
 }
@@ -185,8 +185,8 @@
   }
 
   .terrainBlendOverlay {
-    opacity: 0.3;
-    mix-blend-mode: screen;
+    opacity: 0.12;
+    mix-blend-mode: soft-light;
   }
 }
 

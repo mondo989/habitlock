@@ -1,146 +1,61 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
-import { BASE_PATTERN_IDS, PATTERN_VARIANTS } from './P5PatternBackground';
 import CalendarCell from './CalendarCell';
 import styles from './PatternDebugPanel.module.scss';
+import {
+  BLEND_MODE_OPTIONS,
+  COLOR_MODE_OPTIONS,
+  MASK_OPTIONS,
+  PATTERN_GENERATOR_OPTIONS,
+  SVG_COLOR_MODE_OPTIONS,
+  assessPatternPerformance,
+  createImportedSvgLayerDraft,
+  createPatternConfigClone,
+  createPatternLayerDraft,
+  createPatternPresetDraft,
+  getGeneratorDescription,
+  getGeneratorLabel,
+  normalizePatternConfig,
+  normalizePatternPreset,
+} from '../utils/patterns';
 
-const createPresetDraft = (index = 0) => ({
-  id: `preset_${Date.now()}_${index}`,
-  name: `Preset ${index + 1}`,
-  family: 'mosaic',
-  variant: PATTERN_VARIANTS.mosaic[0],
-  intensity: 2,
-  continuity: true,
-  density: 1,
-  scale: 1,
-  opacity: 1,
-  accentOpacity: 1,
-  strokeWeight: 1,
-  driftAmount: 1,
-  animationMode: 'active',
-  entranceStaggerMs: 160,
-  tileSize: 32,
-  shapeCount: 3,
-  ringCount: 4,
-  amplitude: 1,
-  lineCount: 2,
-  orbCount: 4,
-  rayCount: 8,
-  pieceCount: 6,
-  translateX: 0,
-  translateY: 0,
-  translateZ: 0,
-  rotationDeg: 0,
-});
-
-const toNumber = (value, fallback) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
+const PREVIEW_DAY = {
+  date: '2026-03-14',
+  dayjs: dayjs('2026-03-14'),
+  isCurrentMonth: true,
+  isToday: false,
 };
 
-const getStepDecimals = (step = 1) => {
-  const stepText = String(step);
-  return stepText.includes('.') ? stepText.split('.')[1].length : 0;
+const PERFORMANCE_LABELS = {
+  safe: 'Fast',
+  watch: 'Watch',
+  danger: 'Heavy',
 };
 
-const randomValueFromRange = (field) => {
-  const min = toNumber(field.min, 0);
-  const max = toNumber(field.max, min);
-  const step = toNumber(field.step, 1);
-  const steps = Math.max(0, Math.floor((max - min) / step));
-  const offset = Math.floor(Math.random() * (steps + 1));
-  const value = min + (offset * step);
-  const decimals = getStepDecimals(step);
-  return Number(value.toFixed(decimals));
-};
-
-const randomBoolean = () => Math.random() >= 0.5;
-
-const normalizePreset = (preset) => {
-  const family = preset.family || 'mosaic';
-  const variants = PATTERN_VARIANTS[family] || ['default'];
-  const variant = variants.includes(preset.variant) ? preset.variant : variants[0];
-
-  return {
-    ...createPresetDraft(),
-    ...preset,
-    family,
-    variant,
-    name: typeof preset.name === 'string' ? preset.name : (preset.id || ''),
-    intensity: toNumber(preset.intensity, 2),
-    continuity: Boolean(preset.continuity),
-    density: toNumber(preset.density, 1),
-    scale: toNumber(preset.scale, 1),
-    opacity: toNumber(preset.opacity, 1),
-    accentOpacity: toNumber(preset.accentOpacity, 1),
-    strokeWeight: toNumber(preset.strokeWeight, 1),
-    driftAmount: toNumber(preset.driftAmount, 1),
-    entranceStaggerMs: toNumber(preset.entranceStaggerMs, 160),
-    tileSize: toNumber(preset.tileSize, 32),
-    shapeCount: toNumber(preset.shapeCount, 3),
-    ringCount: toNumber(preset.ringCount, 4),
-    amplitude: toNumber(preset.amplitude, 1),
-    lineCount: toNumber(preset.lineCount, 2),
-    orbCount: toNumber(preset.orbCount, 4),
-    rayCount: toNumber(preset.rayCount, 8),
-    pieceCount: toNumber(preset.pieceCount, 6),
-    translateX: toNumber(preset.translateX, 0),
-    translateY: toNumber(preset.translateY, 0),
-    translateZ: toNumber(preset.translateZ, 0),
-    rotationDeg: toNumber(preset.rotationDeg, 0),
-  };
-};
-
-const normalizeConfig = (config) => {
-  const presets = Object.entries(config?.presets || {}).reduce((acc, [id, preset]) => {
-    acc[id] = normalizePreset({ id, ...preset });
-    return acc;
-  }, {});
-
-  return {
-    presets,
-    emojiAssignments: { ...(config?.emojiAssignments || {}) },
-  };
-};
-
-const FIELD_GROUPS = [
-  { key: 'density', label: 'Density', min: 0.4, max: 2.2, step: 0.1 },
-  { key: 'scale', label: 'Scale', min: 0.5, max: 2, step: 0.1 },
-  { key: 'opacity', label: 'Opacity', min: 0.2, max: 1.4, step: 0.05 },
-  { key: 'accentOpacity', label: 'Accent', min: 0, max: 1.5, step: 0.05 },
-  { key: 'strokeWeight', label: 'Stroke', min: 0.4, max: 2.5, step: 0.1 },
-  { key: 'driftAmount', label: 'Drift', min: 0, max: 2, step: 0.1 },
-  { key: 'entranceStaggerMs', label: 'Stagger', min: 0, max: 500, step: 20 },
+const LAYER_SLIDERS = [
+  { key: 'opacity', label: 'Opacity', min: 0, max: 1.4, step: 0.05 },
+  { key: 'scale', label: 'Scale', min: 0.35, max: 2.5, step: 0.05 },
+  { key: 'rotate', label: 'Rotate', min: -180, max: 180, step: 1 },
   { key: 'translateX', label: 'Translate X', min: -60, max: 60, step: 1 },
   { key: 'translateY', label: 'Translate Y', min: -60, max: 60, step: 1 },
-  { key: 'translateZ', label: 'Translate Z', min: -50, max: 50, step: 1 },
-  { key: 'rotationDeg', label: 'Rotate', min: -180, max: 180, step: 1 },
+  { key: 'strokeWidth', label: 'Stroke', min: 0.3, max: 4, step: 0.1 },
+  { key: 'density', label: 'Density', min: 0.25, max: 2.4, step: 0.05 },
+  { key: 'detail', label: 'Detail', min: 1, max: 12, step: 1 },
+  { key: 'jitter', label: 'Jitter', min: 0, max: 1, step: 0.05 },
+  { key: 'inset', label: 'Inset', min: 0, max: 28, step: 1 },
+  { key: 'blur', label: 'Blur', min: 0, max: 12, step: 0.5 },
 ];
 
-const FAMILY_FIELDS = {
-  mosaic: [
-    { key: 'tileSize', label: 'Tile Size', min: 12, max: 64, step: 2 },
-  ],
-  geometric: [
-    { key: 'shapeCount', label: 'Shape Count', min: 1, max: 8, step: 1 },
-  ],
-  rings: [
-    { key: 'ringCount', label: 'Ring Count', min: 1, max: 8, step: 1 },
-  ],
-  waves: [
-    { key: 'amplitude', label: 'Amplitude', min: 0.4, max: 2, step: 0.1 },
-    { key: 'lineCount', label: 'Line Count', min: 1, max: 6, step: 1 },
-  ],
-  bokeh: [
-    { key: 'orbCount', label: 'Orb Count', min: 1, max: 10, step: 1 },
-  ],
-  starburst: [
-    { key: 'rayCount', label: 'Ray Count', min: 4, max: 16, step: 1 },
-  ],
-  confetti: [
-    { key: 'pieceCount', label: 'Piece Count', min: 2, max: 12, step: 1 },
-  ],
+const randomFromRange = (min, max, step = 1) => {
+  const totalSteps = Math.floor((max - min) / step);
+  return Number((min + (Math.floor(Math.random() * (totalSteps + 1)) * step)).toFixed(2));
 };
+
+const PerformanceBadge = ({ level }) => (
+  <span className={`${styles.performanceBadge} ${styles[`performance${level[0].toUpperCase()}${level.slice(1)}`]}`}>
+    {PERFORMANCE_LABELS[level] || level}
+  </span>
+);
 
 const PatternDebugPanel = ({
   habits,
@@ -148,29 +63,21 @@ const PatternDebugPanel = ({
   saving,
   error,
   onSaveConfig,
-  calendarMatrix = [],
-  getCompletedHabits = () => [],
-  calendarEntries = {},
-  hasHabitMetWeeklyGoal = () => false,
-  patternType = 'mixed',
 }) => {
   const [status, setStatus] = useState(null);
-  const [previewCellSize, setPreviewCellSize] = useState({ width: 120, height: 120 });
-  const [hasMeasuredPreviewCell, setHasMeasuredPreviewCell] = useState(false);
-  const [previewLoadingByPreset, setPreviewLoadingByPreset] = useState({});
-  const [draftConfig, setDraftConfig] = useState(() => normalizeConfig(patternConfig));
+  const [draftConfig, setDraftConfig] = useState(() => normalizePatternConfig(patternConfig));
   const [expandedPresetId, setExpandedPresetId] = useState(null);
-  const measureHostRef = useRef(null);
-  const previewLoadingTimersRef = useRef(new Map());
+  const [selectedLayerId, setSelectedLayerId] = useState(null);
 
   useEffect(() => {
-    setDraftConfig(normalizeConfig(patternConfig));
+    setDraftConfig(normalizePatternConfig(patternConfig));
   }, [patternConfig]);
 
   const presetList = useMemo(
     () => Object.values(draftConfig?.presets || {}),
-    [draftConfig]
+    [draftConfig],
   );
+
   const uniqueHabitEmojis = useMemo(() => {
     const seen = new Set();
     return habits
@@ -181,155 +88,70 @@ const PatternDebugPanel = ({
         return true;
       });
   }, [habits]);
+
   const previewHabitByPresetId = useMemo(() => {
     const habitsByEmoji = new Map(habits.map((habit) => [habit.emoji, habit]));
-    const mapping = {};
-
-    Object.entries(draftConfig?.emojiAssignments || {}).forEach(([emoji, presetId]) => {
-      if (!presetId || mapping[presetId]) return;
+    return Object.entries(draftConfig?.emojiAssignments || {}).reduce((acc, [emoji, presetId]) => {
+      if (!presetId || acc[presetId]) return acc;
       const habit = habitsByEmoji.get(emoji);
-      if (habit) {
-        mapping[presetId] = habit;
-      }
-    });
+      if (habit) acc[presetId] = habit;
+      return acc;
+    }, {});
+  }, [draftConfig, habits]);
 
-    return mapping;
-  }, [habits, draftConfig]);
-  const previewDay = useMemo(() => ({
-    date: '2026-03-14',
-    dayjs: dayjs('2026-03-14'),
-  }), []);
-  const measurementWeek = useMemo(
-    () => Array.from({ length: 7 }, (_, index) => ({
-      date: dayjs('2026-03-08').add(index, 'day').format('YYYY-MM-DD'),
-      dayjs: dayjs('2026-03-08').add(index, 'day'),
-      isCurrentMonth: true,
-      isToday: false,
-    })),
-    []
-  );
-  const fallbackCalendarDay = useMemo(() => {
-    for (let row = 0; row < calendarMatrix.length; row++) {
-      for (let col = 0; col < calendarMatrix[row].length; col++) {
-        const day = calendarMatrix[row][col];
-        if (day?.isCurrentMonth) {
-          return { day, gridRow: row, gridCol: col };
-        }
-      }
-    }
-    return null;
-  }, [calendarMatrix]);
-  const previewSourceByPresetId = useMemo(() => {
-    const lookup = {};
-    presetList.forEach((preset) => {
-      const habit = previewHabitByPresetId[preset.id] || habits[0];
-      if (!habit) return;
-
-      for (let row = 0; row < calendarMatrix.length; row++) {
-        let found = false;
-        for (let col = 0; col < calendarMatrix[row].length; col++) {
-          const day = calendarMatrix[row][col];
-          if (!day?.date) continue;
-          const completed = getCompletedHabits(day.date) || [];
-          if (completed.includes(habit.id)) {
-            lookup[preset.id] = {
-              day,
-              gridRow: row,
-              gridCol: col,
-              completedHabits: completed,
-            };
-            found = true;
-            break;
-          }
-        }
-        if (found) break;
-      }
-
-      if (!lookup[preset.id] && fallbackCalendarDay) {
-        lookup[preset.id] = {
-          day: fallbackCalendarDay.day,
-          gridRow: fallbackCalendarDay.gridRow,
-          gridCol: fallbackCalendarDay.gridCol,
-          completedHabits: getCompletedHabits(fallbackCalendarDay.day.date) || [],
-        };
-      }
-    });
-    return lookup;
-  }, [presetList, previewHabitByPresetId, habits, calendarMatrix, getCompletedHabits, fallbackCalendarDay]);
+  const expandedPreset = presetList.find((preset) => preset.id === expandedPresetId) || null;
 
   useEffect(() => {
-    const sourceCell = measureHostRef.current?.querySelector('[data-calendar-cell="true"]');
-    if (!sourceCell) return undefined;
+    if (!expandedPreset) {
+      setSelectedLayerId(null);
+      return;
+    }
 
-    const updateSize = () => {
-      const rect = sourceCell.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) {
-        setHasMeasuredPreviewCell(true);
-        setPreviewCellSize({
-          width: Math.round(rect.width),
-          height: Math.round(rect.height),
-        });
-      }
-    };
+    const hasSelectedLayer = expandedPreset.layers.some((layer) => layer.id === selectedLayerId);
+    if (!hasSelectedLayer) {
+      setSelectedLayerId(expandedPreset.layers[0]?.id || null);
+    }
+  }, [expandedPreset, selectedLayerId]);
 
-    updateSize();
-    const resizeObserver = new ResizeObserver(updateSize);
-    resizeObserver.observe(sourceCell);
-    window.addEventListener('resize', updateSize);
+  const selectedLayer = expandedPreset?.layers.find((layer) => layer.id === selectedLayerId) || null;
 
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener('resize', updateSize);
-    };
-  }, [habits.length]);
-
-  useEffect(() => () => {
-    previewLoadingTimersRef.current.forEach((timerId) => clearTimeout(timerId));
-    previewLoadingTimersRef.current.clear();
-  }, []);
-
-  const markPreviewLoading = (presetIds) => {
-    if (!presetIds?.length) return;
-
-    setPreviewLoadingByPreset((current) => {
-      const next = { ...current };
-      presetIds.forEach((presetId) => {
-        next[presetId] = true;
-      });
-      return next;
-    });
-
-    presetIds.forEach((presetId) => {
-      const existingTimer = previewLoadingTimersRef.current.get(presetId);
-      if (existingTimer) {
-        clearTimeout(existingTimer);
-      }
-
-      const timerId = setTimeout(() => {
-        setPreviewLoadingByPreset((current) => {
-          if (!current[presetId]) return current;
-          const next = { ...current };
-          delete next[presetId];
-          return next;
-        });
-        previewLoadingTimersRef.current.delete(presetId);
-      }, 220);
-
-      previewLoadingTimersRef.current.set(presetId, timerId);
-    });
-  };
+  const previewHabitsForPreset = useMemo(() => presetList.reduce((acc, preset) => {
+    const primary = previewHabitByPresetId[preset.id] || habits[0] || null;
+    const otherHabits = habits.filter((habit) => habit?.id && habit.id !== primary?.id).slice(0, 2);
+    acc[preset.id] = [primary, ...otherHabits].filter(Boolean);
+    return acc;
+  }, {}), [presetList, previewHabitByPresetId, habits]);
 
   const commit = (updater) => {
-    setDraftConfig((current) => normalizeConfig(updater(current)));
+    setDraftConfig((current) => normalizePatternConfig(updater(current)));
   };
 
   const updatePreset = (presetId, updates) => {
-    markPreviewLoading([presetId]);
     commit((current) => {
       const nextPresets = { ...(current?.presets || {}) };
       const existingPreset = nextPresets[presetId];
       if (!existingPreset) return current;
-      nextPresets[presetId] = normalizePreset({ ...existingPreset, ...updates });
+      nextPresets[presetId] = normalizePatternPreset({ ...existingPreset, ...updates });
+      return {
+        ...current,
+        presets: nextPresets,
+      };
+    });
+  };
+
+  const updateLayer = (presetId, layerId, updates) => {
+    commit((current) => {
+      const nextPresets = { ...(current?.presets || {}) };
+      const existingPreset = nextPresets[presetId];
+      if (!existingPreset) return current;
+
+      nextPresets[presetId] = normalizePatternPreset({
+        ...existingPreset,
+        layers: existingPreset.layers.map((layer) => (
+          layer.id === layerId ? { ...layer, ...updates } : layer
+        )),
+      });
+
       return {
         ...current,
         presets: nextPresets,
@@ -339,7 +161,7 @@ const PatternDebugPanel = ({
 
   const createPreset = () => {
     commit((current) => {
-      const nextPreset = createPresetDraft(Object.keys(current?.presets || {}).length);
+      const nextPreset = createPatternPresetDraft(Object.keys(current?.presets || {}).length);
       return {
         presets: {
           ...(current?.presets || {}),
@@ -356,17 +178,20 @@ const PatternDebugPanel = ({
       const nextAssignments = { ...(current?.emojiAssignments || {}) };
       delete nextPresets[presetId];
       Object.entries(nextAssignments).forEach(([emoji, assignedPresetId]) => {
-        if (assignedPresetId === presetId) {
-          delete nextAssignments[emoji];
-        }
+        if (assignedPresetId === presetId) delete nextAssignments[emoji];
       });
-      return { presets: nextPresets, emojiAssignments: nextAssignments };
+      return {
+        presets: nextPresets,
+        emojiAssignments: nextAssignments,
+      };
     });
+
+    if (expandedPresetId === presetId) {
+      setExpandedPresetId(null);
+    }
   };
 
   const updateAssignment = (emoji, presetId) => {
-    const assignedPresetIds = Object.keys(draftConfig?.presets || {});
-    markPreviewLoading(assignedPresetIds);
     commit((current) => {
       const nextAssignments = { ...(current?.emojiAssignments || {}) };
       if (!presetId) delete nextAssignments[emoji];
@@ -378,453 +203,555 @@ const PatternDebugPanel = ({
     });
   };
 
+  const addLayer = (presetId, type = 'generator') => {
+    const nextLayer = type === 'imported-svg'
+      ? createImportedSvgLayerDraft(Date.now())
+      : createPatternLayerDraft(Date.now(), 'lines');
+
+    updatePreset(presetId, {
+      layers: [...(draftConfig?.presets?.[presetId]?.layers || []), nextLayer],
+    });
+    setSelectedLayerId(nextLayer.id);
+  };
+
+  const deleteLayer = (presetId, layerId) => {
+    const preset = draftConfig?.presets?.[presetId];
+    if (!preset || preset.layers.length <= 1) return;
+
+    updatePreset(presetId, {
+      layers: preset.layers.filter((layer) => layer.id !== layerId),
+    });
+  };
+
+  const duplicateLayer = (presetId, layerId) => {
+    const preset = draftConfig?.presets?.[presetId];
+    const layer = preset?.layers.find((entry) => entry.id === layerId);
+    if (!layer) return;
+
+    const duplicate = {
+      ...layer,
+      id: `${layer.id}_copy_${Date.now()}`,
+      translateX: (layer.translateX || 0) + 6,
+      translateY: (layer.translateY || 0) + 6,
+    };
+
+    updatePreset(presetId, {
+      layers: [...preset.layers, duplicate],
+    });
+    setSelectedLayerId(duplicate.id);
+  };
+
+  const moveLayer = (presetId, layerId, direction) => {
+    const preset = draftConfig?.presets?.[presetId];
+    if (!preset) return;
+
+    const currentIndex = preset.layers.findIndex((layer) => layer.id === layerId);
+    const nextIndex = currentIndex + direction;
+    if (currentIndex === -1 || nextIndex < 0 || nextIndex >= preset.layers.length) return;
+
+    const nextLayers = [...preset.layers];
+    [nextLayers[currentIndex], nextLayers[nextIndex]] = [nextLayers[nextIndex], nextLayers[currentIndex]];
+    updatePreset(presetId, { layers: nextLayers });
+  };
+
+  const randomizePreset = (presetId) => {
+    const preset = draftConfig?.presets?.[presetId];
+    if (!preset) return;
+
+    const layerCount = Math.min(4, Math.max(2, Math.floor(Math.random() * 3) + 2));
+    const nextLayers = Array.from({ length: layerCount }, (_, index) => {
+      const generator = PATTERN_GENERATOR_OPTIONS[Math.floor(Math.random() * PATTERN_GENERATOR_OPTIONS.length)]?.value || 'lines';
+      return {
+        ...createPatternLayerDraft(index, generator),
+        blendMode: BLEND_MODE_OPTIONS[Math.floor(Math.random() * BLEND_MODE_OPTIONS.length)]?.value || 'screen',
+        colorMode: Math.random() > 0.7 ? 'accent' : 'habit',
+        opacity: randomFromRange(0.18, 0.92, 0.02),
+        scale: randomFromRange(0.55, 1.8, 0.05),
+        rotate: randomFromRange(-120, 120, 1),
+        translateX: randomFromRange(-22, 22, 1),
+        translateY: randomFromRange(-22, 22, 1),
+        strokeWidth: randomFromRange(0.4, 2.6, 0.1),
+        density: randomFromRange(0.45, 1.8, 0.05),
+        detail: randomFromRange(3, 9, 1),
+        jitter: randomFromRange(0, 0.75, 0.05),
+        inset: randomFromRange(2, 14, 1),
+        blur: Math.random() > 0.78 ? randomFromRange(0.5, 4, 0.5) : 0,
+        useGradient: Math.random() > 0.45,
+        mask: Math.random() > 0.7 ? MASK_OPTIONS[Math.floor(Math.random() * (MASK_OPTIONS.length - 1)) + 1]?.value || 'none' : 'none',
+      };
+    });
+
+    updatePreset(presetId, { layers: nextLayers });
+    setStatus(`Randomized ${preset.name || presetId}.`);
+  };
+
   const handleSave = async () => {
-    const success = await onSaveConfig(draftConfig);
+    const success = await onSaveConfig(createPatternConfigClone(draftConfig));
     setStatus(success ? 'Saved pattern config.' : 'Save failed.');
   };
 
   const handleSavePreset = async (presetId) => {
     const presetName = draftConfig?.presets?.[presetId]?.name || presetId;
-    const success = await onSaveConfig(draftConfig);
+    const success = await onSaveConfig(createPatternConfigClone(draftConfig));
     setStatus(success ? `Saved ${presetName}.` : `Save failed for ${presetName}.`);
   };
 
-  const randomizePreset = (presetId) => {
-    const existing = draftConfig?.presets?.[presetId];
-    if (!existing) return;
-
-    const family = BASE_PATTERN_IDS[Math.floor(Math.random() * BASE_PATTERN_IDS.length)] || existing.family;
-    const variants = PATTERN_VARIANTS[family] || ['default'];
-    const variant = variants[Math.floor(Math.random() * variants.length)] || variants[0];
-    const familyFields = FAMILY_FIELDS[family] || [];
-
-    const updates = {
-      family,
-      variant,
-      intensity: 1 + Math.floor(Math.random() * 3),
-      continuity: randomBoolean(),
-    };
-
-    FIELD_GROUPS.forEach((field) => {
-      updates[field.key] = randomValueFromRange(field);
-    });
-
-    familyFields.forEach((field) => {
-      updates[field.key] = randomValueFromRange(field);
-    });
-
-    updatePreset(presetId, updates);
-    setStatus(`Randomized ${existing.name || presetId}.`);
-  };
-
-  const expandedPreset = presetList.find((preset) => preset.id === expandedPresetId) || null;
+  const buildSinglePreviewConfig = (preset, previewHabit) => (
+    previewHabit ? {
+      ...draftConfig,
+      presets: {
+        ...(draftConfig?.presets || {}),
+        [preset.id]: preset,
+      },
+      emojiAssignments: {
+        ...(draftConfig?.emojiAssignments || {}),
+        [previewHabit.emoji]: preset.id,
+      },
+    } : draftConfig
+  );
 
   return (
     <div className={styles.debugPanel}>
       <div className={styles.panelBody}>
-          <div className={styles.panelHeader}>
-            <p>Edits preview live in the calendar. Save writes the current draft to the local JSON config.</p>
-            <div className={styles.panelActions}>
-              <button className={styles.primaryButton} onClick={handleSave} disabled={saving}>
-                {saving ? 'Saving...' : 'Save Config'}
-              </button>
-            </div>
+        <div className={styles.panelHeader}>
+          <p>Layered static SVG presets for calendar days. Edit layers visually, paste imported SVG markup when needed, and watch for performance badges before saving.</p>
+          <div className={styles.panelActions}>
+            <button className={styles.primaryButton} onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save Config'}
+            </button>
           </div>
+        </div>
 
-          {(status || error) && (
-            <div className={styles.statusRow}>
-              {status && <span>{status}</span>}
-              {error && <span className={styles.errorText}>{error}</span>}
-            </div>
-          )}
+        {(status || error) && (
+          <div className={styles.statusRow}>
+            {status && <span>{status}</span>}
+            {error && <span className={styles.errorText}>{error}</span>}
+          </div>
+        )}
 
-          <div className={styles.section}>
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
             <h3>Habit Assignments</h3>
-            <div className={styles.assignmentGrid}>
-              {uniqueHabitEmojis.map((emoji) => (
-                <div key={emoji} className={styles.assignmentCard}>
-                  <div className={styles.assignmentHabit}>
-                    <span className={styles.assignmentEmoji}>{emoji}</span>
-                    <div>
-                      <div className={styles.assignmentMeta}>Set preset</div>
-                    </div>
-                  </div>
-                  <select
-                    className={styles.select}
-                    value={draftConfig?.emojiAssignments?.[emoji] || ''}
-                    onChange={(e) => updateAssignment(emoji, e.target.value)}
-                  >
-                    <option value="">Auto</option>
-                    {presetList.map((preset) => (
-                      <option key={preset.id} value={preset.id}>{preset.name}</option>
-                    ))}
-                  </select>
+            <p>Emoji mapping stays intact. Assign a preset or leave it on Auto.</p>
+          </div>
+          <div className={styles.assignmentGrid}>
+            {uniqueHabitEmojis.map((emoji) => (
+              <div key={emoji} className={styles.assignmentCard}>
+                <div className={styles.assignmentHabit}>
+                  <span className={styles.assignmentEmoji}>{emoji}</span>
+                  <div className={styles.assignmentMeta}>Set preset</div>
                 </div>
-              ))}
+                <select
+                  className={styles.select}
+                  value={draftConfig?.emojiAssignments?.[emoji] || ''}
+                  onChange={(event) => updateAssignment(emoji, event.target.value)}
+                >
+                  <option value="">Auto</option>
+                  {presetList.map((preset) => (
+                    <option key={preset.id} value={preset.id}>{preset.name}</option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <h3>Preset Library</h3>
+              <p>Each preset is a layered day pattern that can stack with other completed habits.</p>
             </div>
+            <button className={styles.presetHeaderButton} onClick={createPreset}>
+              New Preset
+            </button>
           </div>
 
-          <div className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h3>Preset Library</h3>
-              <button className={styles.presetHeaderButton} onClick={createPreset}>
-                New Preset
-              </button>
-            </div>
-            <div className={styles.presetButtonRow}>
-              {presetList.map((preset) => {
-                const isExpanded = expandedPresetId === preset.id;
-                const source = previewSourceByPresetId[preset.id];
-                const sourceGridRow = source?.gridRow || 0;
-                const sourceGridCol = source?.gridCol || 0;
-                const sourceDay = source?.day || previewDay;
-                const previewHabit = previewHabitByPresetId[preset.id] || habits[0] || null;
-                const showPreviewLoading = saving || !hasMeasuredPreviewCell || Boolean(previewLoadingByPreset[preset.id]);
-                const previewOverrides = previewHabit ? { [previewHabit.id]: preset } : null;
-                const previewPatternConfig = previewHabit ? {
-                  ...draftConfig,
-                  presets: {
-                    ...(draftConfig?.presets || {}),
-                    [preset.id]: preset,
-                  },
-                  emojiAssignments: {
-                    ...(draftConfig?.emojiAssignments || {}),
-                    [previewHabit.emoji]: preset.id,
-                  },
-                } : { presets: {}, emojiAssignments: {} };
-                const sourceCompleted = previewHabit ? [previewHabit.id] : [];
-                const previewRenderKey = [
-                  'chip',
-                  preset.id,
-                  previewHabit?.id || 'none',
-                  sourceDay?.date || 'none',
-                  preset.family,
-                  preset.variant,
-                  preset.intensity,
-                  preset.continuity ? 1 : 0,
-                  preset.density,
-                  preset.scale,
-                  preset.opacity,
-                  preset.accentOpacity,
-                  preset.strokeWeight,
-                  preset.driftAmount,
-                  preset.entranceStaggerMs,
-                  preset.tileSize,
-                  preset.shapeCount,
-                  preset.ringCount,
-                  preset.amplitude,
-                  preset.lineCount,
-                  preset.orbCount,
-                  preset.rayCount,
-                  preset.pieceCount,
-                  preset.translateX,
-                  preset.translateY,
-                  preset.translateZ,
-                  preset.rotationDeg,
-                  previewCellSize.width,
-                  previewCellSize.height,
-                ].join(':');
+          <div className={styles.presetButtonRow}>
+            {presetList.map((preset) => {
+              const previewHabit = previewHabitByPresetId[preset.id] || habits[0] || null;
+              const performance = assessPatternPerformance(preset);
+              const previewPatternConfig = buildSinglePreviewConfig(preset, previewHabit);
+              const isExpanded = expandedPresetId === preset.id;
 
-                return (
+              return (
+                <div key={preset.id} className={styles.presetChipCard}>
                   <button
-                    key={preset.id}
                     type="button"
                     className={`${styles.presetChip} ${isExpanded ? styles.presetChipActive : ''}`}
                     onClick={() => setExpandedPresetId(isExpanded ? null : preset.id)}
-                    style={{
-                      width: `${previewCellSize.width}px`,
-                      height: `${previewCellSize.height}px`,
-                      minWidth: `${previewCellSize.width}px`,
-                      minHeight: `${previewCellSize.height}px`,
-                    }}
                   >
-                    <span className={styles.presetChipPreview} aria-hidden="true">
-                      {previewHabit ? (
+                    <span className={styles.presetChipPreview}>
+                      {previewHabit && (
                         <CalendarCell
-                          key={previewRenderKey}
-                          day={sourceDay}
-                          gridRow={sourceGridRow}
-                          gridCol={sourceGridCol}
+                          day={PREVIEW_DAY}
                           habits={habits}
                           patternConfig={previewPatternConfig}
-                          completedHabits={sourceCompleted}
+                          completedHabits={[previewHabit.id]}
                           onHabitDetailClick={() => {}}
                           onDayClick={() => {}}
                           onDayHabitsClick={() => {}}
-                          hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
-                          isCurrentMonth={Boolean(sourceDay?.isCurrentMonth)}
-                          isToday={dayjs(sourceDay?.date).isSame(dayjs(), 'day')}
+                          hasHabitMetWeeklyGoal={() => false}
+                          isCurrentMonth={true}
+                          isToday={false}
                           animationIndex={0}
-                          calendarEntries={calendarEntries}
+                          calendarEntries={{}}
                           hoveredHabitId={null}
-                          patternType={patternType}
+                          patternType="mixed"
                           isPreview={true}
-                          previewOverrides={previewOverrides}
-                          patternOnly={true}
+                          previewScale="month"
+                          previewOverrides={{ [previewHabit.id]: preset }}
+                          animatePatterns={false}
+                          showEmojis={false}
+                          disableInteractions={true}
+                          disableAnimations={true}
                         />
-                      ) : null}
+                      )}
                     </span>
-                    {showPreviewLoading && (
-                      <div className={styles.previewLoadingOverlay}>
-                        <div className={styles.previewSpinner} />
-                      </div>
-                    )}
-                    <span className={styles.presetChipOverlay} aria-hidden="true" />
+                    <span className={styles.presetChipOverlay} />
                     <span className={styles.presetChipText}>
+                      <PerformanceBadge level={performance.level} />
                       <span className={styles.presetChipName}>{preset.name}</span>
-                      <span className={styles.presetChipType}>{preset.family} / {preset.variant}</span>
+                      <span className={styles.presetChipType}>{preset.layers.length} layers</span>
                     </span>
                   </button>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
+          </div>
 
-            {expandedPreset && (
+          {expandedPreset && (() => {
+            const performance = assessPatternPerformance(expandedPreset);
+            const previewHabit = previewHabitByPresetId[expandedPreset.id] || habits[0] || null;
+            const compositeHabits = previewHabitsForPreset[expandedPreset.id] || [];
+            const previewPatternConfig = buildSinglePreviewConfig(expandedPreset, previewHabit);
+
+            return (
               <div className={styles.presetCard}>
-                {(() => {
-                  const preset = expandedPreset;
-                  const variantOptions = PATTERN_VARIANTS[preset.family] || [];
-                  const familyFields = FAMILY_FIELDS[preset.family] || [];
-                  const previewHabit = previewHabitByPresetId[preset.id] || habits[0] || null;
-                  const showPreviewLoading = saving || !hasMeasuredPreviewCell || Boolean(previewLoadingByPreset[preset.id]);
-                  const previewOverrides = previewHabit ? { [previewHabit.id]: preset } : null;
-                  const previewPatternConfig = previewHabit ? {
-                    ...draftConfig,
-                    presets: {
-                      ...(draftConfig?.presets || {}),
-                      [preset.id]: preset,
-                    },
-                    emojiAssignments: {
-                      ...(draftConfig?.emojiAssignments || {}),
-                      [previewHabit.emoji]: preset.id,
-                    },
-                  } : { presets: {}, emojiAssignments: {} };
-                  const source = previewSourceByPresetId[preset.id];
-                  const sourceDay = source?.day || previewDay;
-                  const sourceCompleted = previewHabit ? [previewHabit.id] : [];
-                  const sourceGridRow = source?.gridRow || 0;
-                  const sourceGridCol = source?.gridCol || 0;
-                  const previewRenderKey = [
-                    preset.id,
-                    previewHabit?.id || 'none',
-                    sourceDay?.date || 'none',
-                    preset.family,
-                    preset.variant,
-                    preset.intensity,
-                    preset.continuity ? 1 : 0,
-                    preset.density,
-                    preset.scale,
-                    preset.opacity,
-                    preset.accentOpacity,
-                    preset.strokeWeight,
-                    preset.driftAmount,
-                    preset.entranceStaggerMs,
-                    preset.tileSize,
-                    preset.shapeCount,
-                    preset.ringCount,
-                    preset.amplitude,
-                    preset.lineCount,
-                    preset.orbCount,
-                    preset.rayCount,
-                    preset.pieceCount,
-                    preset.translateX,
-                    preset.translateY,
-                    preset.translateZ,
-                    preset.rotationDeg,
-                    previewCellSize.width,
-                    previewCellSize.height,
-                  ].join(':');
+                <div className={styles.presetEditor}>
+                  <div className={styles.presetHeader}>
+                    <input
+                      className={styles.textInput}
+                      value={expandedPreset.name}
+                      onChange={(event) => updatePreset(expandedPreset.id, { name: event.target.value })}
+                    />
+                    <div className={styles.presetActionRow}>
+                      <button
+                        className={styles.secondaryButton}
+                        onClick={() => randomizePreset(expandedPreset.id)}
+                        disabled={saving}
+                      >
+                        Randomize
+                      </button>
+                      <button
+                        className={styles.primaryButton}
+                        onClick={() => handleSavePreset(expandedPreset.id)}
+                        disabled={saving}
+                      >
+                        {saving ? 'Saving...' : 'Save'}
+                      </button>
+                      <button className={styles.deleteButton} onClick={() => deletePreset(expandedPreset.id)}>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
 
-                  return (
-                    <div className={styles.presetEditor}>
-                      <div className={styles.presetHeader}>
-                        <input
-                          className={styles.textInput}
-                          value={preset.name}
-                          onChange={(e) => updatePreset(preset.id, { name: e.target.value })}
+                  <div className={styles.previewGrid}>
+                    <div className={styles.previewPanel}>
+                      <div className={styles.previewLabel}>Preset Preview</div>
+                      <div className={styles.previewDay}>
+                        {previewHabit && (
+                          <CalendarCell
+                            day={PREVIEW_DAY}
+                            habits={habits}
+                            patternConfig={previewPatternConfig}
+                            completedHabits={[previewHabit.id]}
+                            onHabitDetailClick={() => {}}
+                            onDayClick={() => {}}
+                            onDayHabitsClick={() => {}}
+                            hasHabitMetWeeklyGoal={() => false}
+                            isCurrentMonth={true}
+                            isToday={false}
+                            animationIndex={0}
+                            calendarEntries={{}}
+                          hoveredHabitId={null}
+                          patternType="mixed"
+                          isPreview={true}
+                          previewScale="month"
+                          previewOverrides={{ [previewHabit.id]: expandedPreset }}
+                          animatePatterns={false}
+                          showEmojis={false}
+                          disableInteractions={true}
+                          disableAnimations={true}
                         />
-                        <div className={styles.presetActionRow}>
-                          <button
-                            className={styles.secondaryButton}
-                            onClick={() => randomizePreset(preset.id)}
-                            disabled={saving}
-                          >
-                            Randomize
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={styles.previewPanel}>
+                      <div className={styles.previewLabel}>Composite Preview</div>
+                      <div className={styles.previewDay}>
+                        <CalendarCell
+                          day={PREVIEW_DAY}
+                          habits={habits}
+                          patternConfig={previewPatternConfig}
+                          completedHabits={compositeHabits.map((habit) => habit.id)}
+                          onHabitDetailClick={() => {}}
+                          onDayClick={() => {}}
+                          onDayHabitsClick={() => {}}
+                          hasHabitMetWeeklyGoal={() => false}
+                          isCurrentMonth={true}
+                          isToday={false}
+                          animationIndex={0}
+                          calendarEntries={{}}
+                          hoveredHabitId={null}
+                          patternType="mixed"
+                          isPreview={true}
+                          previewScale="month"
+                          previewOverrides={previewHabit ? { [previewHabit.id]: expandedPreset } : null}
+                          animatePatterns={false}
+                          showEmojis={false}
+                          disableInteractions={true}
+                          disableAnimations={true}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.metaRow}>
+                    <label className={`${styles.field} ${styles.checkboxField}`}>
+                      <span>Continuity</span>
+                      <input
+                        type="checkbox"
+                        checked={expandedPreset.continuity}
+                        onChange={(event) => updatePreset(expandedPreset.id, { continuity: event.target.checked })}
+                      />
+                    </label>
+
+                    <div className={styles.performancePanel}>
+                      <div className={styles.performanceHeader}>
+                        <PerformanceBadge level={performance.level} />
+                        <span>{performance.nodeCount} estimated nodes</span>
+                      </div>
+                      {performance.reasons.length > 0 ? (
+                        <ul className={styles.performanceList}>
+                          {performance.reasons.map((reason) => (
+                            <li key={reason}>{reason}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className={styles.performanceCopy}>Current preset is in the fast path.</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className={styles.layerToolbar}>
+                    <h4>Layers</h4>
+                    <div className={styles.layerToolbarActions}>
+                      <button className={styles.secondaryButton} onClick={() => addLayer(expandedPreset.id, 'generator')}>
+                        Add Generator
+                      </button>
+                      <button className={styles.secondaryButton} onClick={() => addLayer(expandedPreset.id, 'imported-svg')}>
+                        Paste SVG Layer
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.layerGrid}>
+                    {expandedPreset.layers.map((layer, index) => {
+                      const layerImpact = assessPatternPerformance({ layers: [layer] });
+                      const isSelected = selectedLayerId === layer.id;
+                      return (
+                        <button
+                          key={layer.id}
+                          type="button"
+                          className={`${styles.layerCard} ${isSelected ? styles.layerCardActive : ''}`}
+                          onClick={() => setSelectedLayerId(layer.id)}
+                        >
+                          <div className={styles.layerCardHeader}>
+                            <div>
+                              <div className={styles.layerTitle}>{layer.type === 'imported-svg' ? 'Imported SVG' : getGeneratorLabel(layer.generator)}</div>
+                              <div className={styles.layerSubtitle}>
+                                Layer {index + 1}
+                                {layer.type === 'generator' && ` · ${getGeneratorDescription(layer.generator)}`}
+                              </div>
+                            </div>
+                            <PerformanceBadge level={layerImpact.level} />
+                          </div>
+                          <div className={styles.layerCardMeta}>
+                            <span>{layer.visible ? 'Visible' : 'Hidden'}</span>
+                            <span>{layer.blendMode}</span>
+                            <span>{layer.mask}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {selectedLayer && (
+                    <div className={styles.layerEditor}>
+                      <div className={styles.layerEditorHeader}>
+                        <div>
+                          <h4>{selectedLayer.type === 'imported-svg' ? 'Imported SVG Layer' : getGeneratorLabel(selectedLayer.generator)}</h4>
+                          <p>Edit properties live. Performance-heavy combinations will surface warnings above.</p>
+                        </div>
+                        <div className={styles.layerActionRow}>
+                          <button className={styles.secondaryButton} onClick={() => moveLayer(expandedPreset.id, selectedLayer.id, -1)}>
+                            Move Up
+                          </button>
+                          <button className={styles.secondaryButton} onClick={() => moveLayer(expandedPreset.id, selectedLayer.id, 1)}>
+                            Move Down
+                          </button>
+                          <button className={styles.secondaryButton} onClick={() => duplicateLayer(expandedPreset.id, selectedLayer.id)}>
+                            Duplicate
                           </button>
                           <button
-                            className={styles.primaryButton}
-                            onClick={() => handleSavePreset(preset.id)}
-                            disabled={saving}
+                            className={styles.deleteButton}
+                            onClick={() => deleteLayer(expandedPreset.id, selectedLayer.id)}
+                            disabled={expandedPreset.layers.length <= 1}
                           >
-                            {saving ? 'Saving...' : 'Save'}
-                          </button>
-                          <button className={styles.deleteButton} onClick={() => deletePreset(preset.id)}>
                             Delete
                           </button>
                         </div>
                       </div>
 
-                      <div
-                        className={styles.previewDay}
-                        style={{
-                          width: `${previewCellSize.width}px`,
-                          height: `${previewCellSize.height}px`,
-                          minWidth: `${previewCellSize.width}px`,
-                          minHeight: `${previewCellSize.height}px`,
-                        }}
-                      >
-                        {previewHabit ? (
-                          <>
-                            <CalendarCell
-                              key={previewRenderKey}
-                              day={sourceDay}
-                              gridRow={sourceGridRow}
-                              gridCol={sourceGridCol}
-                              habits={habits}
-                              patternConfig={previewPatternConfig}
-                              completedHabits={sourceCompleted}
-                              onHabitDetailClick={() => {}}
-                              onDayClick={() => {}}
-                              onDayHabitsClick={() => {}}
-                              hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
-                              isCurrentMonth={Boolean(sourceDay?.isCurrentMonth)}
-                              isToday={dayjs(sourceDay?.date).isSame(dayjs(), 'day')}
-                              animationIndex={0}
-                              calendarEntries={calendarEntries}
-                              hoveredHabitId={null}
-                              patternType={patternType}
-                              isPreview={true}
-                              previewOverrides={previewOverrides}
-                              patternOnly={true}
+                      <div className={styles.controlGrid}>
+                        {selectedLayer.type === 'generator' && (
+                          <label className={styles.field}>
+                            <span>Generator</span>
+                            <select
+                              className={styles.select}
+                              value={selectedLayer.generator}
+                              onChange={(event) => updateLayer(expandedPreset.id, selectedLayer.id, { generator: event.target.value })}
+                            >
+                              {PATTERN_GENERATOR_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                              ))}
+                            </select>
+                          </label>
+                        )}
+
+                        <label className={styles.field}>
+                          <span>Blend Mode</span>
+                          <select
+                            className={styles.select}
+                            value={selectedLayer.blendMode}
+                            onChange={(event) => updateLayer(expandedPreset.id, selectedLayer.id, { blendMode: event.target.value })}
+                          >
+                            {BLEND_MODE_OPTIONS.map((option) => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                          </select>
+                        </label>
+
+                        <label className={styles.field}>
+                          <span>Color Source</span>
+                          <select
+                            className={styles.select}
+                            value={selectedLayer.colorMode}
+                            onChange={(event) => updateLayer(expandedPreset.id, selectedLayer.id, { colorMode: event.target.value })}
+                          >
+                            {COLOR_MODE_OPTIONS.map((option) => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                          </select>
+                        </label>
+
+                        {selectedLayer.colorMode === 'custom' && (
+                          <label className={styles.field}>
+                            <span>Custom Color</span>
+                            <input
+                              className={styles.colorInput}
+                              type="color"
+                              value={selectedLayer.customColor}
+                              onChange={(event) => updateLayer(expandedPreset.id, selectedLayer.id, { customColor: event.target.value })}
                             />
-                            {showPreviewLoading && (
-                              <div className={styles.previewLoadingOverlay}>
-                                <div className={styles.previewSpinner} />
-                              </div>
-                            )}
-                          </>
-                        ) : null}
-                      </div>
+                          </label>
+                        )}
 
-                      <div className={styles.presetGrid}>
                         <label className={styles.field}>
-                          <span>Family</span>
+                          <span>Mask</span>
                           <select
                             className={styles.select}
-                            value={preset.family}
-                            onChange={(e) => updatePreset(preset.id, {
-                              family: e.target.value,
-                              variant: PATTERN_VARIANTS[e.target.value]?.[0] || 'default',
-                            })}
+                            value={selectedLayer.mask}
+                            onChange={(event) => updateLayer(expandedPreset.id, selectedLayer.id, { mask: event.target.value })}
                           >
-                            {BASE_PATTERN_IDS.map((family) => (
-                              <option key={family} value={family}>{family}</option>
+                            {MASK_OPTIONS.map((option) => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
                             ))}
                           </select>
                         </label>
 
-                        <label className={styles.field}>
-                          <span>Variant</span>
-                          <select
-                            className={styles.select}
-                            value={preset.variant}
-                            onChange={(e) => updatePreset(preset.id, { variant: e.target.value })}
-                          >
-                            {variantOptions.map((variant) => (
-                              <option key={variant} value={variant}>{variant}</option>
-                            ))}
-                          </select>
-                        </label>
+                        {selectedLayer.type === 'imported-svg' && (
+                          <label className={styles.field}>
+                            <span>SVG Color Mode</span>
+                            <select
+                              className={styles.select}
+                              value={selectedLayer.svgColorMode}
+                              onChange={(event) => updateLayer(expandedPreset.id, selectedLayer.id, { svgColorMode: event.target.value })}
+                            >
+                              {SVG_COLOR_MODE_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                              ))}
+                            </select>
+                          </label>
+                        )}
 
-                        <label className={styles.field}>
-                          <span>Intensity</span>
-                          <select
-                            className={styles.select}
-                            value={String(preset.intensity)}
-                            onChange={(e) => updatePreset(preset.id, { intensity: Number(e.target.value) })}
-                          >
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                          </select>
-                        </label>
+                        {selectedLayer.type === 'generator' && (
+                          <label className={`${styles.field} ${styles.checkboxField}`}>
+                            <span>Gradient Paint</span>
+                            <input
+                              type="checkbox"
+                              checked={selectedLayer.useGradient}
+                              onChange={(event) => updateLayer(expandedPreset.id, selectedLayer.id, { useGradient: event.target.checked })}
+                            />
+                          </label>
+                        )}
 
                         <label className={`${styles.field} ${styles.checkboxField}`}>
-                          <span>Continuity</span>
+                          <span>Visible</span>
                           <input
                             type="checkbox"
-                            checked={preset.continuity}
-                            onChange={(e) => updatePreset(preset.id, { continuity: e.target.checked })}
+                            checked={selectedLayer.visible}
+                            onChange={(event) => updateLayer(expandedPreset.id, selectedLayer.id, { visible: event.target.checked })}
                           />
                         </label>
                       </div>
 
+                      {selectedLayer.type === 'imported-svg' && (
+                        <label className={styles.field}>
+                          <span>Paste SVG Markup</span>
+                          <textarea
+                            className={styles.textArea}
+                            value={selectedLayer.svgMarkup}
+                            onChange={(event) => updateLayer(expandedPreset.id, selectedLayer.id, { svgMarkup: event.target.value })}
+                            spellCheck={false}
+                          />
+                        </label>
+                      )}
+
                       <div className={styles.sliderGrid}>
-                        {FIELD_GROUPS.map((field) => (
+                        {LAYER_SLIDERS.map((field) => (
                           <label key={field.key} className={styles.field}>
-                            <span>{field.label}: {preset[field.key]}</span>
+                            <span>{field.label}: {selectedLayer[field.key]}</span>
                             <input
                               className={styles.rangeInput}
                               type="range"
                               min={field.min}
                               max={field.max}
                               step={field.step}
-                              value={preset[field.key]}
-                              onChange={(e) => updatePreset(preset.id, { [field.key]: Number(e.target.value) })}
+                              value={selectedLayer[field.key]}
+                              onChange={(event) => updateLayer(expandedPreset.id, selectedLayer.id, { [field.key]: Number(event.target.value) })}
                             />
                           </label>
                         ))}
                       </div>
-
-                      {familyFields.length > 0 && (
-                        <div className={styles.sliderGrid}>
-                          {familyFields.map((field) => (
-                            <label key={field.key} className={styles.field}>
-                              <span>{field.label}: {preset[field.key]}</span>
-                              <input
-                                className={styles.rangeInput}
-                                type="range"
-                                min={field.min}
-                                max={field.max}
-                                step={field.step}
-                                value={preset[field.key]}
-                                onChange={(e) => updatePreset(preset.id, { [field.key]: Number(e.target.value) })}
-                              />
-                            </label>
-                          ))}
-                        </div>
-                      )}
                     </div>
-                  );
-                })()}
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-
-        <div className={styles.measurementHost} ref={measureHostRef}>
-          <div className={styles.measurementWeek}>
-            {measurementWeek.map((day, index) => (
-              <CalendarCell
-                key={day.date}
-                day={day}
-                gridRow={0}
-                gridCol={index}
-                habits={habits}
-                patternConfig={draftConfig}
-                completedHabits={[]}
-                onHabitDetailClick={() => {}}
-                onDayClick={() => {}}
-                onDayHabitsClick={() => {}}
-                hasHabitMetWeeklyGoal={hasHabitMetWeeklyGoal}
-                isCurrentMonth={true}
-                isToday={false}
-                animationIndex={0}
-                calendarEntries={{}}
-                hoveredHabitId={null}
-                patternType={patternType}
-              />
-            ))}
-          </div>
+            );
+          })()}
         </div>
       </div>
     </div>

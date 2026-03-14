@@ -6,6 +6,11 @@ const STORAGE_KEYS = {
   CALENDAR: 'habitlock_dev_calendar',
 };
 
+const LOCAL_EVENTS = {
+  HABITS: 'habitlock:dev:habits',
+  CALENDAR: 'habitlock:dev:calendar',
+};
+
 const generateId = () => crypto.randomUUID();
 
 const getFromStorage = (key) => {
@@ -19,6 +24,10 @@ const getFromStorage = (key) => {
 
 const saveToStorage = (key, data) => {
   localStorage.setItem(key, JSON.stringify(data));
+};
+
+const notifyLocalSubscribers = (eventName) => {
+  window.dispatchEvent(new CustomEvent(eventName));
 };
 
 // ============================================
@@ -43,6 +52,7 @@ export const createHabit = async (userId, habitData) => {
   
   habits.push(newHabit);
   saveToStorage(STORAGE_KEYS.HABITS, habits);
+  notifyLocalSubscribers(LOCAL_EVENTS.HABITS);
   
   console.log('🔧 Dev DB: Created habit', newHabit.name);
   return newHabit;
@@ -55,6 +65,7 @@ export const updateHabit = async (userId, habitId, updates) => {
   if (index !== -1) {
     habits[index] = { ...habits[index], ...updates };
     saveToStorage(STORAGE_KEYS.HABITS, habits);
+    notifyLocalSubscribers(LOCAL_EVENTS.HABITS);
     console.log('🔧 Dev DB: Updated habit', habitId);
   }
 };
@@ -63,6 +74,30 @@ export const deleteHabit = async (userId, habitId) => {
   let habits = getFromStorage(STORAGE_KEYS.HABITS) || [];
   habits = habits.filter(h => !(h.id === habitId && h.userId === userId));
   saveToStorage(STORAGE_KEYS.HABITS, habits);
+
+  const calendar = getFromStorage(STORAGE_KEYS.CALENDAR) || {};
+  const userCalendar = { ...(calendar[userId] || {}) };
+
+  Object.entries(userCalendar).forEach(([date, entry]) => {
+    const completedHabits = (entry.completedHabits || []).filter((id) => id !== habitId);
+    if (completedHabits.length === 0) {
+      delete userCalendar[date];
+      return;
+    }
+
+    const nextHabitDetails = { ...(entry.habits || {}) };
+    delete nextHabitDetails[habitId];
+    userCalendar[date] = {
+      ...entry,
+      completedHabits,
+      habits: nextHabitDetails,
+    };
+  });
+
+  calendar[userId] = userCalendar;
+  saveToStorage(STORAGE_KEYS.CALENDAR, calendar);
+  notifyLocalSubscribers(LOCAL_EVENTS.HABITS);
+  notifyLocalSubscribers(LOCAL_EVENTS.CALENDAR);
   console.log('🔧 Dev DB: Deleted habit', habitId);
 };
 
@@ -74,16 +109,22 @@ export const getHabits = async (userId) => {
 export const subscribeToHabits = (userId, callback) => {
   getHabits(userId).then(callback);
   
+  const emitHabits = () => {
+    getHabits(userId).then(callback);
+  };
+
   const handleStorageChange = (e) => {
     if (e.key === STORAGE_KEYS.HABITS) {
-      getHabits(userId).then(callback);
+      emitHabits();
     }
   };
   
   window.addEventListener('storage', handleStorageChange);
+  window.addEventListener(LOCAL_EVENTS.HABITS, emitHabits);
   
   return () => {
     window.removeEventListener('storage', handleStorageChange);
+    window.removeEventListener(LOCAL_EVENTS.HABITS, emitHabits);
   };
 };
 
@@ -115,6 +156,7 @@ export const updateCalendarEntry = async (userId, date, completedHabitIds, habit
   
   calendar[userId] = userCalendar;
   saveToStorage(STORAGE_KEYS.CALENDAR, calendar);
+  notifyLocalSubscribers(LOCAL_EVENTS.CALENDAR);
   console.log('🔧 Dev DB: Updated calendar entry', date);
 };
 
@@ -132,16 +174,22 @@ export const getAllCalendarEntries = async (userId) => {
 export const subscribeToCalendarEntries = (userId, callback) => {
   getAllCalendarEntries(userId).then(callback);
   
+  const emitCalendarEntries = () => {
+    getAllCalendarEntries(userId).then(callback);
+  };
+
   const handleStorageChange = (e) => {
     if (e.key === STORAGE_KEYS.CALENDAR) {
-      getAllCalendarEntries(userId).then(callback);
+      emitCalendarEntries();
     }
   };
   
   window.addEventListener('storage', handleStorageChange);
+  window.addEventListener(LOCAL_EVENTS.CALENDAR, emitCalendarEntries);
   
   return () => {
     window.removeEventListener('storage', handleStorageChange);
+    window.removeEventListener(LOCAL_EVENTS.CALENDAR, emitCalendarEntries);
   };
 };
 

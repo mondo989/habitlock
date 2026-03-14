@@ -1,4 +1,5 @@
-import { useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useLayoutEffect, useState, useMemo } from 'react';
+import dayjs from 'dayjs';
 import CalendarCell from './CalendarCell';
 import styles from './CalendarGrid.module.scss';
 
@@ -43,17 +44,14 @@ const averageColor = (colors) => {
 const CalendarGrid = ({ 
   calendarMatrix, 
   habits, 
-  patternConfig,
   getCompletedHabits, 
-  onHabitToggle,
   onHabitDetailClick,
   onDayClick,
   onDayHabitsClick,
   hasHabitMetWeeklyGoal,
-  currentDate,
   calendarEntries,
   hoveredHabitId,
-  patternType = 'bokeh'
+  dayPatternAnimation,
 }) => {
   const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const gridRef = useRef(null);
@@ -76,12 +74,20 @@ const CalendarGrid = ({
 
   // Combined state for both streak lines and emoji positions
   const [allEmojiPositions, setAllEmojiPositions] = useState([]);
+  const [hoverCacheVersion, setHoverCacheVersion] = useState(0);
   
   // Track leaving state for exit animation
   const [isLeaving, setIsLeaving] = useState(false);
   const [displayedPositions, setDisplayedPositions] = useState([]);
   const [displayedHabit, setDisplayedHabit] = useState(null);
   const leavingTimerRef = useRef(null);
+  const hoverFrameRef = useRef(null);
+  const hoverDecoratedElementsRef = useRef([]);
+  const hoverMatchedCellsRef = useRef([]);
+  const hoverCacheRef = useRef({
+    cellsByDate: new Map(),
+    datesByHabitId: new Map(),
+  });
   
   // Update displayed positions when new positions are calculated
   useEffect(() => {
@@ -106,6 +112,59 @@ const CalendarGrid = ({
     });
     return lookup;
   }, [calendarMatrix, getCompletedHabits, calendarEntries]);
+
+  const habitProgressByDate = useMemo(() => {
+    const cumulativeByHabit = {};
+    const streakByHabit = {};
+    const progressByDate = {};
+    const sortedDates = Object.keys(calendarEntries || {}).sort();
+    let previousDate = null;
+
+    sortedDates.forEach((date) => {
+      const completed = calendarEntries?.[date]?.completedHabits;
+      if (!Array.isArray(completed) || completed.length === 0) return;
+
+      if (previousDate) {
+        const gapDays = dayjs(date).diff(dayjs(previousDate), 'day');
+        if (gapDays > 1) {
+          Object.keys(streakByHabit).forEach((habitId) => {
+            streakByHabit[habitId] = 0;
+          });
+        }
+      }
+
+      const completedSet = new Set(completed);
+      Object.keys(streakByHabit).forEach((habitId) => {
+        if (!completedSet.has(habitId)) {
+          streakByHabit[habitId] = 0;
+        }
+      });
+
+      progressByDate[date] = {};
+      completed.forEach((habitId) => {
+        cumulativeByHabit[habitId] = (cumulativeByHabit[habitId] || 0) + 1;
+        streakByHabit[habitId] = (streakByHabit[habitId] || 0) + 1;
+        progressByDate[date][habitId] = {
+          completions: cumulativeByHabit[habitId],
+          streak: streakByHabit[habitId],
+        };
+      });
+
+      previousDate = date;
+    });
+
+    return progressByDate;
+  }, [calendarEntries]);
+
+  const dateMetaByDate = useMemo(() => {
+    const lookup = new Map();
+    calendarMatrix.forEach((week, weekIndex) => {
+      week.forEach((day, dayIndex) => {
+        lookup.set(day.date, { weekIndex, dayIndex });
+      });
+    });
+    return lookup;
+  }, [calendarMatrix]);
 
   const terrainBlendBackground = useMemo(() => {
     if (!calendarMatrix.length || !habits.length) return '';
@@ -160,181 +219,280 @@ const CalendarGrid = ({
     };
   }, [hoveredHabitId, displayedPositions.length, isLeaving]);
 
-  // Calculate streak path and emoji positions when hoveredHabitId changes
-  useEffect(() => {
-    if (!hoveredHabitId || !gridRef.current) {
-      setStreakLines([]);
-      setAllEmojiPositions([]);
-      return;
-    }
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return undefined;
 
-    // Small delay to ensure cells are rendered
-    const timer = setTimeout(() => {
-      const grid = gridRef.current;
-      if (!grid) return;
+    let rebuildFrame = null;
 
-      if (!habits.find(h => h.id === hoveredHabitId)) return;
+    const rebuildHoverCache = () => {
+      rebuildFrame = null;
 
-      const cellsNodeList = grid.querySelectorAll('[data-date]');
-      const cells = Array.from(cellsNodeList); // Convert to array for .find() method
-      const allCompletedCells = [];
+      const nextCellsByDate = new Map();
+      const nextDatesByHabitId = new Map();
+      const cellElements = Array.from(grid.querySelectorAll('[data-calendar-cell="true"]'));
+      const gridRect = grid.getBoundingClientRect();
 
-      // Collect ALL completed cells across the entire calendar
-      cells.forEach(cell => {
+      cellElements.forEach((cell) => {
         const date = cell.getAttribute('data-date');
-        const completed = getCompletedHabits(date);
-        
-        if (completed.includes(hoveredHabitId)) {
-          const rect = cell.getBoundingClientRect();
-          const gridRect = grid.getBoundingClientRect();
-          const emojiElement = cell.querySelector(`[data-habit-id="${hoveredHabitId}"]`);
+        if (!date) return;
 
-          const centerX = rect.left - gridRect.left + rect.width / 2;
-          const centerY = rect.top - gridRect.top + rect.height / 2;
+        const cellRect = cell.getBoundingClientRect();
+        const emojiElementsByHabitId = new Map();
+        const emojiCentersByHabitId = new Map();
+        const layerElementsByHabitId = new Map();
 
-          let emojiX = centerX;
-          let emojiY = centerY;
+        cell.querySelectorAll('[data-habit-id]').forEach((emojiElement) => {
+          const habitId = emojiElement.getAttribute('data-habit-id');
+          if (!habitId || emojiElementsByHabitId.has(habitId)) return;
 
-          if (emojiElement) {
-            const emojiRect = emojiElement.getBoundingClientRect();
-            emojiX = emojiRect.left - gridRect.left + emojiRect.width / 2;
-            emojiY = emojiRect.top - gridRect.top + emojiRect.height / 2;
-          }
-          
-          allCompletedCells.push({
-            date,
-            // Keep streak lines horizontally centered within the day cell.
-            x: centerX,
-            y: centerY,
-            // Preserve original emoji position for a center-seeking hover animation.
-            fromX: emojiX,
-            fromY: emojiY,
+          const emojiRect = emojiElement.getBoundingClientRect();
+          emojiElementsByHabitId.set(habitId, emojiElement);
+          emojiCentersByHabitId.set(habitId, {
+            x: emojiRect.left - gridRect.left + emojiRect.width / 2,
+            y: emojiRect.top - gridRect.top + emojiRect.height / 2,
           });
-        }
-      });
+        });
 
-      // Set emoji positions for mask and overlay
-      setAllEmojiPositions(allCompletedCells);
-      
-      // Group completed cells by week (based on calendar matrix structure)
-      const weekGroups = {};
-      
-      // Map each date to its week index using calendar matrix
-      calendarMatrix.forEach((week, weekIndex) => {
-        week.forEach(day => {
-          const completedInThisDay = allCompletedCells.find(cell => cell.date === day.date);
-          if (completedInThisDay) {
-            if (!weekGroups[weekIndex]) {
-              weekGroups[weekIndex] = [];
-            }
-            weekGroups[weekIndex].push(completedInThisDay);
+        cell.querySelectorAll('[data-layer-habit-id]').forEach((layerElement) => {
+          const habitId = layerElement.getAttribute('data-layer-habit-id');
+          if (!habitId || layerElementsByHabitId.has(habitId)) return;
+          layerElementsByHabitId.set(habitId, layerElement);
+        });
+
+        nextCellsByDate.set(date, {
+          cell,
+          left: cellRect.left - gridRect.left,
+          right: cellRect.right - gridRect.left,
+          centerX: cellRect.left - gridRect.left + cellRect.width / 2,
+          centerY: cellRect.top - gridRect.top + cellRect.height / 2,
+          emojiElementsByHabitId,
+          emojiCentersByHabitId,
+          layerElementsByHabitId,
+        });
+
+        (completedHabitsByDate[date] || []).forEach((habitId) => {
+          if (!nextDatesByHabitId.has(habitId)) {
+            nextDatesByHabitId.set(habitId, []);
           }
+          nextDatesByHabitId.get(habitId).push(date);
         });
       });
 
-      // Helper to get day index within a week (0=Sun, 6=Sat)
-      const getDayIndexInWeek = (date, weekIdx) => {
-        return calendarMatrix[weekIdx]?.findIndex(day => day.date === date) ?? -1;
-      };
+      nextDatesByHabitId.forEach((dates) => {
+        dates.sort((left, right) => {
+          const leftMeta = dateMetaByDate.get(left);
+          const rightMeta = dateMetaByDate.get(right);
 
-      // Create separate line segments for each week with 2+ completions
-      const weeklyStreakLines = [];
-      const weekIndices = Object.keys(weekGroups).map(Number).sort((a, b) => a - b);
-      
-      weekIndices.forEach((weekIdx) => {
-        const weekCells = weekGroups[weekIdx];
-        if (weekCells.length >= 2) {
-          // Sort cells within the week by day (left to right)
-          weekCells.sort((a, b) => {
-            const aDay = getDayIndexInWeek(a.date, weekIdx);
-            const bDay = getDayIndexInWeek(b.date, weekIdx);
-            return aDay - bDay;
-          });
-          
-          // Clone points so we can modify them
-          const adjustedPoints = weekCells.map(p => ({ ...p }));
-          
-          // Check if last point is Saturday (index 6)
-          const lastPoint = adjustedPoints[adjustedPoints.length - 1];
-          const lastDayIdx = getDayIndexInWeek(lastPoint.date, weekIdx);
-          
-          // Check if next week exists and starts with Sunday
-          const nextWeekCells = weekGroups[weekIdx + 1];
-          const nextWeekHasSunday = nextWeekCells?.some(cell => {
-            return getDayIndexInWeek(cell.date, weekIdx + 1) === 0;
-          });
-          
-          // If Saturday and next week has Sunday, extend to right edge
-          if (lastDayIdx === 6 && nextWeekHasSunday) {
-            try {
-              const saturdayCell = cells.find(cell => cell.getAttribute('data-date') === lastPoint.date);
-              if (saturdayCell) {
-                const rect = saturdayCell.getBoundingClientRect();
-                const gridRect = grid.getBoundingClientRect();
-                lastPoint.x = rect.right - gridRect.left - 12; // Right edge with small padding
-              }
-            } catch (e) {
-              console.warn('Could not extend Saturday line:', e);
-            }
+          if (!leftMeta || !rightMeta) {
+            return left.localeCompare(right);
           }
-          
-          // Check if first point is Sunday (index 0)
-          const firstPoint = adjustedPoints[0];
-          const firstDayIdx = getDayIndexInWeek(firstPoint.date, weekIdx);
-          
-          // Check if previous week exists and ends with Saturday
-          const prevWeekCells = weekGroups[weekIdx - 1];
-          const prevWeekHasSaturday = prevWeekCells?.some(cell => {
-            return getDayIndexInWeek(cell.date, weekIdx - 1) === 6;
-          });
-          
-          // If Sunday and previous week has Saturday, start from left edge
-          if (firstDayIdx === 0 && prevWeekHasSaturday) {
-            try {
-              const sundayCell = cells.find(cell => cell.getAttribute('data-date') === firstPoint.date);
-              if (sundayCell) {
-                const rect = sundayCell.getBoundingClientRect();
-                const gridRect = grid.getBoundingClientRect();
-                firstPoint.x = rect.left - gridRect.left + 12; // Left edge with small padding
-              }
-            } catch (e) {
-              console.warn('Could not extend Sunday line:', e);
-            }
+
+          if (leftMeta.weekIndex !== rightMeta.weekIndex) {
+            return leftMeta.weekIndex - rightMeta.weekIndex;
           }
-          
-          // Calculate path length for this week
-          let weekLength = 0;
-          for (let i = 0; i < adjustedPoints.length - 1; i++) {
-            const dx = adjustedPoints[i + 1].x - adjustedPoints[i].x;
-            const dy = adjustedPoints[i + 1].y - adjustedPoints[i].y;
-            weekLength += Math.sqrt(dx * dx + dy * dy);
-          }
-          
-          weeklyStreakLines.push({
-            points: adjustedPoints,
-            length: weekLength,
-            weekIndex: weekIdx
-          });
-        }
+
+          return leftMeta.dayIndex - rightMeta.dayIndex;
+        });
       });
 
-      // Debug: Log weekly line segments
-      if (weeklyStreakLines.length > 0) {
-        console.log('Weekly streak lines:', weeklyStreakLines.map(line => ({
-          week: line.weekIndex,
-          points: line.points.length,
-          dates: line.points.map(p => p.date)
-        })));
-      }
-      
-      setStreakLines(weeklyStreakLines);
-    }, 50);
+      hoverCacheRef.current = {
+        cellsByDate: nextCellsByDate,
+        datesByHabitId: nextDatesByHabitId,
+      };
+      setHoverCacheVersion((version) => version + 1);
+    };
 
-    return () => clearTimeout(timer);
-  }, [hoveredHabitId, getCompletedHabits, calendarMatrix, habits]);
+    const scheduleRebuild = () => {
+      if (rebuildFrame) {
+        cancelAnimationFrame(rebuildFrame);
+      }
+      rebuildFrame = requestAnimationFrame(rebuildHoverCache);
+    };
+
+    scheduleRebuild();
+
+    let resizeObserver = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => {
+        scheduleRebuild();
+      });
+      resizeObserver.observe(grid);
+    }
+
+    return () => {
+      if (rebuildFrame) {
+        cancelAnimationFrame(rebuildFrame);
+      }
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, [calendarMatrix, completedHabitsByDate, dateMetaByDate, habits, isMobile]);
+
+  // Drive hover visuals through DOM attributes so cell hover does not force React rerenders.
+  useEffect(() => {
+    const clearHoverState = () => {
+      hoverMatchedCellsRef.current.forEach((cell) => {
+        delete cell.dataset.hoverMatch;
+      });
+      hoverMatchedCellsRef.current = [];
+
+      hoverDecoratedElementsRef.current.forEach((element) => {
+        delete element.dataset.hoverMatch;
+      });
+      hoverDecoratedElementsRef.current = [];
+    };
+
+    if (hoverFrameRef.current) {
+      cancelAnimationFrame(hoverFrameRef.current);
+      hoverFrameRef.current = null;
+    }
+
+    const hoverCache = hoverCacheRef.current;
+    if (!hoveredHabitId) {
+      clearHoverState();
+      setStreakLines([]);
+      setAllEmojiPositions([]);
+      return () => {
+        if (hoverFrameRef.current) {
+          cancelAnimationFrame(hoverFrameRef.current);
+          hoverFrameRef.current = null;
+        }
+      };
+    }
+
+    hoverFrameRef.current = requestAnimationFrame(() => {
+      hoverFrameRef.current = null;
+      clearHoverState();
+      const matchingDates = hoverCache.datesByHabitId.get(hoveredHabitId) || [];
+
+      if (matchingDates.length === 0) {
+        setStreakLines([]);
+        setAllEmojiPositions([]);
+        return;
+      }
+
+      const allCompletedCells = [];
+      const decoratedElements = [];
+      const matchedCells = [];
+
+      matchingDates.forEach((date) => {
+        const cellData = hoverCache.cellsByDate.get(date);
+        if (!cellData) return;
+
+        const {
+          cell,
+          left,
+          right,
+          centerX,
+          centerY,
+          emojiElementsByHabitId,
+          emojiCentersByHabitId,
+          layerElementsByHabitId,
+        } = cellData;
+        const emojiElement = emojiElementsByHabitId.get(hoveredHabitId);
+        const emojiCenter = emojiCentersByHabitId.get(hoveredHabitId);
+        const layerElement = layerElementsByHabitId.get(hoveredHabitId);
+
+        cell.dataset.hoverMatch = 'true';
+        matchedCells.push(cell);
+
+        if (emojiElement) {
+          emojiElement.dataset.hoverMatch = 'true';
+          decoratedElements.push(emojiElement);
+        }
+
+        if (layerElement) {
+          layerElement.dataset.hoverMatch = 'true';
+          decoratedElements.push(layerElement);
+        }
+
+        allCompletedCells.push({
+          date,
+          x: centerX,
+          y: centerY,
+          fromX: emojiCenter?.x ?? centerX,
+          fromY: emojiCenter?.y ?? centerY,
+          left,
+          right,
+        });
+      });
+
+      hoverMatchedCellsRef.current = matchedCells;
+      hoverDecoratedElementsRef.current = decoratedElements;
+      setAllEmojiPositions(allCompletedCells);
+
+      const weekGroups = {};
+      allCompletedCells.forEach((point) => {
+        const meta = dateMetaByDate.get(point.date);
+        if (!meta) return;
+        if (!weekGroups[meta.weekIndex]) {
+          weekGroups[meta.weekIndex] = [];
+        }
+        weekGroups[meta.weekIndex].push(point);
+      });
+
+      const getDayIndexInWeek = (date) => dateMetaByDate.get(date)?.dayIndex ?? -1;
+      const weeklyStreakLines = [];
+      const weekIndices = Object.keys(weekGroups).map(Number).sort((a, b) => a - b);
+
+      weekIndices.forEach((weekIdx) => {
+        const weekCells = weekGroups[weekIdx];
+        if (weekCells.length < 2) return;
+
+        const adjustedPoints = [...weekCells]
+          .sort((left, right) => getDayIndexInWeek(left.date) - getDayIndexInWeek(right.date))
+          .map((point) => ({ ...point }));
+
+        const lastPoint = adjustedPoints[adjustedPoints.length - 1];
+        const lastDayIdx = getDayIndexInWeek(lastPoint.date);
+        const nextWeekHasSunday = weekGroups[weekIdx + 1]?.some((point) => getDayIndexInWeek(point.date) === 0);
+
+        if (lastDayIdx === 6 && nextWeekHasSunday) {
+          lastPoint.x = lastPoint.right - 12;
+        }
+
+        const firstPoint = adjustedPoints[0];
+        const firstDayIdx = getDayIndexInWeek(firstPoint.date);
+        const prevWeekHasSaturday = weekGroups[weekIdx - 1]?.some((point) => getDayIndexInWeek(point.date) === 6);
+
+        if (firstDayIdx === 0 && prevWeekHasSaturday) {
+          firstPoint.x = firstPoint.left + 12;
+        }
+
+        let weekLength = 0;
+        for (let index = 0; index < adjustedPoints.length - 1; index++) {
+          const dx = adjustedPoints[index + 1].x - adjustedPoints[index].x;
+          const dy = adjustedPoints[index + 1].y - adjustedPoints[index].y;
+          weekLength += Math.sqrt(dx * dx + dy * dy);
+        }
+
+        weeklyStreakLines.push({
+          points: adjustedPoints,
+          length: weekLength,
+          weekIndex: weekIdx,
+        });
+      });
+
+      setStreakLines(weeklyStreakLines);
+    });
+
+    return () => {
+      if (hoverFrameRef.current) {
+        cancelAnimationFrame(hoverFrameRef.current);
+        hoverFrameRef.current = null;
+      }
+      clearHoverState();
+    };
+  }, [hoveredHabitId, dateMetaByDate, hoverCacheVersion]);
 
   return (
-    <div className={styles.calendarGrid} ref={gridRef}>
+    <div
+      className={styles.calendarGrid}
+      ref={gridRef}
+      data-calendar-hover-active={hoveredHabitId ? 'true' : undefined}
+    >
       {/* Streak lines SVG overlay - line connecting emojis */}
       {hoveredHabitId && hoveredHabit && (
         <svg className={styles.streakOverlay}>
@@ -468,7 +626,6 @@ const CalendarGrid = ({
             {week.map((day, dayIndex) => {
               const completedHabits = completedHabitsByDate[day.date] || [];
               const animationIndex = weekIndex * 7 + dayIndex;
-              const shouldAnimatePatterns = completedHabits.length > 0;
               
               return (
                 <CalendarCell
@@ -477,9 +634,7 @@ const CalendarGrid = ({
                   gridRow={weekIndex}
                   gridCol={dayIndex}
                   habits={habits}
-                  patternConfig={patternConfig}
                   completedHabits={completedHabits}
-                  onHabitToggle={onHabitToggle}
                   onHabitDetailClick={onHabitDetailClick}
                   onDayClick={onDayClick}
                   onDayHabitsClick={onDayHabitsClick}
@@ -488,10 +643,9 @@ const CalendarGrid = ({
                   isToday={day.isToday}
                   animationIndex={animationIndex}
                   calendarEntries={calendarEntries}
-                  hoveredHabitId={hoveredHabitId}
-                  patternType={patternType}
+                  habitProgressByDate={habitProgressByDate}
                   isMobile={isMobile}
-                  animatePatterns={shouldAnimatePatterns}
+                  dayPatternAnimation={dayPatternAnimation?.date === day.date ? dayPatternAnimation : null}
                   data-date={day.date}
                 />
               );

@@ -17,24 +17,95 @@ import {
 import dayjs from 'dayjs';
 
 export const useCalendar = (habits = []) => {
+  const RECENT_LOCAL_UPDATE_WINDOW_MS = 2500;
   const [currentYear, setCurrentYear] = useState(dayjs().year());
   const [currentMonth, setCurrentMonth] = useState(dayjs().month());
   const [calendarEntries, setCalendarEntries] = useState({});
+  const [patternRevealByDate, setPatternRevealByDate] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Use stable userId instead of auth.currentUser object reference
   const userId = authSync.currentUser?.uid ?? null;
   const prevUserIdRef = useRef(userId);
+  const revealTimersRef = useRef({});
+  const recentLocalUpdatesRef = useRef({});
+
+  const markRecentLocalUpdate = (date, entry) => {
+    if (!date) return;
+    recentLocalUpdatesRef.current[date] = {
+      entry,
+      timestamp: Date.now(),
+    };
+  };
+
+  const clearRecentLocalUpdate = (date) => {
+    if (!date || !(date in recentLocalUpdatesRef.current)) return;
+    delete recentLocalUpdatesRef.current[date];
+  };
+
+  const mergeWithRecentLocalUpdates = (entries) => {
+    const mergedEntries = { ...entries };
+    const now = Date.now();
+
+    Object.entries(recentLocalUpdatesRef.current).forEach(([date, localUpdate]) => {
+      if (!localUpdate) return;
+
+      const isFresh = (now - localUpdate.timestamp) <= RECENT_LOCAL_UPDATE_WINDOW_MS;
+      if (!isFresh) {
+        delete recentLocalUpdatesRef.current[date];
+        return;
+      }
+
+      mergedEntries[date] = localUpdate.entry;
+    });
+
+    return mergedEntries;
+  };
+
+  const triggerPatternReveal = (date) => {
+    if (!date) return;
+
+    setPatternRevealByDate((prev) => ({
+      ...prev,
+      [date]: (prev[date] || 0) + 1,
+    }));
+
+    if (revealTimersRef.current[date]) {
+      clearTimeout(revealTimersRef.current[date]);
+    }
+
+    revealTimersRef.current[date] = setTimeout(() => {
+      setPatternRevealByDate((prev) => {
+        if (!(date in prev)) return prev;
+        const next = { ...prev };
+        delete next[date];
+        return next;
+      });
+      delete revealTimersRef.current[date];
+    }, 1100);
+  };
+
+  useEffect(() => {
+    return () => {
+      Object.values(revealTimersRef.current).forEach((timerId) => clearTimeout(timerId));
+      revealTimersRef.current = {};
+    };
+  }, []);
 
   // Subscribe to calendar entries
   useEffect(() => {
     // Reset state when user changes (including logout)
     if (prevUserIdRef.current !== userId) {
       setCalendarEntries({});
+      setPatternRevealByDate({});
       setLoading(true);
       setError(null);
       prevUserIdRef.current = userId;
+      recentLocalUpdatesRef.current = {};
+
+      Object.values(revealTimersRef.current).forEach((timerId) => clearTimeout(timerId));
+      revealTimersRef.current = {};
     }
 
     if (!userId) {
@@ -43,7 +114,7 @@ export const useCalendar = (habits = []) => {
     }
 
     const unsubscribe = subscribeToCalendarEntries(userId, (entries) => {
-      setCalendarEntries(entries);
+      setCalendarEntries(mergeWithRecentLocalUpdates(entries));
       setLoading(false);
     });
 
@@ -102,7 +173,6 @@ export const useCalendar = (habits = []) => {
     
     let updatedHabits;
     let updatedHabitDetails = { ...habitDetails };
-    
     if (completedHabits.includes(habitId)) {
       updatedHabits = completedHabits.filter(id => id !== habitId);
       delete updatedHabitDetails[habitId];
@@ -116,14 +186,17 @@ export const useCalendar = (habits = []) => {
 
     // Optimistic update: update UI immediately for instant feedback
     const previousEntries = { ...calendarEntries };
+    const optimisticEntry = {
+      date,
+      completedHabits: updatedHabits,
+      habits: updatedHabitDetails,
+    };
     setCalendarEntries(prev => ({
       ...prev,
-      [date]: {
-        date,
-        completedHabits: updatedHabits,
-        habits: updatedHabitDetails,
-      },
+      [date]: optimisticEntry,
     }));
+    markRecentLocalUpdate(date, optimisticEntry);
+    triggerPatternReveal(date);
 
     try {
       setError(null);
@@ -132,6 +205,7 @@ export const useCalendar = (habits = []) => {
     } catch (err) {
       // Rollback on error
       setCalendarEntries(previousEntries);
+      clearRecentLocalUpdate(date);
       setError('Failed to update calendar entry');
       console.error('Error updating calendar entry:', err);
       return false;
@@ -145,8 +219,13 @@ export const useCalendar = (habits = []) => {
       return false;
     }
 
+    const entry = calendarEntries[date] || { date, completedHabits: [], habits: {} };
+    const priorCompletedHabits = entry.completedHabits || [];
+
     // Filter out any invalid habit IDs
     const validHabitIds = habitIds.filter(habitId => habitId != null && habitId !== '');
+    const hasDayChanged = validHabitIds.length !== priorCompletedHabits.length
+      || validHabitIds.some((habitId) => !priorCompletedHabits.includes(habitId));
     
     // Create habit details for all completed habits
     const habitDetails = {};
@@ -161,14 +240,19 @@ export const useCalendar = (habits = []) => {
 
     // Optimistic update: update UI immediately for instant feedback
     const previousEntries = { ...calendarEntries };
+    const optimisticEntry = {
+      date,
+      completedHabits: validHabitIds,
+      habits: habitDetails,
+    };
     setCalendarEntries(prev => ({
       ...prev,
-      [date]: {
-        date,
-        completedHabits: validHabitIds,
-        habits: habitDetails,
-      },
+      [date]: optimisticEntry,
     }));
+    markRecentLocalUpdate(date, optimisticEntry);
+    if (hasDayChanged) {
+      triggerPatternReveal(date);
+    }
 
     try {
       setError(null);
@@ -177,6 +261,7 @@ export const useCalendar = (habits = []) => {
     } catch (err) {
       // Rollback on error
       setCalendarEntries(previousEntries);
+      clearRecentLocalUpdate(date);
       setError('Failed to update calendar entry');
       console.error('Error updating calendar entry:', err);
       return false;
@@ -233,6 +318,7 @@ export const useCalendar = (habits = []) => {
     const previousEntries = { ...calendarEntries };
     const optimisticUpdates = {};
     const serverUpdates = [];
+    const revealDates = [];
     
     let current = dayjs(startDate);
     const end = dayjs(endDate);
@@ -251,6 +337,7 @@ export const useCalendar = (habits = []) => {
           completedAt: new Date().toISOString(),
           habitId: habitId,
         };
+        revealDates.push(dateStr);
       } else if (!completed && completedHabits.includes(habitId)) {
         updatedHabits = completedHabits.filter(id => id !== habitId);
         delete updatedHabitDetails[habitId];
@@ -259,11 +346,13 @@ export const useCalendar = (habits = []) => {
       }
 
       if (JSON.stringify(updatedHabits) !== JSON.stringify(completedHabits)) {
-        optimisticUpdates[dateStr] = {
+        const optimisticEntry = {
           date: dateStr,
           completedHabits: updatedHabits,
           habits: updatedHabitDetails,
         };
+        optimisticUpdates[dateStr] = optimisticEntry;
+        markRecentLocalUpdate(dateStr, optimisticEntry);
         serverUpdates.push({ dateStr, updatedHabits, updatedHabitDetails });
       }
 
@@ -273,6 +362,7 @@ export const useCalendar = (habits = []) => {
     // Optimistic update: apply all changes immediately
     if (Object.keys(optimisticUpdates).length > 0) {
       setCalendarEntries(prev => ({ ...prev, ...optimisticUpdates }));
+      revealDates.forEach((date) => triggerPatternReveal(date));
     }
 
     try {
@@ -289,6 +379,7 @@ export const useCalendar = (habits = []) => {
     } catch (err) {
       // Rollback on error
       setCalendarEntries(previousEntries);
+      serverUpdates.forEach(({ dateStr }) => clearRecentLocalUpdate(dateStr));
       setError('Failed to bulk update calendar entries');
       console.error('Error bulk updating calendar entries:', err);
       return false;
@@ -300,6 +391,7 @@ export const useCalendar = (habits = []) => {
     currentYear,
     currentMonth,
     calendarEntries,
+    patternRevealByDate,
     calendarMatrix,
     streaks,
     weekStats,

@@ -1,38 +1,77 @@
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import Tooltip from './Tooltip';
+import PatternBackground, {
+  getAutoPatternPreset,
+  getHabitSeedOffset,
+} from './PatternBackground';
 import { getPatternOverrideForHabit } from '../hooks/usePatternConfig';
 import { calculateWeeklyCompletions } from '../utils/streakUtils';
-import P5PatternBackground, {
-  getPatternIdentityForHabit,
-  getCrowdedPatternVariant,
-  getHabitSeedOffset,
-  getPatternIntensityForDay,
-} from './P5PatternBackground';
 import styles from './CalendarCell.module.scss';
 
 const seededRandom = (seed) => {
-  // Better seeded random using mulberry32 algorithm
   let t = seed + 0x6D2B79F5;
-  t = Math.imul(t ^ t >>> 15, t | 1);
-  t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-  return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
 
-const hashString = (str) => {
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+const getHistoryProgress = (completionCount) => {
+  if (!Number.isFinite(completionCount) || completionCount <= 0) return 0;
+  const cap = 50;
+  return clamp(Math.log10(completionCount + 1) / Math.log10(cap + 1), 0, 1);
+};
+
+const getStreakProgress = (streakCount) => {
+  if (!Number.isFinite(streakCount) || streakCount <= 0) return 0;
+  if (streakCount === 1) return 0.08;
+  if (streakCount === 2) return 0.18;
+  return clamp(streakCount, 1, 7) / 7;
+};
+
+const getHabitVisualStrength = ({ completions = 0, streak = 0 } = {}) => {
+  const streakProgress = getStreakProgress(streak);
+  if (streakProgress > 0) return streakProgress;
+  return 0.08 + (getHistoryProgress(completions) * 0.2);
+};
+
+const lightenColor = (hex, amount) => {
+  const normalized = (hex || '#60a5fa').replace('#', '');
+  const value = parseInt(normalized, 16);
+  const r = Math.min(255, ((value >> 16) & 0xff) + Math.round(255 * amount));
+  const g = Math.min(255, ((value >> 8) & 0xff) + Math.round(255 * amount));
+  const b = Math.min(255, (value & 0xff) + Math.round(255 * amount));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+};
+
+const toHex = (opacity) => (
+  Math.round(Math.min(1, Math.max(0, opacity)) * 255).toString(16).padStart(2, '0')
+);
+
+const toTimestamp = (value) => {
+  if (!value) return null;
+  const timestamp = new Date(value).getTime();
+  return Number.isFinite(timestamp) ? timestamp : null;
+};
+
+const hashString = (value = '') => {
   let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+  for (let index = 0; index < value.length; index += 1) {
+    hash = ((hash << 5) + hash) ^ value.charCodeAt(index);
   }
   return Math.abs(hash);
 };
+const DEFAULT_HABIT_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
+const PATTERN_ENTER_DURATION_MS = 460;
+const PATTERN_EXIT_DURATION_MS = 420;
+const STREAK_ROTATION_MIN_DAYS = 7;
 
-const CalendarCell = ({ 
-  day, 
-  gridRow = 0,
-  gridCol = 0,
-  habits, 
+const CalendarCell = ({
+  day,
+  habits,
   patternConfig,
-  completedHabits, 
+  completedHabits,
   onHabitDetailClick,
   onDayClick,
   onDayHabitsClick,
@@ -41,273 +80,287 @@ const CalendarCell = ({
   isToday = false,
   animationIndex = 0,
   calendarEntries = {},
-  hoveredHabitId = null,
-  patternType = 'bokeh',
+  habitProgressByDate = {},
   isPreview = false,
+  previewScale = 'default',
   previewOverrides = null,
   isMobile = false,
   patternOnly = false,
-  animatePatterns = true,
+  showEmojis = true,
+  disableInteractions = false,
+  disableAnimations = false,
+  dayPatternAnimation = null,
 }) => {
   const { date } = day;
+  const [isPatternEntering, setIsPatternEntering] = useState(false);
+  const [patternAnimationKey, setPatternAnimationKey] = useState(0);
+  const [exitingHabitIds, setExitingHabitIds] = useState([]);
+  const enterAnimationTimerRef = useRef(null);
+  const enterAnimationFrameRef = useRef(null);
+  const exitAnimationTimerRef = useRef(null);
 
-  const completedHabitDetails = useMemo(() => {
-    return habits.filter(habit => 
-      habit && 
-      habit.id && 
-      completedHabits.includes(habit.id)
-    );
-  }, [habits, completedHabits]);
+  const completedHabitDetails = useMemo(
+    () => habits.filter((habit) => habit && habit.id && completedHabits.includes(habit.id)),
+    [habits, completedHabits],
+  );
+  const habitById = useMemo(
+    () => new Map(habits.filter((habit) => habit && habit.id).map((habit) => [habit.id, habit])),
+    [habits],
+  );
+  const exitingHabitDetails = useMemo(
+    () => exitingHabitIds.map((habitId) => habitById.get(habitId)).filter((habit) => habit && habit.id),
+    [exitingHabitIds, habitById],
+  );
 
-  const completionPercentage = useMemo(() => {
-    if (habits.length === 0) return 0;
-    return (completedHabitDetails.length / habits.length) * 100;
-  }, [habits.length, completedHabitDetails.length]);
+  useEffect(() => () => {
+    if (enterAnimationTimerRef.current) {
+      clearTimeout(enterAnimationTimerRef.current);
+    }
+    if (enterAnimationFrameRef.current) {
+      cancelAnimationFrame(enterAnimationFrameRef.current);
+    }
+    if (exitAnimationTimerRef.current) {
+      clearTimeout(exitAnimationTimerRef.current);
+    }
+  }, []);
 
-  const dateSeed = useMemo(() => date.split('-').reduce((acc, num) => acc + parseInt(num), 0), [date]);
-  const mixedPatternSeed = useMemo(() => {
-    if (completedHabitDetails.length === 0) return 0;
+  const allHabitsComplete = habits.length > 0 && completedHabitDetails.length === habits.length;
 
-    const habitSetKey = completedHabitDetails
-      .map((habit) => habit.id)
-      .sort()
-      .join('|');
-
-    return hashString(habitSetKey);
-  }, [completedHabitDetails]);
+  const dateSeed = useMemo(
+    () => date.split('-').reduce((acc, num) => acc + parseInt(num, 10), 0),
+    [date],
+  );
 
   const habitColors = useMemo(() => {
-    const defaultColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
-    return completedHabitDetails.map((h, i) => h.color || defaultColors[i % defaultColors.length]);
+    return completedHabitDetails.map(
+      (habit, index) => habit.color || DEFAULT_HABIT_COLORS[index % DEFAULT_HABIT_COLORS.length],
+    );
   }, [completedHabitDetails]);
-  
+  const habitColorById = useMemo(() => {
+    const lookup = new Map();
+    completedHabitDetails.forEach((habit, index) => {
+      lookup.set(habit.id, habit.color || DEFAULT_HABIT_COLORS[index % DEFAULT_HABIT_COLORS.length]);
+    });
+    return lookup;
+  }, [completedHabitDetails]);
+  const exitingHabitColors = useMemo(() => {
+    return exitingHabitDetails.map(
+      (habit, index) => habit.color || DEFAULT_HABIT_COLORS[index % DEFAULT_HABIT_COLORS.length],
+    );
+  }, [exitingHabitDetails]);
+
+  const sortedPatternHabitDetails = useMemo(() => {
+    if (completedHabitDetails.length <= 1) return completedHabitDetails;
+
+    const entryHabits = calendarEntries?.[date]?.habits || {};
+    const originalOrderById = new Map(
+      completedHabitDetails.map((habit, index) => [habit.id, index]),
+    );
+
+    return [...completedHabitDetails].sort((a, b) => {
+      const aTimestamp = toTimestamp(entryHabits?.[a.id]?.completedAt);
+      const bTimestamp = toTimestamp(entryHabits?.[b.id]?.completedAt);
+
+      if (aTimestamp != null && bTimestamp != null && aTimestamp !== bTimestamp) {
+        return aTimestamp - bTimestamp;
+      }
+
+      return (originalOrderById.get(a.id) ?? 0) - (originalOrderById.get(b.id) ?? 0);
+    });
+  }, [calendarEntries, completedHabitDetails, date]);
+
+  const patternSeed = useMemo(() => (
+    completedHabitDetails.length > 0
+      ? hashString(completedHabitDetails.map((habit) => habit.id).sort().join('|'))
+      : 0
+  ), [completedHabitDetails]);
+  const exitingPatternSeed = useMemo(() => (
+    exitingHabitDetails.length > 0
+      ? hashString(exitingHabitDetails.map((habit) => habit.id).sort().join('|'))
+      : 0
+  ), [exitingHabitDetails]);
+
   const emojiData = useMemo(() => {
     if (completedHabitDetails.length === 0) return [];
-    
-    const count = completedHabitDetails.length;
-    
+
     return completedHabitDetails.map((habit, index) => {
-      const baseSeed = dateSeed + index * 100 + habit.id.charCodeAt(0);
-      
+      const baseSeed = dateSeed + (index * 100) + habit.id.charCodeAt(0);
+      const count = completedHabitDetails.length;
+
       let size;
-      if (count === 1) {
-        size = 1.8;
-      } else if (count === 2) {
-        size = 1.4;
-      } else if (count === 3) {
-        size = 1.2;
-      } else if (count <= 6) {
-        size = 1.0 + seededRandom(baseSeed + 2) * 0.3;
-      } else {
-        size = 0.8 + seededRandom(baseSeed + 2) * 0.3;
-      }
-      
+      if (count === 1) size = 1.8;
+      else if (count === 2) size = 1.4;
+      else if (count === 3) size = 1.2;
+      else if (count <= 6) size = 1.0 + (seededRandom(baseSeed + 2) * 0.3);
+      else size = 0.8 + (seededRandom(baseSeed + 2) * 0.3);
+
       return { size };
     });
   }, [completedHabitDetails, dateSeed]);
 
-  const mixedPatternLayers = useMemo(() => {
-    const intensity = getPatternIntensityForDay(completedHabitDetails.length, habits.length);
-    const entranceStepMs = completedHabitDetails.length >= 5 ? 120 : 160;
-    const familyCounts = completedHabitDetails.reduce((counts, habit) => {
-      const { family } = getPatternIdentityForHabit(habit.id);
-      counts[family] = (counts[family] || 0) + 1;
-      return counts;
-    }, {});
-    const familyIndexes = {};
+  const dayVisualStrength = useMemo(() => {
+    if (completedHabitDetails.length === 0) return 0;
+    return completedHabitDetails.reduce((acc, habit) => {
+      const progress = habitProgressByDate?.[date]?.[habit.id] || { completions: 1, streak: 1 };
+      return acc + getHabitVisualStrength(progress);
+    }, 0) / Math.max(1, completedHabitDetails.length);
+  }, [completedHabitDetails, habitProgressByDate, date]);
 
-    return completedHabitDetails.map((habit, idx) => {
-      const override = previewOverrides?.[habit.id] || getPatternOverrideForHabit(habit, patternConfig);
-      const identity = override || getPatternIdentityForHabit(habit.id);
-      const collisionIndex = familyIndexes[identity.family] || 0;
-      familyIndexes[identity.family] = collisionIndex + 1;
-      const continuity = typeof identity.continuity === 'boolean'
-        ? identity.continuity
-        : identity.family === 'mosaic' && identity.variant === 'triangles';
-      const continuitySeed = getHabitSeedOffset(`${habit.id}:${identity.family}:${identity.variant}`);
-      const intensityValue = override?.intensity ?? intensity;
-      const resolvedVariant = override
-        ? identity.variant
-        : getCrowdedPatternVariant(
-            identity.family,
-            identity.variant,
-            collisionIndex,
-            familyCounts[identity.family]
-          );
+  const patternLayers = useMemo(() => sortedPatternHabitDetails.map((habit, index) => {
+    const override = previewOverrides?.[habit.id] || getPatternOverrideForHabit(habit, patternConfig);
+    const preset = override || getAutoPatternPreset(habit.id);
+    const progress = habitProgressByDate?.[date]?.[habit.id] || { completions: 1, streak: 1 };
+    const visualStrength = getHabitVisualStrength(progress);
+    const streakDays = Number.isFinite(progress?.streak) ? progress.streak : 0;
 
-      return {
-        color: habit.color || habitColors[idx],
-        habitId: habit.id,
-        intensity: intensityValue,
-        seed: continuity ? continuitySeed : mixedPatternSeed + getHabitSeedOffset(habit.id),
-        patternType: identity.family,
-        patternVariant: resolvedVariant,
-        continuity,
-        worldOffsetX: gridCol,
-        worldOffsetY: gridRow,
-        entranceDelayMs: idx * (override?.entranceStaggerMs ?? entranceStepMs),
-        settings: override ? {
-          density: override.density,
-          scale: override.scale,
-          opacity: override.opacity,
-          accentOpacity: override.accentOpacity,
-          strokeWeight: override.strokeWeight,
-          driftAmount: override.driftAmount,
-          animationMode: override.animationMode,
-          tileSize: override.tileSize,
-          shapeCount: override.shapeCount,
-          ringCount: override.ringCount,
-          amplitude: override.amplitude,
-          lineCount: override.lineCount,
-          orbCount: override.orbCount,
-          rayCount: override.rayCount,
-          pieceCount: override.pieceCount,
-          translateX: override.translateX,
-          translateY: override.translateY,
-          translateZ: override.translateZ,
-          rotationDeg: override.rotationDeg,
-        } : null,
-      };
-    });
-  }, [completedHabitDetails, habitColors, habits.length, mixedPatternSeed, gridCol, gridRow, patternConfig, previewOverrides]);
+    return {
+      color: habitColorById.get(habit.id) || habit.color || DEFAULT_HABIT_COLORS[index % DEFAULT_HABIT_COLORS.length],
+      habitId: habit.id,
+      preset,
+      seed: patternSeed + getHabitSeedOffset(`${date}:${habit.id}:${index}`),
+      opacityMultiplier: isPreview ? 1 : clamp(0.4 + (visualStrength * 0.65), 0.4, 1),
+      scaleMultiplier: isPreview ? 1 : 0.94 + (visualStrength * 0.12),
+      streakDays,
+    };
+  }), [date, habitColorById, habitProgressByDate, isPreview, patternConfig, patternSeed, previewOverrides, sortedPatternHabitDetails]);
+  const exitingPatternLayers = useMemo(() => exitingHabitDetails.map((habit, index) => {
+    const override = previewOverrides?.[habit.id] || getPatternOverrideForHabit(habit, patternConfig);
+    const preset = override || getAutoPatternPreset(habit.id);
+    const progress = habitProgressByDate?.[date]?.[habit.id] || { completions: 1, streak: 1 };
+    const visualStrength = getHabitVisualStrength(progress);
 
-  const mixedPatternRenderLayers = useMemo(() => {
-    if (mixedPatternLayers.length === 0) return [];
-
-    const layers = mixedPatternLayers.map((layer) => ({ ...layer }));
-
-    if (completedHabitDetails.length === habits.length && habits.length > 0) {
-      layers.push({
-        habitId: `${date}-celebration`,
-        color: habitColors[0] || '#ffffff',
-        intensity: 3,
-        seed: mixedPatternSeed + 777,
-        patternType: 'mosaic',
-        patternVariant: 'shards',
-        entranceDelayMs: mixedPatternLayers.length * 140,
-      });
+    return {
+      color: habit.color || exitingHabitColors[index],
+      habitId: habit.id,
+      preset,
+      seed: exitingPatternSeed + getHabitSeedOffset(`${date}:${habit.id}:${index}`),
+      opacityMultiplier: isPreview ? 1 : clamp(0.4 + (visualStrength * 0.65), 0.4, 1),
+      scaleMultiplier: isPreview ? 1 : 0.94 + (visualStrength * 0.12),
+    };
+  }), [date, exitingHabitColors, exitingHabitDetails, exitingPatternSeed, habitProgressByDate, isPreview, patternConfig, previewOverrides]);
+  const rotatingPatternSettings = useMemo(() => {
+    if (
+      disableAnimations
+      || isPreview
+      || patternOnly
+      || patternLayers.length === 0
+    ) {
+      return [];
     }
 
-    return layers;
-  }, [mixedPatternLayers, completedHabitDetails.length, habits.length, date, habitColors, mixedPatternSeed]);
+    return patternLayers.map((patternLayer, index) => {
+      if ((patternLayer.streakDays ?? 0) < STREAK_ROTATION_MIN_DAYS) {
+        return null;
+      }
+
+      const spinSeed = (patternLayer.seed ?? (patternSeed + index + 1)) + dateSeed + (index * 37);
+      const durationSeconds = 22 + (seededRandom(spinSeed) * 20);
+      const duration = `${durationSeconds.toFixed(2)}s`;
+      const delay = `-${(seededRandom(spinSeed + 1) * durationSeconds).toFixed(2)}s`;
+      const reverse = seededRandom(spinSeed + 2) > 0.5;
+
+      return {
+        duration,
+        delay,
+        reverse,
+      };
+    });
+  }, [dateSeed, disableAnimations, isPreview, patternLayers, patternOnly, patternSeed]);
+  const hasRotatingPatternLayer = useMemo(
+    () => rotatingPatternSettings.some(Boolean),
+    [rotatingPatternSettings],
+  );
+
+  useEffect(() => {
+    if (disableAnimations || isPreview || patternOnly) {
+      return;
+    }
+    if (!dayPatternAnimation || dayPatternAnimation.date !== date) {
+      return;
+    }
+
+    const {
+      token,
+      hasAddedHabits,
+      hasRemovedHabits,
+      previousHabitIds = [],
+    } = dayPatternAnimation;
+
+    if (!token) return;
+
+    if (hasRemovedHabits && previousHabitIds.length > 0) {
+      const validPreviousHabitIds = previousHabitIds.filter((habitId) => habitById.has(habitId));
+      if (validPreviousHabitIds.length > 0) {
+        setExitingHabitIds(validPreviousHabitIds);
+        if (exitAnimationTimerRef.current) {
+          clearTimeout(exitAnimationTimerRef.current);
+        }
+        exitAnimationTimerRef.current = setTimeout(() => {
+          setExitingHabitIds([]);
+          exitAnimationTimerRef.current = null;
+        }, PATTERN_EXIT_DURATION_MS);
+      }
+    }
+
+    if (hasAddedHabits && patternLayers.length > 0) {
+      if (enterAnimationTimerRef.current) {
+        clearTimeout(enterAnimationTimerRef.current);
+      }
+      if (enterAnimationFrameRef.current) {
+        cancelAnimationFrame(enterAnimationFrameRef.current);
+      }
+
+      setPatternAnimationKey(token);
+      setIsPatternEntering(false);
+      enterAnimationFrameRef.current = requestAnimationFrame(() => {
+        setIsPatternEntering(true);
+        enterAnimationFrameRef.current = null;
+        enterAnimationTimerRef.current = setTimeout(() => {
+          setIsPatternEntering(false);
+          enterAnimationTimerRef.current = null;
+        }, PATTERN_ENTER_DURATION_MS);
+      });
+    }
+  }, [date, dayPatternAnimation, disableAnimations, habitById, isPreview, patternLayers.length, patternOnly]);
 
   const backgroundStyle = useMemo(() => {
     const baseStyle = {
       '--animation-delay': `${animationIndex * 0.02}s`,
-      '--completion-percent': `${completionPercentage}%`,
+      '--completion-overlay-opacity': `${0.05 + (dayVisualStrength * 0.18)}`,
     };
 
     if (completedHabitDetails.length === 0 || habits.length === 0) {
       return baseStyle;
     }
 
-    const defaultColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
-    const colors = completedHabitDetails.map((h, i) => h.color || defaultColors[i % defaultColors.length]);
-    
-    if (colors.length === 0) {
-      return baseStyle;
-    }
-    
+    const colors = habitColors;
     const completionRatio = completedHabitDetails.length / habits.length;
-    
-    // Full opacity when any habit is completed
-    const baseOpacity = 1;
-    
-    // Glow intensity increases with completion
-    const glowIntensity = Math.pow(completionRatio, 1.5);
-    const glowOpacity = 0.1 + glowIntensity * 0.4;
-    
-    const toHex = (opacity) => Math.round(Math.min(1, Math.max(0, opacity)) * 255).toString(16).padStart(2, '0');
-    
-    // Helper to lighten color for glow effects
-    const lightenColor = (hex, amount) => {
-      const num = parseInt(hex.replace('#', ''), 16);
-      const r = Math.min(255, ((num >> 16) & 0xff) + Math.round(255 * amount));
-      const g = Math.min(255, ((num >> 8) & 0xff) + Math.round(255 * amount));
-      const b = Math.min(255, (num & 0xff) + Math.round(255 * amount));
-      return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
-    };
-    
-    const seed = date.split('-').reduce((acc, num) => acc + parseInt(num), 0);
-    const angle1 = Math.floor(seededRandom(seed) * 360);
-    const angle2 = (angle1 + 120 + Math.floor(seededRandom(seed + 1) * 60)) % 360;
-    const angle3 = (angle2 + 120 + Math.floor(seededRandom(seed + 2) * 60)) % 360;
-    
-    // Animation speeds up slightly with more completion (more "alive" feeling)
-    const animDuration = 12 - (completionRatio * 4);
-    const animDelay = Math.floor(seededRandom(seed + 3) * 3);
-    
-    // Determine completion tier for progressive effects
-    const tier = completionRatio >= 1 ? 'complete' 
-               : completionRatio >= 0.75 ? 'high' 
-               : completionRatio >= 0.5 ? 'medium' 
-               : completionRatio >= 0.25 ? 'low' 
-               : 'minimal';
-    
-    // Primary color (most prominent or average)
+    const baseOpacity = clamp(isPreview ? 0.2 + (dayVisualStrength * 0.5) : dayVisualStrength, 0.08, 1);
     const primaryColor = colors[0];
     const secondaryColor = colors[1] || colors[0];
-    // Create luminous center glow that intensifies with completion
-    const centerGlow = `radial-gradient(ellipse at 50% 50%, ${lightenColor(primaryColor, 0.3)}${toHex(glowOpacity * 0.6)} 0%, transparent 70%)`;
-    
-    // Ambient color orbs positioned uniquely per date
-    const orbs = colors.slice(0, Math.min(5, colors.length)).map((color, i) => {
-      const orbSeed = seed + i * 17;
-      const x = 15 + seededRandom(orbSeed) * 70;
-      const y = 15 + seededRandom(orbSeed + 1) * 70;
-      const size = 40 + seededRandom(orbSeed + 2) * 30 + (completionRatio * 20);
-      const orbOpacity = baseOpacity * (0.5 + completionRatio * 0.5);
-      return `radial-gradient(ellipse ${size}% ${size * 1.2}% at ${x}% ${y}%, ${color}${toHex(orbOpacity)} 0%, ${color}${toHex(orbOpacity * 0.3)} 40%, transparent 70%)`;
+    const angle1 = Math.floor(seededRandom(dateSeed) * 360);
+    const angle2 = (angle1 + 120 + Math.floor(seededRandom(dateSeed + 1) * 60)) % 360;
+
+    const centerGlow = `radial-gradient(ellipse at 50% 50%, ${lightenColor(primaryColor, 0.22)}${toHex(baseOpacity * 0.18)} 0%, transparent 72%)`;
+    const orbs = colors.slice(0, Math.min(4, colors.length)).map((color, index) => {
+      const orbSeed = dateSeed + (index * 17);
+      const x = 15 + (seededRandom(orbSeed) * 70);
+      const y = 15 + (seededRandom(orbSeed + 1) * 70);
+      const size = 38 + (seededRandom(orbSeed + 2) * 32) + (completionRatio * 18);
+      const orbOpacity = baseOpacity * (0.05 + (completionRatio * 0.07));
+      return `radial-gradient(ellipse ${size}% ${size * 1.18}% at ${x}% ${y}%, ${color}${toHex(orbOpacity)} 0%, ${color}${toHex(orbOpacity * 0.32)} 38%, transparent 72%)`;
     });
-    
-    // Soft edge glow for depth
-    const edgeGlow = `radial-gradient(ellipse at 50% 100%, ${secondaryColor}${toHex(baseOpacity * 0.4)} 0%, transparent 50%)`;
-    
-    // Aurora-like sweeping gradient (more visible at higher completion)
-    const auroraOpacity = baseOpacity * (0.3 + completionRatio * 0.5);
-    const aurora = colors.length >= 2 
-      ? `linear-gradient(${angle1}deg, ${colors.map((c, i) => `${c}${toHex(auroraOpacity)} ${(i / (colors.length)) * 100}%`).join(', ')}, transparent 100%)`
-      : `linear-gradient(${angle1}deg, ${primaryColor}${toHex(auroraOpacity)} 0%, ${lightenColor(primaryColor, 0.2)}${toHex(auroraOpacity * 0.5)} 100%)`;
-    
-    // Base fill that gives overall tone
-    const baseFill = `linear-gradient(180deg, ${primaryColor}${toHex(baseOpacity * 0.3)} 0%, ${secondaryColor}${toHex(baseOpacity * 0.5)} 100%)`;
-    
-    // High completion adds extra luminosity layers
-    const luminosityLayers = tier === 'complete' || tier === 'high' ? [
-      `radial-gradient(ellipse at ${30 + seededRandom(seed + 20) * 40}% ${20 + seededRandom(seed + 21) * 30}%, ${lightenColor(primaryColor, 0.4)}${toHex(0.25)} 0%, transparent 40%)`,
-      `radial-gradient(ellipse at ${50 + seededRandom(seed + 22) * 30}% ${60 + seededRandom(seed + 23) * 30}%, ${lightenColor(secondaryColor, 0.3)}${toHex(0.2)} 0%, transparent 45%)`,
-    ] : [];
-    
-    // Complete state gets extra celebration glow
-    const celebrationGlow = tier === 'complete' ? [
-      `radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.15) 0%, transparent 50%)`,
-      `radial-gradient(ellipse at 30% 30%, ${lightenColor(primaryColor, 0.5)}${toHex(0.3)} 0%, transparent 40%)`,
-    ] : [];
-    
-    const allLayers = [
-      ...celebrationGlow,
-      ...luminosityLayers,
-      centerGlow,
-      ...orbs,
-      edgeGlow,
-      aurora,
-      baseFill,
-    ].filter(Boolean);
+    const edgeGlow = `radial-gradient(ellipse at 50% 100%, ${secondaryColor}${toHex(baseOpacity * 0.06)} 0%, transparent 50%)`;
+    const aurora = colors.length >= 2
+      ? `linear-gradient(${angle1}deg, ${colors.map((color, index) => `${color}${toHex(baseOpacity * 0.06)} ${(index / colors.length) * 100}%`).join(', ')}, transparent 100%)`
+      : `linear-gradient(${angle1}deg, ${primaryColor}${toHex(baseOpacity * 0.08)} 0%, ${lightenColor(primaryColor, 0.16)}${toHex(baseOpacity * 0.04)} 100%)`;
+    const baseFill = `linear-gradient(${angle2}deg, ${primaryColor}${toHex(baseOpacity * 0.24)} 0%, ${secondaryColor}${toHex(baseOpacity * 0.5)} 100%)`;
 
     return {
       ...baseStyle,
-      '--gradient-angle': `${angle1}deg`,
-      '--gradient-angle-2': `${angle2}deg`,
-      '--gradient-angle-3': `${angle3}deg`,
-      '--anim-duration': `${animDuration}s`,
-      '--anim-delay': `${animDelay}s`,
-      '--glow-intensity': glowIntensity,
-      '--completion-tier': tier,
-      '--primary-color': primaryColor,
-      '--primary-color-light': lightenColor(primaryColor, 0.3),
-      background: allLayers.join(', '),
+      '--cell-background': [centerGlow, ...orbs, edgeGlow, aurora, baseFill].filter(Boolean).join(', '),
     };
-  }, [completedHabitDetails, habits.length, completionPercentage, animationIndex, date]);
+  }, [animationIndex, completedHabitDetails.length, dateSeed, dayVisualStrength, habitColors, habits.length, isPreview]);
 
   const dayNumberTooltipContent = useMemo(() => {
     if (completedHabitDetails.length === 0) {
@@ -318,7 +371,7 @@ const CalendarCell = ({
         </div>
       );
     }
-    
+
     return (
       <div>
         <div className={styles.tooltipDate}>{day.dayjs.format('MMM D, YYYY')}</div>
@@ -327,29 +380,22 @@ const CalendarCell = ({
         </div>
       </div>
     );
-  }, [completedHabitDetails, habits.length, day]);
+  }, [completedHabitDetails, day, habits.length]);
 
-  const handleCellClick = (e) => {
-    e.preventDefault();
-    if (onDayClick) {
-      onDayClick(date, day);
-    }
+  const handleCellClick = (event) => {
+    event.preventDefault();
+    if (onDayClick) onDayClick(date, day);
   };
 
-  const handleHabitClick = (e, habitId) => {
-    e.stopPropagation();
-    onHabitDetailClick(habitId);
+  const handleHabitClick = (event, habitId) => {
+    event.stopPropagation();
+    if (onHabitDetailClick) onHabitDetailClick(habitId);
   };
 
-  const handleStackedHabitsClick = (e) => {
-    e.stopPropagation();
-    if (onDayHabitsClick) {
-      onDayHabitsClick(day);
-    }
+  const handleStackedHabitsClick = (event) => {
+    event.stopPropagation();
+    if (onDayHabitsClick) onDayHabitsClick(day);
   };
-
-  // Check if the hovered habit is completed on this day
-  const hasHoveredHabit = hoveredHabitId && completedHabitDetails.some(h => h.id === hoveredHabitId);
 
   return (
     <div
@@ -358,57 +404,86 @@ const CalendarCell = ({
         ${!isCurrentMonth ? styles.otherMonth : ''}
         ${isToday ? styles.today : ''}
         ${completedHabitDetails.length > 0 ? styles.hasCompletions : ''}
-        ${completionPercentage === 100 ? styles.allComplete : ''}
-        ${hoveredHabitId ? styles.habitHovered : ''}
-        ${hasHoveredHabit ? styles.hasHoveredHabit : ''}
+        ${allHabitsComplete ? styles.allComplete : ''}
+        ${disableAnimations ? styles.staticPreview : ''}
+        ${previewScale === 'month' ? styles.previewMonthCell : ''}
+        ${previewScale === 'year' ? styles.previewYearCell : ''}
       `}
       style={backgroundStyle}
-      onClick={patternOnly ? undefined : handleCellClick}
+      onClick={patternOnly || disableInteractions ? undefined : handleCellClick}
       data-date={date}
       data-calendar-cell={isPreview ? undefined : 'true'}
     >
-      {!patternOnly && (
-        <div className={styles.habitOverlay} />
+      <div className={styles.backgroundLayer} />
+
+      {patternLayers.length > 0 && (
+        <div
+          key={patternAnimationKey}
+          className={`${styles.patternLayer} ${isPatternEntering ? styles.patternEnter : ''}`}
+        >
+          {hasRotatingPatternLayer ? (
+            <div className={styles.patternLayerStack}>
+              {patternLayers.map((patternLayer, index) => {
+                const spin = rotatingPatternSettings[index];
+                const layerSeed = patternLayer.seed ?? (patternSeed + index + 1);
+
+                return (
+                  <div
+                    key={`${patternLayer.habitId || `layer-${index}`}-${layerSeed}`}
+                    className={`${styles.patternLayerItem} ${spin ? styles.patternLayerSpin : ''} ${spin?.reverse ? styles.patternLayerSpinReverse : ''}`}
+                    style={spin ? {
+                      '--pattern-spin-duration': spin.duration,
+                      '--pattern-spin-delay': spin.delay,
+                    } : undefined}
+                  >
+                    <PatternBackground
+                      patternLayers={[patternLayer]}
+                      seed={layerSeed}
+                      className={styles.patternBackground}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <PatternBackground
+              patternLayers={patternLayers}
+              seed={patternSeed}
+              className={styles.patternBackground}
+            />
+          )}
+        </div>
       )}
-      
-      {/* P5.js generated geometric pattern background */}
-      {completedHabitDetails.length > 0 && (
-        patternType === 'mixed' ? (
-          <P5PatternBackground
-            key={`${date}-mixed`}
-            patternLayers={mixedPatternRenderLayers}
-            seed={mixedPatternSeed}
-            className={`${styles.p5Background} ${completedHabitDetails.length === habits.length && habits.length > 0 ? styles.celebrationPattern : ''}`}
-            animated={animatePatterns}
+      {exitingPatternLayers.length > 0 && (
+        <div className={`${styles.patternLayer} ${styles.patternExit}`}>
+          <PatternBackground
+            patternLayers={exitingPatternLayers}
+            seed={exitingPatternSeed}
+            className={styles.patternBackground}
           />
-        ) : (
-          // Single pattern mode: all habits share one pattern
-          <P5PatternBackground
-            key={`${date}-${patternType}`}
-            colors={habitColors}
-            seed={dateSeed}
-            patternType={patternType}
-            className={styles.p5Background}
-            animated={animatePatterns}
-          />
-        )
+        </div>
       )}
-      
+
+      {!patternOnly && <div className={styles.habitOverlay} />}
+
       {!patternOnly && (
-        <Tooltip content={dayNumberTooltipContent} position="top">
-          <div className={styles.dayNumber}>
-            {day.dayjs.date()}
-          </div>
-        </Tooltip>
+        <div className={styles.dayNumberTooltipAnchor}>
+          <Tooltip
+            content={dayNumberTooltipContent}
+            position="top"
+            openOnClick={false}
+            hoverCloseDelay={0}
+          >
+            <div className={styles.dayNumber}>{day.dayjs.date()}</div>
+          </Tooltip>
+        </div>
       )}
-      
-      {!patternOnly && completedHabitDetails.length > 0 && (
+
+      {!patternOnly && showEmojis && completedHabitDetails.length > 0 && (
         <div className={styles.emojiCanvas}>
           {isMobile ? (
             <div className={styles.mobileLayout} onClick={handleStackedHabitsClick}>
-              <span className={styles.mobileCount}>
-                {completedHabitDetails.length}
-              </span>
+              <span className={styles.mobileCount}>{completedHabitDetails.length}</span>
             </div>
           ) : (
             <div className={styles.emojiCluster}>
@@ -416,7 +491,6 @@ const CalendarCell = ({
                 const data = emojiData[index];
                 const hasMetGoal = hasHabitMetWeeklyGoal(habit.id, date);
                 const weeklyCompletions = calculateWeeklyCompletions(habit.id, date, calendarEntries);
-                
                 const emojiTooltipContent = (
                   <div className={styles.emojiTooltip}>
                     <div className={styles.tooltipHeader}>
@@ -433,9 +507,9 @@ const CalendarCell = ({
                 return (
                   <Tooltip key={habit.id} content={emojiTooltipContent} position="bottom">
                     <span
-                      className={`${styles.floatingEmoji} ${hasMetGoal ? styles.goalMet : ''} ${hoveredHabitId === habit.id ? styles.highlighted : ''}`}
+                      className={`${styles.floatingEmoji} ${hasMetGoal ? styles.goalMet : ''}`}
                       style={{ fontSize: `${data.size}rem` }}
-                      onClick={(e) => handleHabitClick(e, habit.id)}
+                      onClick={(event) => handleHabitClick(event, habit.id)}
                       data-habit-id={habit.id}
                     >
                       {habit.emoji}
@@ -447,7 +521,6 @@ const CalendarCell = ({
           )}
         </div>
       )}
-
     </div>
   );
 };
@@ -455,16 +528,26 @@ const CalendarCell = ({
 const areCompletedHabitsEqual = (prev, next) => {
   if (prev === next) return true;
   if (!prev || !next || prev.length !== next.length) return false;
-  for (let index = 0; index < prev.length; index++) {
+  for (let index = 0; index < prev.length; index += 1) {
     if (prev[index] !== next[index]) return false;
   }
   return true;
 };
+const areDayPatternAnimationsEqual = (prev, next) => (
+  (prev === next)
+  || (
+    prev
+    && next
+    && prev.date === next.date
+    && prev.token === next.token
+    && prev.hasAddedHabits === next.hasAddedHabits
+    && prev.hasRemovedHabits === next.hasRemovedHabits
+    && areCompletedHabitsEqual(prev.previousHabitIds || [], next.previousHabitIds || [])
+  )
+);
 
 const areEqual = (prevProps, nextProps) => (
   prevProps.day === nextProps.day &&
-  prevProps.gridRow === nextProps.gridRow &&
-  prevProps.gridCol === nextProps.gridCol &&
   prevProps.habits === nextProps.habits &&
   prevProps.patternConfig === nextProps.patternConfig &&
   areCompletedHabitsEqual(prevProps.completedHabits, nextProps.completedHabits) &&
@@ -473,13 +556,16 @@ const areEqual = (prevProps, nextProps) => (
   prevProps.isToday === nextProps.isToday &&
   prevProps.animationIndex === nextProps.animationIndex &&
   prevProps.calendarEntries === nextProps.calendarEntries &&
-  prevProps.hoveredHabitId === nextProps.hoveredHabitId &&
-  prevProps.patternType === nextProps.patternType &&
+  prevProps.habitProgressByDate === nextProps.habitProgressByDate &&
   prevProps.isPreview === nextProps.isPreview &&
+  prevProps.previewScale === nextProps.previewScale &&
   prevProps.previewOverrides === nextProps.previewOverrides &&
   prevProps.isMobile === nextProps.isMobile &&
   prevProps.patternOnly === nextProps.patternOnly &&
-  prevProps.animatePatterns === nextProps.animatePatterns
+  prevProps.showEmojis === nextProps.showEmojis &&
+  prevProps.disableInteractions === nextProps.disableInteractions &&
+  prevProps.disableAnimations === nextProps.disableAnimations &&
+  areDayPatternAnimationsEqual(prevProps.dayPatternAnimation, nextProps.dayPatternAnimation)
 );
 
-export default memo(CalendarCell, areEqual); 
+export default memo(CalendarCell, areEqual);
