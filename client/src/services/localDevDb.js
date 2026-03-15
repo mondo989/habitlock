@@ -43,6 +43,7 @@ export const createHabit = async (userId, habitData) => {
     description: habitData.description || null,
     emoji: habitData.emoji || '✅',
     color: habitData.color || '#4CAF50',
+    patternPresetId: habitData.patternPresetId || null,
     weeklyGoal: habitData.weeklyGoal || 7,
     category: habitData.category || null,
     frequency: habitData.frequency || null,

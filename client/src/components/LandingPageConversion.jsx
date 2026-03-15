@@ -3,7 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { onAuthChange } from '../services/supabase';
 import AuthModal from './AuthModal';
+import HabitTimelineStrip from './HabitTimelineStrip';
 import SEO from './SEO';
+import artShowcaseData from '../data/homepageArtShowcase';
 import styles from './LandingPageConversion.module.scss';
 
 const LandingPageConversion = () => {
@@ -37,27 +39,6 @@ const LandingPageConversion = () => {
     setShowExitIntent(false);
     setShowAuthModal(true);
   };
-
-  const whyHabitLock = [
-    {
-      stat: '92%',
-      highlight: 'of habits fail',
-      description: 'Most people give up within the first 2 weeks. Without visual progress tracking, motivation fades quickly.',
-      icon: '📉'
-    },
-    {
-      stat: '21',
-      highlight: 'days to form a habit',
-      description: 'Research shows consistency is key. HabitLock makes every day visible so you never want to break the chain.',
-      icon: '🔗'
-    },
-    {
-      stat: '3x',
-      highlight: 'more likely to succeed',
-      description: 'People who track their habits are significantly more likely to achieve their goals. See your progress, stay motivated.',
-      icon: '🚀'
-    }
-  ];
 
   const features = [
     {
@@ -114,11 +95,7 @@ const LandingPageConversion = () => {
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <div className={styles.socialBadge}>
-            <div className={styles.avatarStack}>
-              <div className={styles.miniAvatar}>JK</div>
-              <div className={styles.miniAvatar}>SM</div>
-              <div className={styles.miniAvatar}>AL</div>
-            </div>
+            <span className={styles.offerEmoji} aria-hidden="true">🎁</span>
             <span><strong>Special offer:</strong> track up to 8 habits free during beta</span>
           </div>
           
@@ -171,40 +148,46 @@ const LandingPageConversion = () => {
       <section className={styles.whySection}>
         <div className={styles.whyContent}>
           <div className={styles.whyHeader}>
-            <span className={styles.whyLabel}>Why HabitLock?</span>
-            <h2>Building habits is hard. <span>We make it easier.</span></h2>
-            <p>Most habit apps overwhelm you with features. HabitLock focuses on what actually works: visual progress that keeps you motivated.</p>
+            <span className={styles.whyLabel}>{artShowcaseData.sectionLabel}</span>
+            <h2>{artShowcaseData.headline} <span>{artShowcaseData.subheadline}</span></h2>
+            <p>Make consistency visible and watch your routines become a recognizable identity over time.</p>
           </div>
-          
-          <div className={styles.whyGrid}>
-            {whyHabitLock.map((item, i) => (
-              <div key={i} className={styles.whyCard}>
-                <div className={styles.whyIcon}>{item.icon}</div>
-                <div className={styles.whyStat}>
-                  <span className={styles.whyNumber}>{item.stat}</span>
-                  <span className={styles.whyHighlight}>{item.highlight}</span>
-                </div>
-                <p className={styles.whyDescription}>{item.description}</p>
+
+          <div className={styles.identityRow}>
+            {artShowcaseData.identityLines.map((line) => (
+              <span key={line} className={styles.identityChip}>{line}</span>
+            ))}
+          </div>
+
+          <div className={styles.mechanicGrid}>
+            {artShowcaseData.mechanicCards.map((item) => (
+              <div key={item.title} className={styles.mechanicCard}>
+                <div className={styles.mechanicIcon}>{item.icon}</div>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+                {item.image && (
+                  <div className={styles.mechanicMedia}>
+                    <img src={item.image} alt={item.imageAlt || item.title} loading="lazy" />
+                  </div>
+                )}
               </div>
             ))}
           </div>
 
-          <div className={styles.whyFeatures}>
-            <div className={styles.whyFeature}>
-              <span className={styles.checkIcon}>✓</span>
-              <span>No complex setup</span>
+          <div className={styles.yearSection}>
+            <div className={styles.yearHeader}>
+              <h3>{artShowcaseData.yearExample.title}</h3>
+              <p>{artShowcaseData.yearExample.subtitle}</p>
             </div>
-            <div className={styles.whyFeature}>
-              <span className={styles.checkIcon}>✓</span>
-              <span>Works on any device</span>
-            </div>
-            <div className={styles.whyFeature}>
-              <span className={styles.checkIcon}>✓</span>
-              <span>Free forever</span>
-            </div>
-            <div className={styles.whyFeature}>
-              <span className={styles.checkIcon}>✓</span>
-              <span>No account required</span>
+            <p className={styles.yearHoverHint}>Hover on a grid to see the completed habits.</p>
+            <div className={styles.yearTimelineWrap}>
+              <HabitTimelineStrip
+                year={artShowcaseData.yearExample.year}
+                habits={artShowcaseData.yearExample.habits}
+                getCompletedHabits={artShowcaseData.yearExample.getCompletedHabits}
+                habitProgressByDate={artShowcaseData.yearExample.habitProgressByDate}
+                size="compact"
+              />
             </div>
           </div>
         </div>

@@ -349,6 +349,13 @@ export const normalizePatternConfig = (config = {}) => ({
 
 export const createPatternConfigClone = (config = {}) => normalizePatternConfig(config);
 
+const resolvePresetById = (presetId, patternConfig) => {
+  if (!presetId) return null;
+
+  const preset = patternConfig?.presets?.[presetId];
+  return preset ? normalizePatternPreset({ ...preset, id: presetId }) : null;
+};
+
 export const getPatternIntensityForDay = (completedCount, totalHabits) => {
   if (completedCount <= 0 || totalHabits <= 0) return 1;
   const completionRatio = completedCount / totalHabits;
@@ -486,17 +493,17 @@ export const assessPatternPerformance = (preset = {}) => {
 };
 
 export const getPatternOverrideForHabit = (habit, patternConfig) => {
+  const directPreset = resolvePresetById(habit?.patternPresetId, patternConfig);
+  if (directPreset) {
+    return directPreset;
+  }
+
   if (!habit?.emoji || !patternConfig?.emojiAssignments) {
     return null;
   }
 
   const presetId = patternConfig.emojiAssignments[habit.emoji];
-  if (!presetId) {
-    return null;
-  }
-
-  const preset = patternConfig.presets?.[presetId];
-  return preset ? normalizePatternPreset({ ...preset, id: presetId }) : null;
+  return resolvePresetById(presetId, patternConfig);
 };
 
 export const getGeneratorLabel = (generator) => (

@@ -58,6 +58,7 @@ export const useHabits = () => {
       ...habitData,
       emoji: habitData.emoji || '✅',
       color: habitData.color || '#4CAF50',
+      patternPresetId: habitData.patternPresetId || null,
       weeklyGoal: habitData.weeklyGoal || 7,
       createdAt: Date.now(),
     };

@@ -114,6 +114,7 @@ const _createHabit = async (userId, habitData) => {
       description: habitData.description || null,
       emoji: habitData.emoji || '✅',
       color: habitData.color || '#4CAF50',
+      pattern_preset_id: habitData.patternPresetId || null,
       weekly_goal: habitData.weeklyGoal || 7,
       category: habitData.category || null,
       frequency: habitData.frequency || null,
@@ -129,6 +130,7 @@ const _createHabit = async (userId, habitData) => {
     description: data.description,
     emoji: data.emoji,
     color: data.color,
+    patternPresetId: data.pattern_preset_id,
     weeklyGoal: data.weekly_goal,
     category: data.category,
     frequency: data.frequency,
@@ -142,6 +144,7 @@ const _updateHabit = async (userId, habitId, updates) => {
   if (updates.description !== undefined) dbUpdates.description = updates.description;
   if (updates.emoji !== undefined) dbUpdates.emoji = updates.emoji;
   if (updates.color !== undefined) dbUpdates.color = updates.color;
+  if (updates.patternPresetId !== undefined) dbUpdates.pattern_preset_id = updates.patternPresetId;
   if (updates.weeklyGoal !== undefined) dbUpdates.weekly_goal = updates.weeklyGoal;
   if (updates.category !== undefined) dbUpdates.category = updates.category;
   if (updates.frequency !== undefined) dbUpdates.frequency = updates.frequency;
@@ -180,6 +183,7 @@ const _getHabits = async (userId) => {
     description: habit.description,
     emoji: habit.emoji,
     color: habit.color,
+    patternPresetId: habit.pattern_preset_id,
     weeklyGoal: habit.weekly_goal,
     category: habit.category,
     frequency: habit.frequency,

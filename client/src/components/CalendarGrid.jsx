@@ -41,6 +41,30 @@ const averageColor = (colors) => {
   };
 };
 
+const STREAK_MILESTONE_COLOR = '#f59e0b';
+
+const getLineThickness = (streak) => {
+  if (streak >= 30) return 8;
+  if (streak < 7) return 2.25;
+
+  const progressToThirty = (Math.min(streak, 30) - 7) / 23;
+  return 3.5 + (progressToThirty * 2.5);
+};
+
+const getSegmentVisual = (streak, baseColor) => {
+  const strokeWidth = getLineThickness(streak);
+  const isMilestone = streak >= 30;
+
+  return {
+    stroke: isMilestone ? STREAK_MILESTONE_COLOR : baseColor,
+    strokeWidth,
+    backgroundWidth: strokeWidth + 1.75,
+    glowWidth: strokeWidth + (isMilestone ? 5.5 : 4),
+    glowOpacity: isMilestone ? 0.55 : 0.32,
+    streak,
+  };
+};
+
 const CalendarGrid = ({ 
   calendarMatrix, 
   habits, 
@@ -377,9 +401,19 @@ const CalendarGrid = ({
       const decoratedElements = [];
       const matchedCells = [];
 
+      let currentStreak = 0;
+      let previousMatchingDate = null;
+
       matchingDates.forEach((date) => {
         const cellData = hoverCache.cellsByDate.get(date);
         if (!cellData) return;
+
+        const isConsecutive = previousMatchingDate
+          ? dayjs(date).diff(dayjs(previousMatchingDate), 'day') === 1
+          : false;
+
+        currentStreak = isConsecutive ? currentStreak + 1 : 1;
+        previousMatchingDate = date;
 
         const {
           cell,
@@ -416,6 +450,7 @@ const CalendarGrid = ({
           fromY: emojiCenter?.y ?? centerY,
           left,
           right,
+          streak: currentStreak,
         });
       });
 
@@ -436,6 +471,7 @@ const CalendarGrid = ({
       const getDayIndexInWeek = (date) => dateMetaByDate.get(date)?.dayIndex ?? -1;
       const weeklyStreakLines = [];
       const weekIndices = Object.keys(weekGroups).map(Number).sort((a, b) => a - b);
+      let animationCursor = 0;
 
       weekIndices.forEach((weekIdx) => {
         const weekCells = weekGroups[weekIdx];
@@ -461,16 +497,27 @@ const CalendarGrid = ({
           firstPoint.x = firstPoint.left + 12;
         }
 
-        let weekLength = 0;
-        for (let index = 0; index < adjustedPoints.length - 1; index++) {
-          const dx = adjustedPoints[index + 1].x - adjustedPoints[index].x;
-          const dy = adjustedPoints[index + 1].y - adjustedPoints[index].y;
-          weekLength += Math.sqrt(dx * dx + dy * dy);
-        }
-
         weeklyStreakLines.push({
-          points: adjustedPoints,
-          length: weekLength,
+          segments: adjustedPoints.slice(0, -1).map((point, index) => {
+            const nextPoint = adjustedPoints[index + 1];
+            const dx = nextPoint.x - point.x;
+            const dy = nextPoint.y - point.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const animDuration = Math.min(0.5, Math.max(0.16, length / 900));
+            const segmentVisual = getSegmentVisual(nextPoint.streak, hoveredHabit.color);
+            const segment = {
+              start: point,
+              end: nextPoint,
+              points: `${point.x},${point.y} ${nextPoint.x},${nextPoint.y}`,
+              length,
+              animDuration,
+              animDelay: animationCursor,
+              ...segmentVisual,
+            };
+
+            animationCursor += animDuration;
+            return segment;
+          }),
           weekIndex: weekIdx,
         });
       });
@@ -516,71 +563,58 @@ const CalendarGrid = ({
               </feMerge>
             </filter>
           </defs>
-          {streakLines.map((path, index) => {
-            const pointsStr = path.points.map(p => `${p.x},${p.y}`).join(' ');
-            // Scale animation duration based on path length (longer path = slightly longer animation)
-            // Min 0.3s, max 0.8s for quicker feel since we're staggering
-            const animDuration = Math.min(0.8, Math.max(0.3, path.length / 800));
-            
-            // Calculate stagger delay - each week starts after previous ones complete
-            let staggerDelay = 0;
-            for (let i = 0; i < index; i++) {
-              const prevDuration = Math.min(0.8, Math.max(0.3, streakLines[i].length / 800));
-              staggerDelay += prevDuration;
-            }
-            
-            return (
-              <g key={`${hoveredHabitId}-${path.weekIndex}`}>
-                {/* Background line for contrast */}
-                <polyline
-                  points={pointsStr}
-                  fill="none"
-                  stroke="rgba(0,0,0,0.3)"
-                  strokeWidth="10"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={styles.streakLineBg}
-                  style={{ 
-                    '--line-length': path.length, 
-                    '--anim-duration': `${animDuration}s`,
-                    '--anim-delay': `${staggerDelay}s`
-                  }}
-                />
-                {/* Outer glow effect */}
-                <polyline
-                  points={pointsStr}
-                  fill="none"
-                  stroke={hoveredHabit.color}
-                  strokeWidth="16"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  opacity="0.4"
-                  filter="url(#glow)"
-                  className={styles.streakLineGlow}
-                  style={{ 
-                    '--line-length': path.length, 
-                    '--anim-duration': `${animDuration}s`,
-                    '--anim-delay': `${staggerDelay}s`
-                  }}
-                />
-                {/* Main line */}
-                <polyline
-                  points={pointsStr}
-                  fill="none"
-                  stroke={hoveredHabit.color}
-                  strokeWidth="6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={styles.streakLine}
-                  style={{ 
-                    '--line-length': path.length, 
-                    '--anim-duration': `${animDuration}s`,
-                    '--anim-delay': `${staggerDelay}s`
-                  }}
-                />
-              </g>
-            );
-          })}
+          {streakLines.map((path) => (
+            <g key={`${hoveredHabitId}-${path.weekIndex}`}>
+              {path.segments.map((segment, segmentIndex) => (
+                <g key={`${hoveredHabitId}-${path.weekIndex}-${segmentIndex}`}>
+                  <polyline
+                    points={segment.points}
+                    fill="none"
+                    stroke="rgba(0,0,0,0.26)"
+                    strokeWidth={segment.backgroundWidth}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={styles.streakLineBg}
+                    style={{
+                      '--line-length': segment.length,
+                      '--anim-duration': `${segment.animDuration}s`,
+                      '--anim-delay': `${segment.animDelay}s`
+                    }}
+                  />
+                  <polyline
+                    points={segment.points}
+                    fill="none"
+                    stroke={segment.stroke}
+                    strokeWidth={segment.glowWidth}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity={segment.glowOpacity}
+                    filter="url(#glow)"
+                    className={styles.streakLineGlow}
+                    style={{
+                      '--line-length': segment.length,
+                      '--anim-duration': `${segment.animDuration}s`,
+                      '--anim-delay': `${segment.animDelay}s`
+                    }}
+                  />
+                  <polyline
+                    points={segment.points}
+                    fill="none"
+                    stroke={segment.stroke}
+                    strokeWidth={segment.strokeWidth}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={styles.streakLine}
+                    style={{
+                      '--line-length': segment.length,
+                      '--anim-duration': `${segment.animDuration}s`,
+                      '--anim-delay': `${segment.animDelay}s`
+                    }}
+                  />
+                </g>
+              ))}
+            </g>
+          ))}
         </svg>
       )}
 

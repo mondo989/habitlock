@@ -162,6 +162,18 @@
   padding-top: 14px;
 }
 
+.calendarClusterPaused {
+  pointer-events: none;
+  user-select: none;
+
+  :global(*) {
+    animation-play-state: paused !important;
+    transition-delay: 0s !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 .inlineTimelineStrip {
   margin-top: 28px;
   padding-top: 18px;
@@ -2250,6 +2262,8 @@
   :global(html.dark-mode) & {
     opacity: 1;
     background: linear-gradient(180deg, #1a1d23 0%, #15181d 100%);
+    border-left: 1px solid #ffffff14;
+    border-right: 1px solid #ffffff14;
   }
 }
 

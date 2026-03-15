@@ -82,9 +82,9 @@ const createSpinSettings = (spinSeed) => {
 
 const CalendarCell = ({
   day,
-  habits,
+  habits = [],
   patternConfig,
-  completedHabits,
+  completedHabits = [],
   onHabitDetailClick,
   onDayClick,
   onDayHabitsClick,

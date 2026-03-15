@@ -191,6 +191,13 @@ const CalendarView = () => {
   const prevPageHabits = habitPages[getLoopedPageIndex(mobileLegendPage - 1)] || [];
   const currentPageHabits = habitPages[getLoopedPageIndex(mobileLegendPage)] || [];
   const nextPageHabits = habitPages[getLoopedPageIndex(mobileLegendPage + 1)] || [];
+  const isCalendarUiPaused = (
+    isHabitModalOpen
+    || isDayModalOpen
+    || isDayHabitsModalOpen
+    || isExportPreviewOpen
+    || showCelebration
+  );
   const habitById = useMemo(
     () => new Map(habits.map((habit) => [habit.id, habit])),
     [habits]
@@ -355,6 +362,34 @@ const CalendarView = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!isCalendarUiPaused) return;
+
+    setHoveredHabitId(null);
+    setDayPatternAnimation(null);
+    setLegendAttentionHabitIds([]);
+    setIsLegendDragging(false);
+    setIsLegendAnimating(false);
+    setLegendDragDelta(0);
+    setMobileLegendTrackX(MOBILE_CAROUSEL_CENTER);
+
+    if (legendAnimationTimerRef.current) {
+      clearTimeout(legendAnimationTimerRef.current);
+      legendAnimationTimerRef.current = null;
+    }
+
+    if (dayPatternAnimationTimerRef.current) {
+      clearTimeout(dayPatternAnimationTimerRef.current);
+      dayPatternAnimationTimerRef.current = null;
+    }
+
+    Object.values(legendAttentionTimersRef.current).forEach((timerGroup) => {
+      if (timerGroup?.start) clearTimeout(timerGroup.start);
+      if (timerGroup?.end) clearTimeout(timerGroup.end);
+    });
+    legendAttentionTimersRef.current = {};
+  }, [isCalendarUiPaused]);
 
   const showSaveToast = (message, type = 'success') => {
     if (saveToastTimerRef.current) {
@@ -562,8 +597,12 @@ const CalendarView = () => {
               ${isLegendAttentionActive ? styles.liquidAttention : ''}
             `}
             onClick={() => handleHabitDetailClick(habit.id)}
-            onMouseEnter={() => setHoveredHabitId(habit.id)}
-            onMouseLeave={() => setHoveredHabitId(null)}
+            onMouseEnter={() => {
+              if (!isCalendarUiPaused) setHoveredHabitId(habit.id);
+            }}
+            onMouseLeave={() => {
+              if (!isCalendarUiPaused) setHoveredHabitId(null);
+            }}
             style={{
               '--habit-color': habit.color,
               '--fill-level': `${percentage}%`,
@@ -1024,7 +1063,7 @@ const CalendarView = () => {
       )}
       */}
 
-      <section className={styles.calendarCluster}>
+      <section className={`${styles.calendarCluster} ${isCalendarUiPaused ? styles.calendarClusterPaused : ''}`}>
         {/* Habits Legend - Integrated above Calendar */}
         <div className={styles.habitsLegend}>
           <div className={styles.legendTopRow}>
